@@ -6,6 +6,10 @@ namespace Spatial\Core;
 
 use Attribute;
 
+/**
+ * Class Area
+ * @package Spatial\Core
+ */
 #[Attribute]
 class Area
 {

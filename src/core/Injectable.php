@@ -1,6 +1,5 @@
 <?php
 
-
 declare(strict_types=1);
 
 namespace Spatial\Core;
@@ -8,11 +7,17 @@ namespace Spatial\Core;
 use Attribute;
 
 /**
- * Class Controller
+ * Class Injectable
  * @package Spatial\Core
+ * Injectable Attribute for DI Service
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class Controller
+class Injectable
 {
-    public string $event = 'controller';
+
+
+    public function __construct() {
+    }
+
+
 }

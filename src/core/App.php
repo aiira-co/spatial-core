@@ -5,9 +5,16 @@ namespace Spatial\Core;
 
 
 use JetBrains\PhpStorm\Pure;
+use Reflection;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
+use Spatial\Interface\IRouteModule;
 
+/**
+ * Class App
+ * @package Spatial\Core
+ */
 class App
 {
 
@@ -36,6 +43,8 @@ class App
         'page'
     ];
 
+    private array $appModules;
+
     private array $patternArray;
     private object $defaults;
 
@@ -44,12 +53,97 @@ class App
 
     #[Pure]
     public function __construct(
-        string $uri
+        ?string $uri = null
     ) {
+        $uri = $uri ?? $_SERVER['REQUEST_URI'];
+
         $this->patternArray['uri'] = explode('/', trim(urldecode($uri), '/'));
         $this->patternArray['count'] = count($this->patternArray['uri']);
     }
 
+    /**
+     * @param $uri
+     * @return string
+     */
+    private function _formatRoute($uri): string
+    {
+        // Strip query string (?foo=bar) and decode URI
+        if (false !== $pos = strpos($uri, '?')) {
+            $uri = substr($uri, 0, $pos);
+        }
+        $uri = rawurldecode($uri);
+
+        if ($uri === '') {
+            return '/';
+        }
+        return $uri;
+    }
+
+
+    /**
+     * @param string ...$appModule
+     * @return $this
+     * expects all params to have an attribute
+     * @throws ReflectionException
+     */
+    public function bootstrapModule(string ...$appModule): self
+    {
+        foreach ($appModule as $i => $iValue) {
+            $reflectionClass = new ReflectionClass($appModule[$i]);
+            $apiModuleAttributes = $reflectionClass->getAttributes(ApiModule::class);
+
+            if (count($apiModuleAttributes) > 0 && $apiModuleAttributes[0] instanceof ApiModule) {
+                $apiModule = $apiModuleAttributes[0];
+
+//                if module is found and matches
+                if ($this->resolveApiModule($apiModule)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        return $this;
+    }
+
+
+    /**
+     * @param ApiModule $api
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function resolveApiModule(ApiModule $api): bool
+    {
+//        find the import with routeModule
+        $routeModule = $this->getParamWith($api->imports, IRouteModule::class);
+        if ($routeModule === null) {
+            return false;
+        }
+        $routeModule->render();
+        return true;
+    }
+
+    /**
+     * @param array $moduleParam
+     * @param string $classInstance
+     * @return object|null
+     * @throws ReflectionException
+     */
+    private function getParamWith(array $moduleParam, string $classInstance): ?object
+    {
+        foreach ($moduleParam as $i => $iValue) {
+            $param = new ReflectionClass($moduleParam[$i]);
+            if ($param instanceof $classInstance) {
+                return $param;
+            }
+        }
+        return null;
+    }
+
+    public function catch(callable $exceptionCallable): void
+    {
+        $exceptionCallable();
+    }
 
     /**
      * @param array $uriArr
@@ -168,5 +262,29 @@ class App
         }
 
         return $listeners;
+    }
+
+    /**
+     * @return string
+     */
+    private function _getRequestedMethod(): string
+    {
+//        $method = 'httpGet';
+
+
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            $httpRequest = $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'];
+        } else {
+            $httpRequest = $_SERVER['REQUEST_METHOD'];
+        }
+
+
+        return match ($httpRequest) {
+            'GET' => 'httpGet',
+            'POST' => 'httpPost',
+            'PUT' => 'httpPut',
+            'DELETE' => 'httpDelete',
+            default => 'http' . ucfirst(strtolower($httpRequest)),
+        };
     }
 }
