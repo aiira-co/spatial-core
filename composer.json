@@ -1,0 +1,33 @@
+{
+  "name": "spatial/core",
+  "description": "Spatial API Core Contains Attributes",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Kofi Owusu-Afriyie",
+      "email": "airdesign.code@gmail.com",
+      "homepage": "https://github.com/air-Design",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Spatial\\Core\\": "src/core/",
+      "Spatial\\Common\\": "src/common/",
+      "Spatial\\Interface\\": "src/interface/",
+      "Spatial\\Swoole\\": "src/swoole/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+    }
+  },
+  "minimum-stability": "dev",
+  "require-dev": {
+    "ext-json": "*"
+  }
+}
