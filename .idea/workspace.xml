@@ -2,31 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/core/EventEmitter.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/Injectable.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/IRouteModule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/CommonModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/CommonModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Http/HttpDelete.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Http/HttpDelete.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Http/HttpGet.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Http/HttpGet.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Http/HttpHead.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Http/HttpHead.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Http/HttpPatch.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Http/HttpPatch.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Http/HttpPost.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Http/HttpPost.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Http/HttpPut.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Http/HttpPut.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/ApiModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ApiModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Area.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Area.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Controller.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Controller.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/HttpMethodAttribute.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/HttpMethodAttribute.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Route.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Route.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ComposerSettings">
+  <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
+    <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
     <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="composer.json" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -71,7 +66,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1603887427090</updated>
-      <workItem from="1603887428315" duration="7816000" />
+      <workItem from="1603887428315" duration="9465000" />
+      <workItem from="1603904506339" duration="2413000" />
     </task>
     <servers />
   </component>

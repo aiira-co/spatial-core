@@ -17,7 +17,8 @@ class ApiModule
 
     public function __construct(
         public array $imports,
-        public array $controllers,
+        public array $declarations,
+        public array $exports,
         /**
          * Register Services for DI
          * @var array|null
