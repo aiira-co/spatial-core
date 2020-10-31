@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Spatial\Common\Http;
+namespace Spatial\Common\HttpAttributes;
 
 use Attribute;
 use Spatial\Core\HttpMethodAttribute;
 
 /**
- * Class HttpGet
+ * Class HttpDelete
  * @package Spatial\Common\Http
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
-class HttpGet extends HttpMethodAttribute
+class HttpDelete extends HttpMethodAttribute
 {
-    public string $event = 'get';
-
+    public string $event = 'delete';
 }

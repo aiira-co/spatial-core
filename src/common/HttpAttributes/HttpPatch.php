@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Spatial\Common\Http;
+namespace Spatial\Common\HttpAttributes;
 
 use Attribute;
 use Spatial\Core\HttpMethodAttribute;

@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Spatial\Common\Http;
+namespace Spatial\Common\HttpAttributes;
 
 use Attribute;
 use Spatial\Core\HttpMethodAttribute;
 
 /**
- * Class HttpPost
+ * Class HttpHead
  * @package Spatial\Common\Http
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
-class HttpPost extends HttpMethodAttribute
+class HttpHead extends HttpMethodAttribute
 {
-    public string $event = 'created';
+    public string $event = 'head';
+
 }

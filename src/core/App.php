@@ -4,11 +4,12 @@
 namespace Spatial\Core;
 
 
+use Exception;
 use JetBrains\PhpStorm\Pure;
-use Reflection;
 use ReflectionClass;
 use ReflectionException;
-use ReflectionMethod;
+use Spatial\Core\Attributes\AppModule;
+use Spatial\Interface\IApplicationBuilder;
 use Spatial\Interface\IRouteModule;
 
 /**
@@ -17,7 +18,7 @@ use Spatial\Interface\IRouteModule;
  */
 class App
 {
-
+    private IApplicationBuilder $applicationBuilder;
     /**
      * @var array|string[]
      */
@@ -43,7 +44,30 @@ class App
         'page'
     ];
 
-    private array $appModules;
+    /**
+     * Keep Track of Imported Modules,
+     * Inherit their exports to one $declarations
+     * module declarations that are not exported are kept in the module
+     * scope for routing and functional use.
+     * Providers hold @Injectables for module declarations
+     * @var array
+     */
+    private array $importModules = [];
+
+
+    /**
+     * Includes declarations from the appModules
+     * and exports from imported modules
+     * @var array
+     */
+    private array $providers = [];
+
+    /**
+     * Modules declarations with imported declarations from import module's exports
+     * @var array
+     */
+    private array $declarations = [];
+
 
     private array $patternArray;
     private object $defaults;
@@ -55,18 +79,22 @@ class App
     public function __construct(
         ?string $uri = null
     ) {
-        $uri = $uri ?? $_SERVER['REQUEST_URI'];
+        $uri = $this->_formatRoute($uri ?? $_SERVER['REQUEST_URI']);
 
         $this->patternArray['uri'] = explode('/', trim(urldecode($uri), '/'));
         $this->patternArray['count'] = count($this->patternArray['uri']);
+
+        $this->applicationBuilder = new ApplicationBuilder();
     }
 
     /**
      * @param $uri
      * @return string
      */
-    private function _formatRoute($uri): string
-    {
+    #[Pure]
+    private function _formatRoute(
+        $uri
+    ): string {
         // Strip query string (?foo=bar) and decode URI
         if (false !== $pos = strpos($uri, '?')) {
             $uri = substr($uri, 0, $pos);
@@ -81,61 +109,88 @@ class App
 
 
     /**
-     * @param string ...$appModule
-     * @return $this
+     * @param object|string $appModule
+     * @return App|null expects all params to have an attribute
      * expects all params to have an attribute
      * @throws ReflectionException
      */
-    public function bootstrapModule(string ...$appModule): self
+    public function bootstrapModule(object|string $appModule): ?self
     {
-        foreach ($appModule as $i => $iValue) {
-            $reflectionClass = new ReflectionClass($appModule[$i]);
-            $apiModuleAttributes = $reflectionClass->getAttributes(ApiModule::class);
+        $reflectionClass = new ReflectionClass($appModule);
+        $reflectionClassApiAttributes = $reflectionClass->getAttributes(AppModule::class);
 
-            if (count($apiModuleAttributes) > 0 && $apiModuleAttributes[0] instanceof ApiModule) {
-                $apiModule = $apiModuleAttributes[0];
-
-//                if module is found and matches
-                if ($this->resolveApiModule($apiModule)) {
-                    break;
-                }
-            } else {
-                break;
-            }
+        if (count($reflectionClassApiAttributes) === 0) {
+            return $this;
         }
-        return $this;
+
+
+        $apiModuleAttributes = $reflectionClassApiAttributes[0]->getInstance();
+
+        if (!$apiModuleAttributes instanceof AppModule) {
+            return $this;
+        }
+
+        $apiModule = $apiModuleAttributes[0];
+
+//                load attribute metadata
+        $this->resolveAppModule($apiModule);
+
+//          load configs
+        $apiModule->configuration($this->applicationBuilder);
+
+        return null;
     }
 
 
     /**
-     * @param ApiModule $api
+     * Make sure to avoid circle imports
+     * @param AppModule $app
      * @return bool
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function resolveApiModule(ApiModule $api): bool
+    private function resolveAppModule(AppModule $app): bool
     {
 //        find the import with routeModule
-        $routeModule = $this->getParamWith($api->imports, IRouteModule::class);
+        $routeModule = $this->getParams($app->imports);
         if ($routeModule === null) {
             return false;
         }
+
+        $this->resolveProviders($app->providers);
+
         $routeModule->render();
         return true;
     }
 
     /**
-     * @param array $moduleParam
-     * @param string $classInstance
-     * @return object|null
+     * @param array $moduleProviders
      * @throws ReflectionException
      */
-    private function getParamWith(array $moduleParam, string $classInstance): ?object
+    private function resolveProviders(array $moduleProviders): void
     {
-        foreach ($moduleParam as $i => $iValue) {
-            $param = new ReflectionClass($moduleParam[$i]);
-            if ($param instanceof $classInstance) {
-                return $param;
+        foreach ($moduleProviders as $provider) {
+            if (!isset($this->providers[$provider])) {
+                //            check if it has DI for provider
+                $this->providers[$provider] = new ReflectionClass($provider);
             }
+        }
+    }
+
+    /**
+     * @param array $moduleParam
+     * @param string|null $classInstance
+     * @return object|null
+     * @throws Exception
+     */
+    private function getParams(array $moduleParam, ?string $classInstance = null): ?object
+    {
+        foreach ($moduleParam as $param) {
+            if (isset($this->importModules[$param])) {
+                throw new \RuntimeException('Import Module ' . $param . ' is already imported in module');
+            }
+//            check if it has DI for provider
+            $this->importModules[$param] = new ReflectionClass($param);
         }
         return null;
     }

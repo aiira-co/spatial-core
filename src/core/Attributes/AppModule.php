@@ -2,20 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Spatial\Core;
+namespace Spatial\Core\Attributes;
 
 use Attribute;
 
 /**
- * Class ApiModule
+ * Class AppModule
  * @package Spatial\Core
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class ApiModule
+class AppModule
 {
 
 
     public function __construct(
+        /**
+         * Import AppModels To App
+         */
         public array $imports,
         public array $declarations,
         public array $exports,

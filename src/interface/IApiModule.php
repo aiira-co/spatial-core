@@ -3,7 +3,8 @@
 namespace Spatial\Interface;
 
 /**
- * Interface to AuthGuard-ing
+ * Interface IApiModule
+ * @package Spatial\Interface
  */
 interface IApiModule
 {

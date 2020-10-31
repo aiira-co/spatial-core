@@ -3,7 +3,7 @@
 
 declare(strict_types=1);
 
-namespace Spatial\Core;
+namespace Spatial\Core\Attributes;
 
 use Attribute;
 
