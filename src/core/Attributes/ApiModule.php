@@ -21,7 +21,7 @@ class ApiModule
          */
         public array $imports,
         public array $declarations,
-        public array $exports,
+        public ?array $exports = null,
         /**
          * Register Services for DI
          * @var array|null
