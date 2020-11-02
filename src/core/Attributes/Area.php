@@ -8,7 +8,7 @@ use Attribute;
 
 /**
  * Class Area
- * @package Spatial\Core
+ * @package Spatial\Core\Attributes
  */
 #[Attribute]
 class Area

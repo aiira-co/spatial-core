@@ -8,7 +8,7 @@ use Attribute;
 
 /**
  * Class Injectable
- * @package Spatial\Core
+ * @package Spatial\Core\Attributes
  * Injectable Attribute for DI Service
  */
 #[Attribute(Attribute::TARGET_CLASS)]

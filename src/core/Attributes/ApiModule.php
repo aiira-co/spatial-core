@@ -7,11 +7,11 @@ namespace Spatial\Core\Attributes;
 use Attribute;
 
 /**
- * Class AppModule
- * @package Spatial\Core
+ * Class ApiModule
+ * @package Spatial\Core\Attributes
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class AppModule
+class ApiModule
 {
 
 

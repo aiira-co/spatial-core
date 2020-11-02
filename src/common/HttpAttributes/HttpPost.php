@@ -9,6 +9,7 @@ use Spatial\Core\HttpMethodAttribute;
 
 /**
  * Class HttpPost
+ * Identifies an action that supports the HTTP POST action verb.
  * @package Spatial\Common\Http
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]

@@ -8,7 +8,7 @@ use Exception;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
-use Spatial\Core\Attributes\AppModule;
+use Spatial\Core\Attributes\ApiModule;
 use Spatial\Interface\IApplicationBuilder;
 use Spatial\Interface\IRouteModule;
 
@@ -117,7 +117,7 @@ class App
     public function bootstrapModule(object|string $appModule): ?self
     {
         $reflectionClass = new ReflectionClass($appModule);
-        $reflectionClassApiAttributes = $reflectionClass->getAttributes(AppModule::class);
+        $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
 
         if (count($reflectionClassApiAttributes) === 0) {
             return $this;
@@ -126,7 +126,7 @@ class App
 
         $apiModuleAttributes = $reflectionClassApiAttributes[0]->getInstance();
 
-        if (!$apiModuleAttributes instanceof AppModule) {
+        if (!$apiModuleAttributes instanceof ApiModule) {
             return $this;
         }
 
@@ -144,12 +144,12 @@ class App
 
     /**
      * Make sure to avoid circle imports
-     * @param AppModule $app
+     * @param ApiModule $app
      * @return bool
      * @throws ReflectionException
      * @throws Exception
      */
-    private function resolveAppModule(AppModule $app): bool
+    private function resolveAppModule(ApiModule $app): bool
     {
 //        find the import with routeModule
         $routeModule = $this->getParams($app->imports);

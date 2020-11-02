@@ -9,6 +9,7 @@ use Spatial\Core\HttpMethodAttribute;
 
 /**
  * Class HttpGet
+ * Identifies an action that supports the HTTP GET action verb.
  * @package Spatial\Common\Http
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]

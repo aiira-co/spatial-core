@@ -7,16 +7,11 @@ namespace Spatial\Core\Attributes;
 use Attribute;
 
 /**
- * Class EventEmitter
+ * Class Bind
+ * Specifies prefix and properties to include for model binding.
  * @package Spatial\Core\Attributes
  */
-#[Attribute(Attribute::TARGET_PROPERTY)]
-class EventEmitter
+#[Attribute(Attribute::TARGET_METHOD)]
+class Bind
 {
-
-    public function __construct()
-    {
-    }
-
-
 }

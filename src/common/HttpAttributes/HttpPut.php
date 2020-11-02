@@ -9,6 +9,7 @@ use Spatial\Core\HttpMethodAttribute;
 
 /**
  * Class HttpPut
+ * Identifies an action that supports the HTTP PUT action verb.
  * @package Spatial\Common\Http
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
