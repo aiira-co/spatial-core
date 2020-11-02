@@ -1,10 +1,10 @@
 <?php
 
-namespace Spatial\Core\Interface;
+namespace Spatial\Core\Interfaces;
 
 /**
- * Interface IRouteModule
- * @package Spatial\Interface
+ * Interfaces IRouteModule
+ * @package Spatial\Interfaces
  */
 interface IRouteModule
 {

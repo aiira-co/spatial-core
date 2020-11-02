@@ -114,7 +114,7 @@ class App
      * expects all params to have an attribute
      * @throws ReflectionException
      */
-    public function bootstrapModule(object|string $appModule): ?self
+    public function bootstrapModule(string $appModule): ?self
     {
         $reflectionClass = new ReflectionClass($appModule);
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
@@ -123,20 +123,17 @@ class App
             return $this;
         }
 
+//        print_r($reflectionClassApiAttributes[0]->newInstance());
+        $apiModuleAttributes = $reflectionClassApiAttributes[0]->newInstance();
 
-        $apiModuleAttributes = $reflectionClassApiAttributes[0]->getInstance();
-
-        if (!$apiModuleAttributes instanceof ApiModule) {
-            return $this;
-        }
-
-        $apiModule = $apiModuleAttributes[0];
+//        $apiModule = $apiModuleAttributes[0];
 
 //                load attribute metadata
-        $this->resolveAppModule($apiModule);
+        $this->resolveAppModule($apiModuleAttributes);
 
 //          load configs
-        $apiModule->configuration($this->applicationBuilder);
+        $baseModule = $reflectionClass->newInstance();
+        $baseModule->configure($this->applicationBuilder);
 
         return null;
     }

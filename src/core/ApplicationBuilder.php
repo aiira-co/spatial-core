@@ -3,7 +3,7 @@
 
 namespace Spatial\Core;
 
-use Spatial\Core\Interface\IApplicationBuilder;
+use Spatial\Core\Interfaces\IApplicationBuilder;
 
 /**
  * Class ApplicationBuilder
@@ -11,21 +11,34 @@ use Spatial\Core\Interface\IApplicationBuilder;
  */
 class ApplicationBuilder implements IApplicationBuilder
 {
-    /**
-     * Use Swoole HttpServer. Expose Swoole Setting/Take In
-     */
+
     public function useSwooleHttp(): void
     {
         // TODO: Implement useSwooleHttp() method.
     }
 
-    public function UseMvcWithDefaultRoute(): void
+    public function useDeveloperExceptionPage(): void
     {
-        // TODO: Implement UseMvcWithDefaultRoute() method.
+        // TODO: Implement useDeveloperExceptionPage() method.
     }
 
-    public function useMvc(callable $configureRoute): void
+    public function useHttpsRedirection(): void
     {
-        // TODO: Implement useMvc() method.
+        // TODO: Implement useHttpsRedirection() method.
+    }
+
+    public function useRouting(): void
+    {
+        // TODO: Implement useRouting() method.
+    }
+
+    public function useAuthorization(): void
+    {
+        // TODO: Implement useAuthorization() method.
+    }
+
+    public function useEndpoints(callable $endpoint): void
+    {
+        // TODO: Implement useEndpoints() method.
     }
 }
