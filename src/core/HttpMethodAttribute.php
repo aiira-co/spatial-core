@@ -11,7 +11,7 @@ namespace Spatial\Core;
 //page
 
 
-use Spatial\Interface\IApiModule;
+use Spatial\Core\Interface\IApiModule;
 
 /**
  * Class HttpMethodAttribute

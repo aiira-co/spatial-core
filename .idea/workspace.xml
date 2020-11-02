@@ -2,8 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/infrastructure/Template.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/swoole/BridgeManager.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/swoole/HttpServer.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/swoole/WebSocket.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Attributes/ApiModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Attributes/ApiModule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ApplicationBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ApplicationBuilder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/HttpMethodAttribute.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/HttpMethodAttribute.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/IApiModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interface/IApiModule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/IApplicationBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interface/IApplicationBuilder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/IRouteModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interface/IRouteModule.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,6 +66,8 @@
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/core" />
       <recent name="$PROJECT_DIR$/src/core/Attributes" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\core" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\common\Http" />
@@ -88,7 +101,8 @@
       <workItem from="1604064534999" duration="35000" />
       <workItem from="1604064742813" duration="7574000" />
       <workItem from="1604268044774" duration="5930000" />
-      <workItem from="1604283581188" duration="62000" />
+      <workItem from="1604283581188" duration="123000" />
+      <workItem from="1604283826535" duration="277000" />
     </task>
     <servers />
   </component>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Spatial\Interface;
+namespace Spatial\Core\Interface;
 
 /**
  * Interface IRouteModule

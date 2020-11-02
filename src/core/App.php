@@ -9,8 +9,8 @@ use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
 use Spatial\Core\Attributes\ApiModule;
-use Spatial\Interface\IApplicationBuilder;
-use Spatial\Interface\IRouteModule;
+use Spatial\Core\Interface\IApplicationBuilder;
+use Spatial\Core\Interface\IRouteModule;
 
 /**
  * Class App

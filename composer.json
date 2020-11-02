@@ -18,7 +18,7 @@
     "psr-4": {
       "Spatial\\Core\\": "src/core/",
       "Spatial\\Common\\": "src/common/",
-      "Spatial\\Interface\\": "src/interface/",
+      "Spatial\\Infrastructure\\": "src/infrastructure/",
       "Spatial\\Swoole\\": "src/swoole/"
     }
   },

@@ -3,7 +3,7 @@
 
 namespace Spatial\Core;
 
-use Spatial\Interface\IApplicationBuilder;
+use Spatial\Core\Interface\IApplicationBuilder;
 
 /**
  * Class ApplicationBuilder

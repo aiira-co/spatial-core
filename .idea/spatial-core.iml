@@ -5,9 +5,9 @@
       <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/common" isTestSource="false" packagePrefix="Spatial\Common\" />
       <sourceFolder url="file://$MODULE_DIR$/src/core" isTestSource="false" packagePrefix="Spatial\Core\" />
-      <sourceFolder url="file://$MODULE_DIR$/src/interface" isTestSource="false" packagePrefix="Spatial\Interface\" />
       <sourceFolder url="file://$MODULE_DIR$/src/swoole" isTestSource="false" packagePrefix="Spatial\Swoole\" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/infrastructure" isTestSource="false" packagePrefix="Spatial\Infrastructure\" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
