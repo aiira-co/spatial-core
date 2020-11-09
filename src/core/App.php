@@ -8,9 +8,15 @@ use Exception;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
+use Spatial\Common\HttpAttributes\HttpGet;
+use Spatial\Common\HttpAttributes\HttpHead;
+use Spatial\Common\HttpAttributes\HttpPost;
+use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\ApiModule;
-use Spatial\Core\Interface\IApplicationBuilder;
-use Spatial\Core\Interface\IRouteModule;
+use Spatial\Core\Attributes\Route;
+use Spatial\Core\Attributes\Area;
+use Spatial\Core\Interfaces\IApplicationBuilder;
+use Spatial\Core\Interfaces\IRouteModule;
 
 /**
  * Class App
@@ -29,6 +35,15 @@ class App
         'HttpDelete',
         'HttpHead',
         'HttpPatch',
+    ];
+
+    private array $httpVerbsClass = [
+        'HttpGet' => HttpGet::class,
+        'HttpPost' => HttpPost::class,
+        'HttpPut' => HttpPut::class,
+        'HttpDelete' => HttpDelete::class,
+        'HttpHead' => HttpHead::class,
+        'HttpPatch' => HttpPatch::class,
     ];
 
     /**
@@ -68,11 +83,17 @@ class App
      */
     private array $declarations = [];
 
+    private array $controllers = [];
+    private array $routetable = [];
+    private array $pipes = [];
+
 
     private array $patternArray;
     private object $defaults;
 
     public array $status = ['code' => 401, 'reason' => 'Unauthorized'];
+
+    private array $routeTemplateArr = [];
 
 
     #[Pure]
@@ -128,12 +149,14 @@ class App
 
 //        $apiModule = $apiModuleAttributes[0];
 
-//                load attribute metadata
+//        load attribute metadata
         $this->resolveAppModule($apiModuleAttributes);
 
 //          load configs
         $baseModule = $reflectionClass->newInstance();
         $baseModule->configure($this->applicationBuilder);
+        $this->runApp();
+
 
         return null;
     }
@@ -146,18 +169,21 @@ class App
      * @throws ReflectionException
      * @throws Exception
      */
-    private function resolveAppModule(ApiModule $app): bool
+    private function resolveAppModule(ApiModule $app): void
     {
 //        find the import with routeModule
-        $routeModule = $this->getParams($app->imports);
-        if ($routeModule === null) {
-            return false;
-        }
+        echo 'resoliving imports \n';
+        $this->resolveImports($app->imports);
 
+//        Dependency Injection Services
+        echo 'resoliving providers \n';
         $this->resolveProviders($app->providers);
 
-        $routeModule->render();
-        return true;
+//        Declarations
+        echo 'resoliving declarations \n';
+        $this->resolveDeclarations($app->declarations);
+//        $routeModule->render();
+
     }
 
     /**
@@ -174,22 +200,36 @@ class App
         }
     }
 
+
+    /**
+     * @param array $moduleDeclarations
+     * @throws ReflectionException
+     */
+    private function resolveDeclarations(array $moduleDeclarations): void
+    {
+        foreach ($moduleDeclarations as $declaration) {
+            if (!isset($this->declarations[$declaration])) {
+                //            check if it has DI for provider
+                $this->declarations[$declaration] = new ReflectionClass($declaration);
+            }
+        }
+    }
+
     /**
      * @param array $moduleParam
      * @param string|null $classInstance
      * @return object|null
      * @throws Exception
      */
-    private function getParams(array $moduleParam, ?string $classInstance = null): ?object
+    private function resolveImports(array $moduleImports): void
     {
-        foreach ($moduleParam as $param) {
-            if (isset($this->importModules[$param])) {
-                throw new \RuntimeException('Import Module ' . $param . ' is already imported in module');
+        foreach ($moduleImports as $module) {
+            if (isset($this->importModules[$module])) {
+                throw new \RuntimeException('Import Module ' . $module . ' is already imported in module');
             }
 //            check if it has DI for provider
-            $this->importModules[$param] = new ReflectionClass($param);
+            $this->importModules[$module] = new ReflectionClass($module);
         }
-        return null;
     }
 
     public function catch(callable $exceptionCallable): void
@@ -339,4 +379,286 @@ class App
             default => 'http' . ucfirst(strtolower($httpRequest)),
         };
     }
+
+    /**
+     *
+     */
+    private function runApp()
+    {
+        $this->createRouteTable();
+
+        if ($this->applicationBuilder->isSwooleHttp) {
+            return;
+        }
+
+        if ($this->applicationBuilder->isSwooleWebsocket) {
+            return;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function createRouteTable(): void
+    {
+        echo '<pre>';
+        var_dump($this->declarations);
+
+//        separating declarations to
+//        controllers
+//        pipes
+//        directive
+
+        foreach ($this->declarations as $declaration) {
+            echo '<br/> >> Declaration checking is ' . $declaration->getShortName();
+            $attr = $declaration->getAttributes(ApiController::class);
+            if (count($attr) > 0) {
+                $this->registerNewController($declaration);
+                // Now try do draw route table
+
+            } else {
+//            check parent;
+//                    loop through parents
+                while ($parent = $declaration->getParentClass()) {
+                    if (
+                        $parent->getName() === "Spatial\Core\ControllerBase" ||
+                        $parent->getName() === "Spatial\Core\Controller"
+                    ) {
+                        $this->registerNewController($declaration);
+                        break;
+                    } else {
+                        echo '<br /> checking parent attribute';
+                        $parentAttr = $parent->getAttributes(ApiController::class);
+                        if (count($parentAttr) > 0) {
+                            $this->registerNewController($declaration);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+//        echo '<br /> Controllers are... <br/> >>';
+//        var_dump($this->controllers);
+
+        echo '<p> Route Table <br/> >';
+        print_r($this->routetable);
+    }
+
+    /**
+     * @param ReflectionClass $controller
+     * @throws Exception
+     */
+    private function registerNewController(ReflectionClass $controller)
+    {
+        if (isset($this->controllers[$controller->getName()])) {
+            var_dump($this->controllers);
+            throw new Exception('Controller ' . $controller->getName() . ' cannot be declared twice');
+            return;
+        }
+        $this->controllers[$controller->getName()] = $controller;
+
+//        $this->registerControllerRoutes($controller);
+
+//    attribute routing
+        $this->registerAttributeRoute($controller);
+    }
+
+
+    /**
+     * @param ReflectionClass $controller
+     */
+    private function registerControllerRoutes(ReflectionClass $controllerReflection)
+    {
+//        get configed route template
+//        default - '{controller=Home}/{action=Index}/{id?}';
+//        area - '{area}/{controller=Home}/{action=Index}/{id?}';
+//        first get routes from controller
+        $routeTemplate = '{controller=Home}/{action=Index}/{id?}';
+        $this->routeTemplateArr = explode('/', trim(urldecode($routeTemplate), '/'));
+        $route = '';
+
+        $controllerName = strtolower(rtrim($controllerReflection->getShortName(), 'Controller'));
+        $controllerArea = $controllerReflection->getAttributes(Area::class)[0] ?? '';
+//        $controllerActions = $controllerReflection->
+
+        echo '<br/ > route template string is >>> ' . $routeTemplate . '<br/>';
+        print_r($this->routeTemplateArr);
+
+
+//        conventional routing
+        foreach ($this->routeTemplateArr as $routeTX) {
+            foreach ($this->reservedRoutingNames as $token) {
+                if (str_starts_with($routeTX, '{' . $token)) {
+                    echo '<br /> found ' . $token . ' in ' . $routeTX . ' -->' . $controllerName . '<br /> ';
+                    $route = match ($token) {
+                        'controller' => $controllerName,
+                        'area' => $controllerArea,
+                        'action' => '[action]',
+                        default => ''
+                    };
+                    break;
+                } else {
+                    $route .= $routeTX . '/';
+                }
+            }
+        }
+        $this->routetable[] = [
+            'route' => '',
+            'controller' => '',
+            'httpMethod' => '',
+            'params' => ''
+        ];
+    }
+
+    /**
+     * @param ReflectionClass $controllerReflection
+     */
+    private function registerAttributeRoute(ReflectionClass $controllerReflection)
+    {
+        $controllerName = strtolower(str_replace('Controller', '', $controllerReflection->getShortName()));
+        $controllerArea = '';
+        $areaAttribute = $controllerReflection->getAttributes(Area::class);
+
+        if (count($areaAttribute) > 0) {
+            $areaInstance = $areaAttribute[0]->newInstance();
+            $controllerArea = $areaInstance->name;
+        }
+
+        $controllerBaseRoute = [''];
+        $controllerRoutes = [];
+        $controllerRouteAttributes = $controllerReflection->getAttributes(Route::class);
+        $controllerActions = $controllerReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+
+//        print_r(
+//            [
+//                $controllerReflection->getName(),
+//                $controllerName,
+//                $controllerArea
+//            ]
+//        );
+
+        if (count($controllerRouteAttributes) > 0) {
+            $controllerBaseRoute = [];
+            foreach ($controllerRouteAttributes as $baseRouteReflectionAttributes) {
+                $routeInstance = $baseRouteReflectionAttributes->newInstance();
+                $controllerBaseRoute[] = $routeInstance->template;
+            }
+        }
+
+        foreach ($controllerActions as $action) {
+            $actionRouteReflectionAttributes = $action->getAttributes(Route::class);
+            if (count($actionRouteReflectionAttributes) > 0) {
+                foreach ($actionRouteReflectionAttributes as $routeReflectionAttribute) {
+                    $routeInstance = $routeReflectionAttribute->newInstance();
+                    if (str_starts_with($routeInstance->template, '/')) {
+                        $this->setToRouteTable(
+                            $controllerReflection->getName(),
+                            $routeInstance->template,
+                            $controllerName,
+                            $controllerArea,
+                            $action
+                        );
+                    } else {
+                        foreach ($controllerBaseRoute as $baseRoute) {
+                            $this->setToRouteTable(
+                                $controllerReflection->getName(),
+                                $baseRoute . $routeInstance->template,
+                                $controllerName,
+                                $controllerArea,
+                                $action
+                            );
+                        }
+                    }
+                }
+            } else {
+//            now also check if method/action has httpverbs without any route, map it to the table
+                $actionRouteReflectionAttributes = $action->getAttributes(Route::class);
+                foreach ($controllerBaseRoute as $baseRoute) {
+                    $this->setToRouteTable(
+                        $controllerReflection->getName(),
+                        $baseRoute,
+                        $controllerName,
+                        $controllerArea,
+                        $action
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $template
+     * @param string $controller
+     * @param string $area
+     */
+    private function setToRouteTable(
+        string $controllerClassName,
+        string $template,
+        string $controller,
+        string $area,
+        ?\ReflectionMethod $action = null
+    ) {
+        echo 'setting to route table';
+
+        $this->routetable[] = [
+            'route' => $this->replaceTemplateTokens(
+                $template,
+                $controller,
+                $area
+            ),
+            'controller' => $controllerClassName,
+            'httpMethod' => $action ? $this->getHttpVerbsFromMethods($action) : null,
+            'action' => $action?->getName(),
+            'params' => $action?->getParameters()
+        ];
+    }
+
+    /**
+     * @param string $template
+     * @param string $controller
+     * @param string $area
+     * @return string
+     */
+    private function replaceTemplateTokens(string $template, string $controller, string $area): string
+    {
+//                replace any part that is reserved with [...];
+        $template = str_replace('[area]', $area, $template);
+        $template = str_replace('[controller]', $controller, $template);
+
+        return $template;
+    }
+
+    /**
+     * @param \ReflectionMethod $action
+     * @return array
+     */
+    private function getHttpVerbsFromMethods(\ReflectionMethod $action): array
+    {
+        $verbs = [];
+        $params = [];
+
+        foreach ($this->httpVerbs as $httpMethod) {
+            $params = [];
+            $httpGetReflection = $action->getAttributes($this->httpVerbsClass[$httpMethod]);
+
+            if (count($httpGetReflection) > 0) {
+                $verbs[$httpMethod] = [];
+
+                foreach ($httpGetReflection as $verb) {
+                    $verbInstance = $verb->newInstance();
+                    $verbClassReflection = new ReflectionClass($verbInstance);
+
+                    foreach ($verbClassReflection->getProperties() as $property) {
+                        $params[$property->getName()] = $verbInstance->{$property->getName()};
+                    };
+
+                    $verbs[$httpMethod][] = $params;
+                }
+            }
+        }
+
+        return $verbs;
+    }
 }
+

@@ -12,9 +12,13 @@ use Spatial\Core\Interfaces\IApplicationBuilder;
 class ApplicationBuilder implements IApplicationBuilder
 {
 
+    public bool $isSwooleWebsocket = false;
+    public bool $isSwooleHttp = false;
+
+
     public function useSwooleHttp(): void
     {
-        // TODO: Implement useSwooleHttp() method.
+        $this->isSwooleHttp = true;
     }
 
     public function useDeveloperExceptionPage(): void
@@ -39,6 +43,7 @@ class ApplicationBuilder implements IApplicationBuilder
 
     public function useEndpoints(callable $endpoint): void
     {
+        $endpoint();
         // TODO: Implement useEndpoints() method.
     }
 }
