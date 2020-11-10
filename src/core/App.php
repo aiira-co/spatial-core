@@ -172,15 +172,15 @@ class App
     private function resolveAppModule(ApiModule $app): void
     {
 //        find the import with routeModule
-        echo 'resoliving imports \n';
+//        echo 'resoliving imports \n';
         $this->resolveImports($app->imports);
 
 //        Dependency Injection Services
-        echo 'resoliving providers \n';
+//        echo 'resoliving providers \n';
         $this->resolveProviders($app->providers);
 
 //        Declarations
-        echo 'resoliving declarations \n';
+//        echo 'resoliving declarations \n';
         $this->resolveDeclarations($app->declarations);
 //        $routeModule->render();
 
@@ -402,7 +402,7 @@ class App
     private function createRouteTable(): void
     {
         echo '<pre>';
-        var_dump($this->declarations);
+//        var_dump($this->declarations);
 
 //        separating declarations to
 //        controllers
@@ -410,7 +410,7 @@ class App
 //        directive
 
         foreach ($this->declarations as $declaration) {
-            echo '<br/> >> Declaration checking is ' . $declaration->getShortName();
+//            echo '<br/> >> Declaration checking is ' . $declaration->getShortName();
             $attr = $declaration->getAttributes(ApiController::class);
             if (count($attr) > 0) {
                 $this->registerNewController($declaration);
@@ -427,7 +427,7 @@ class App
                         $this->registerNewController($declaration);
                         break;
                     } else {
-                        echo '<br /> checking parent attribute';
+//                        echo '<br /> checking parent attribute';
                         $parentAttr = $parent->getAttributes(ApiController::class);
                         if (count($parentAttr) > 0) {
                             $this->registerNewController($declaration);
@@ -441,7 +441,31 @@ class App
 //        var_dump($this->controllers);
 
         echo '<p> Route Table <br/> >';
-        print_r($this->routetable);
+        echo '<table> 
+<thead>
+<tr>
+<th>Route</th>
+<th>Controller</th>
+<th>Action</th>
+<th>Params</th>
+<th>HttpVerb</th>
+
+</tr>
+</thead>
+<tbody>';
+        foreach ($this->routetable as $row) {
+            echo '
+            <tr>
+<th>' . $row['route'] . '</th>
+<th>' . $row['controller'] . '</th>
+<th>' . $row['action'] . '</th>
+<th>' . json_encode($row['params']) . '</th>
+<th>' . json_encode($row['httpMethod']) . '</th>
+
+</tr>';
+        }
+
+        echo '</tbody></table>';
     }
 
     /**
@@ -451,7 +475,7 @@ class App
     private function registerNewController(ReflectionClass $controller)
     {
         if (isset($this->controllers[$controller->getName()])) {
-            var_dump($this->controllers);
+//            var_dump($this->controllers);
             throw new Exception('Controller ' . $controller->getName() . ' cannot be declared twice');
             return;
         }
@@ -515,20 +539,18 @@ class App
      */
     private function registerAttributeRoute(ReflectionClass $controllerReflection)
     {
-        $controllerName = strtolower(str_replace('Controller', '', $controllerReflection->getShortName()));
-        $controllerArea = '';
-        $areaAttribute = $controllerReflection->getAttributes(Area::class);
-
-        if (count($areaAttribute) > 0) {
-            $areaInstance = $areaAttribute[0]->newInstance();
-            $controllerArea = $areaInstance->name;
-        }
+        $tokens = [
+            'action' => '',
+            'area' => $this->getAreaAttribute($controllerReflection->getAttributes(Area::class)) ?? '',
+            'controller' => strtolower(str_replace('Controller', '', $controllerReflection->getShortName())),
+            'handler' => '',
+            'page' => ''
+        ];
 
         $controllerBaseRoute = [''];
         $controllerRoutes = [];
         $controllerRouteAttributes = $controllerReflection->getAttributes(Route::class);
         $controllerActions = $controllerReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-
 
 //        print_r(
 //            [
@@ -547,6 +569,11 @@ class App
         }
 
         foreach ($controllerActions as $action) {
+            if ($action->getName() === '__construct') {
+                continue;
+            }
+            $tokens['action'] = $action->getName();
+
             $actionRouteReflectionAttributes = $action->getAttributes(Route::class);
             if (count($actionRouteReflectionAttributes) > 0) {
                 foreach ($actionRouteReflectionAttributes as $routeReflectionAttribute) {
@@ -555,8 +582,7 @@ class App
                         $this->setToRouteTable(
                             $controllerReflection->getName(),
                             $routeInstance->template,
-                            $controllerName,
-                            $controllerArea,
+                            $tokens,
                             $action
                         );
                     } else {
@@ -564,8 +590,7 @@ class App
                             $this->setToRouteTable(
                                 $controllerReflection->getName(),
                                 $baseRoute . $routeInstance->template,
-                                $controllerName,
-                                $controllerArea,
+                                $tokens,
                                 $action
                             );
                         }
@@ -578,13 +603,25 @@ class App
                     $this->setToRouteTable(
                         $controllerReflection->getName(),
                         $baseRoute,
-                        $controllerName,
-                        $controllerArea,
+                        $tokens,
                         $action
                     );
                 }
             }
         }
+    }
+
+    /**
+     * @param \ReflectionAttribute $areaAttribute
+     * @return string|null
+     */
+    private function getAreaAttribute(array $areaAttribute): ?string
+    {
+        if (count($areaAttribute) === 0) {
+            return null;
+        }
+        $areaInstance = $areaAttribute[0]->newInstance();
+        return $areaInstance->name;
     }
 
     /**
@@ -595,21 +632,18 @@ class App
     private function setToRouteTable(
         string $controllerClassName,
         string $template,
-        string $controller,
-        string $area,
+        array $tokens,
         ?\ReflectionMethod $action = null
     ) {
-        echo 'setting to route table';
+//        echo 'setting to route table';
+//        check for action area attribute. if it exists, overwrite else none
+        $tokens['area'] = $this->getAreaAttribute($action->getAttributes(Area::class)) ?? $tokens['area'];
 
         $this->routetable[] = [
-            'route' => $this->replaceTemplateTokens(
-                $template,
-                $controller,
-                $area
-            ),
+            'route' => $this->replaceTemplateTokens($template, $tokens),
             'controller' => $controllerClassName,
             'httpMethod' => $action ? $this->getHttpVerbsFromMethods($action) : null,
-            'action' => $action?->getName(),
+            'action' => $tokens['action'],
             'params' => $action?->getParameters()
         ];
     }
@@ -620,11 +654,16 @@ class App
      * @param string $area
      * @return string
      */
-    private function replaceTemplateTokens(string $template, string $controller, string $area): string
+    private function replaceTemplateTokens(string $template, array $tokens): string
     {
 //                replace any part that is reserved with [...];
-        $template = str_replace('[area]', $area, $template);
-        $template = str_replace('[controller]', $controller, $template);
+        foreach ($this->reservedRoutingNames as $tokenKey) {
+            if ($tokens[$tokenKey] === null) {
+                continue;
+            }
+            $template = str_replace('[' . $tokenKey . ']', $tokens[$tokenKey], $template);
+        }
+//        $template = str_replace('[controller]', $controller, $template);
 
         return $template;
     }
