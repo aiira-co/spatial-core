@@ -88,6 +88,7 @@ class App
     private array $pipes = [];
 
 
+    private array $baseRouteTemplate = [''];
     private array $patternArray;
     private object $defaults;
 
@@ -105,6 +106,11 @@ class App
         $this->patternArray['uri'] = explode('/', trim(urldecode($uri), '/'));
         $this->patternArray['count'] = count($this->patternArray['uri']);
 
+//        prepare baseRoute
+//        To be moeved to application builder to use endpoints
+        $this->convertRouteTemplateToPattern('{controller=Home}/{action=Index}/{id?}');
+
+//        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
     }
 
@@ -441,8 +447,8 @@ class App
 //        var_dump($this->controllers);
 
         echo '<p> Route Table <br/> >';
-        echo '<table> 
-<thead>
+        echo '<table style="display: block; background-color: paleturquoise"> 
+<thead style="background-color: aliceblue">
 <tr>
 <th>Route</th>
 <th>Controller</th>
@@ -455,7 +461,7 @@ class App
 <tbody>';
         foreach ($this->routetable as $row) {
             echo '
-            <tr>
+            <tr style="background-color: bisque">
 <th>' . $row['route'] . '</th>
 <th>' . $row['controller'] . '</th>
 <th>' . $row['action'] . '</th>
@@ -469,76 +475,20 @@ class App
     }
 
     /**
-     * @param ReflectionClass $controller
+     * @param ReflectionClass $controllerReflection
      * @throws Exception
      */
-    private function registerNewController(ReflectionClass $controller)
+    private function registerNewController(ReflectionClass $controllerReflection)
     {
-        if (isset($this->controllers[$controller->getName()])) {
+        if (isset($this->controllers[$controllerReflection->getName()])) {
 //            var_dump($this->controllers);
-            throw new Exception('Controller ' . $controller->getName() . ' cannot be declared twice');
+            throw new Exception('Controller ' . $controllerReflection->getName() . ' cannot be declared twice');
             return;
         }
-        $this->controllers[$controller->getName()] = $controller;
+        $this->controllers[$controllerReflection->getName()] = $controllerReflection;
 
-//        $this->registerControllerRoutes($controller);
+        $routeType = 2;
 
-//    attribute routing
-        $this->registerAttributeRoute($controller);
-    }
-
-
-    /**
-     * @param ReflectionClass $controller
-     */
-    private function registerControllerRoutes(ReflectionClass $controllerReflection)
-    {
-//        get configed route template
-//        default - '{controller=Home}/{action=Index}/{id?}';
-//        area - '{area}/{controller=Home}/{action=Index}/{id?}';
-//        first get routes from controller
-        $routeTemplate = '{controller=Home}/{action=Index}/{id?}';
-        $this->routeTemplateArr = explode('/', trim(urldecode($routeTemplate), '/'));
-        $route = '';
-
-        $controllerName = strtolower(rtrim($controllerReflection->getShortName(), 'Controller'));
-        $controllerArea = $controllerReflection->getAttributes(Area::class)[0] ?? '';
-//        $controllerActions = $controllerReflection->
-
-        echo '<br/ > route template string is >>> ' . $routeTemplate . '<br/>';
-        print_r($this->routeTemplateArr);
-
-
-//        conventional routing
-        foreach ($this->routeTemplateArr as $routeTX) {
-            foreach ($this->reservedRoutingNames as $token) {
-                if (str_starts_with($routeTX, '{' . $token)) {
-                    echo '<br /> found ' . $token . ' in ' . $routeTX . ' -->' . $controllerName . '<br /> ';
-                    $route = match ($token) {
-                        'controller' => $controllerName,
-                        'area' => $controllerArea,
-                        'action' => '[action]',
-                        default => ''
-                    };
-                    break;
-                } else {
-                    $route .= $routeTX . '/';
-                }
-            }
-        }
-        $this->routetable[] = [
-            'route' => '',
-            'controller' => '',
-            'httpMethod' => '',
-            'params' => ''
-        ];
-    }
-
-    /**
-     * @param ReflectionClass $controllerReflection
-     */
-    private function registerAttributeRoute(ReflectionClass $controllerReflection)
-    {
         $tokens = [
             'action' => '',
             'area' => $this->getAreaAttribute($controllerReflection->getAttributes(Area::class)) ?? '',
@@ -547,6 +497,81 @@ class App
             'page' => ''
         ];
 
+        switch ($routeType) {
+            case 1:
+                $this->registerControllerRoutes($controllerReflection, $tokens);
+                break;
+            case 2:
+//    attribute routing
+                $this->registerAttributeRoute($controllerReflection, $tokens);
+                break;
+
+            default:
+                $this->registerControllerRoutes($controllerReflection, $tokens);
+                $this->registerAttributeRoute($controllerReflection, $tokens);
+                break;
+        }
+    }
+
+    /**
+     * @param string $routeTemplate
+     */
+    private function convertRouteTemplateToPattern(string $routeTemplate): void
+    {
+        $this->routeTemplateArr = explode('/', trim(urldecode($routeTemplate), '/'));
+        $baseRoute = '';
+
+        $found = false;
+
+//        conventional routing
+        foreach ($this->routeTemplateArr as $routeTX) {
+            foreach ($this->reservedRoutingNames as $token) {
+                if (str_starts_with($routeTX, '{' . $token)) {
+//                    echo '<br /> found ' . $token . ' in ' . $routeTX . ' -->' . $controllerName . '<br /> ';
+                    $baseRoute .= '[' . $token . ']/';
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $baseRoute .= $routeTX . '/';
+                $found = false;
+            }
+        }
+
+        echo $baseRoute . '<br/>';
+        $this->baseRouteTemplate[] = $baseRoute;
+    }
+
+    /**
+     * @param ReflectionClass $controller
+     */
+    private function registerControllerRoutes(ReflectionClass $controllerReflection, array $tokens)
+    {
+        $controllerActions = $controllerReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach ($controllerActions as $action) {
+            if ($action->getName() === '__construct') {
+                continue;
+            }
+            $tokens['action'] = $action->getName();
+
+            foreach ($this->baseRouteTemplate as $baseRoute) {
+                $this->setToRouteTable(
+                    $controllerReflection->getName(),
+                    $baseRoute,
+                    $tokens,
+                    $action
+                );
+            }
+        }
+    }
+
+    /**
+     * @param ReflectionClass $controllerReflection
+     */
+    private function registerAttributeRoute(ReflectionClass $controllerReflection, array $tokens)
+    {
         $controllerBaseRoute = [''];
         $controllerRoutes = [];
         $controllerRouteAttributes = $controllerReflection->getAttributes(Route::class);
@@ -598,7 +623,7 @@ class App
                 }
             } else {
 //            now also check if method/action has httpverbs without any route, map it to the table
-                $actionRouteReflectionAttributes = $action->getAttributes(Route::class);
+//                $actionRouteReflectionAttributes = $action->getAttributes(Route::class);
                 foreach ($controllerBaseRoute as $baseRoute) {
                     $this->setToRouteTable(
                         $controllerReflection->getName(),
@@ -665,7 +690,7 @@ class App
         }
 //        $template = str_replace('[controller]', $controller, $template);
 
-        return $template;
+        return rtrim(strtolower($template), '/');
     }
 
     /**
