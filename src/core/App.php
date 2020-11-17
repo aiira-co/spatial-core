@@ -8,9 +8,13 @@ use Exception;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
+use Spatial\Common\HttpAttributes\HttpDelete;
 use Spatial\Common\HttpAttributes\HttpGet;
 use Spatial\Common\HttpAttributes\HttpHead;
+use Spatial\Common\HttpAttributes\HttpPatch;
 use Spatial\Common\HttpAttributes\HttpPost;
+use Spatial\Common\HttpAttributes\HttpPut;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\ApiModule;
 use Spatial\Core\Attributes\Route;
@@ -97,7 +101,6 @@ class App
     private array $routeTemplateArr = [];
 
 
-    #[Pure]
     public function __construct(
         ?string $uri = null
     ) {
@@ -107,7 +110,7 @@ class App
         $this->patternArray['count'] = count($this->patternArray['uri']);
 
 //        prepare baseRoute
-//        To be moeved to application builder to use endpoints
+//        To be moved to application builder to use endpoints
         $this->convertRouteTemplateToPattern('{controller=Home}/{action=Index}/{id?}');
 
 //        bootstraps app
@@ -136,10 +139,11 @@ class App
 
 
     /**
-     * @param object|string $appModule
+     * @param string $appModule
      * @return App|null expects all params to have an attribute
      * expects all params to have an attribute
      * @throws ReflectionException
+     * @throws Exception
      */
     public function bootstrapModule(string $appModule): ?self
     {
@@ -171,9 +175,8 @@ class App
     /**
      * Make sure to avoid circle imports
      * @param ApiModule $app
-     * @return bool
+     * @return void
      * @throws ReflectionException
-     * @throws Exception
      */
     private function resolveAppModule(ApiModule $app): void
     {
@@ -222,10 +225,9 @@ class App
     }
 
     /**
-     * @param array $moduleParam
-     * @param string|null $classInstance
-     * @return object|null
-     * @throws Exception
+     * @param array $moduleImports
+     * @return void
+     * @throws ReflectionException
      */
     private function resolveImports(array $moduleImports): void
     {
@@ -388,8 +390,9 @@ class App
 
     /**
      *
+     * @throws Exception
      */
-    private function runApp()
+    private function runApp(): void
     {
         $this->createRouteTable();
 
@@ -446,6 +449,15 @@ class App
 //        echo '<br /> Controllers are... <br/> >>';
 //        var_dump($this->controllers);
 
+        $this->printRouteTable();
+//        now resolve route
+    }
+
+    /**
+     * Print route tables
+     */
+    private function printRouteTable(): void
+    {
         echo '<p> Route Table <br/> >';
         echo '<table style="display: block; background-color: paleturquoise"> 
 <thead style="background-color: aliceblue">
@@ -478,11 +490,11 @@ class App
      * @param ReflectionClass $controllerReflection
      * @throws Exception
      */
-    private function registerNewController(ReflectionClass $controllerReflection)
+    private function registerNewController(ReflectionClass $controllerReflection): void
     {
         if (isset($this->controllers[$controllerReflection->getName()])) {
 //            var_dump($this->controllers);
-            throw new Exception('Controller ' . $controllerReflection->getName() . ' cannot be declared twice');
+            throw new \RuntimeException('Controller ' . $controllerReflection->getName() . ' cannot be declared twice');
             return;
         }
         $this->controllers[$controllerReflection->getName()] = $controllerReflection;
@@ -544,11 +556,12 @@ class App
     }
 
     /**
-     * @param ReflectionClass $controller
+     * @param ReflectionClass $controllerReflection
+     * @param array $tokens
      */
-    private function registerControllerRoutes(ReflectionClass $controllerReflection, array $tokens)
+    private function registerControllerRoutes(ReflectionClass $controllerReflection, array $tokens): void
     {
-        $controllerActions = $controllerReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $controllerActions = $controllerReflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($controllerActions as $action) {
             if ($action->getName() === '__construct') {
@@ -570,12 +583,12 @@ class App
     /**
      * @param ReflectionClass $controllerReflection
      */
-    private function registerAttributeRoute(ReflectionClass $controllerReflection, array $tokens)
+    private function registerAttributeRoute(ReflectionClass $controllerReflection, array $tokens): void
     {
         $controllerBaseRoute = [''];
         $controllerRoutes = [];
         $controllerRouteAttributes = $controllerReflection->getAttributes(Route::class);
-        $controllerActions = $controllerReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $controllerActions = $controllerReflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
 //        print_r(
 //            [
@@ -637,7 +650,7 @@ class App
     }
 
     /**
-     * @param \ReflectionAttribute $areaAttribute
+     * @param array $areaAttribute
      * @return string|null
      */
     private function getAreaAttribute(array $areaAttribute): ?string
@@ -645,21 +658,21 @@ class App
         if (count($areaAttribute) === 0) {
             return null;
         }
-        $areaInstance = $areaAttribute[0]->newInstance();
-        return $areaInstance->name;
+        return $areaAttribute[0]->newInstance()->name;
     }
 
     /**
+     * @param string $controllerClassName
      * @param string $template
-     * @param string $controller
-     * @param string $area
+     * @param array $tokens
+     * @param ReflectionMethod|null $action
      */
     private function setToRouteTable(
         string $controllerClassName,
         string $template,
         array $tokens,
-        ?\ReflectionMethod $action = null
-    ) {
+        ?ReflectionMethod $action = null
+    ): void {
 //        echo 'setting to route table';
 //        check for action area attribute. if it exists, overwrite else none
         $tokens['area'] = $this->getAreaAttribute($action->getAttributes(Area::class)) ?? $tokens['area'];
@@ -694,10 +707,10 @@ class App
     }
 
     /**
-     * @param \ReflectionMethod $action
+     * @param ReflectionMethod $action
      * @return array
      */
-    private function getHttpVerbsFromMethods(\ReflectionMethod $action): array
+    private function getHttpVerbsFromMethods(ReflectionMethod $action): array
     {
         $verbs = [];
         $params = [];
