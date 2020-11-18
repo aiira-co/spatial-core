@@ -2,8 +2,35 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/ActivatedRoute.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/ActiveRouteBuilder.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/HttpMethodAttribute.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/Interfaces/CanActivate.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/Interfaces/IRouteBuilder.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/Interfaces/IRoutingTemplateProvider.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/RouteBuilder.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/Trait/SecurityTrait.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/RouterModule.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/TestModule.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/controllers/MyBaseController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/controllers/ProductController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/controllers/TestController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/controllers/ValuesController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpDelete.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpDelete.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpGet.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpGet.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpHead.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpHead.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPatch.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPatch.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPost.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPost.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPut.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPut.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ApplicationBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ApplicationBuilder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/Interfaces/IRouteModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interfaces/IRouteModule.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -12,7 +39,9 @@
   </component>
   <component name="ComposerSettings" doNotAsk="true" synchronizationState="SYNCHRONIZE">
     <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
-    <execution />
+    <execution>
+      <executable path="composer" />
+    </execution>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -24,6 +53,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="PhpServers">
+    <servers>
+      <server host="127.0.0.1" id="a43ec319-3674-48d2-80d8-d38876d66c03" name="PHP 8 Dev Server" port="5200" />
+    </servers>
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="PHP 8.0">
+    <include_path>
+      <path value="$PROJECT_DIR$/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
+      <path value="$PROJECT_DIR$/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/vendor/ralouphie/getallheaders" />
+      <path value="$PROJECT_DIR$/vendor/spatial/psr7" />
+      <path value="$PROJECT_DIR$/vendor/psr/http-server-handler" />
+    </include_path>
+  </component>
   <component name="ProjectId" id="1jVRlvBcYX20DtOwa2bScSvgjQZ" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -34,7 +78,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/common/BindSourceAttributes" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -48,11 +92,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/router" />
       <recent name="$PROJECT_DIR$/src/common/BindSourceAttributes" />
       <recent name="$PROJECT_DIR$/src/core/Attributes" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\interface" />
-      <recent name="I:\Code\PHP\Frameworks\spatial-core\src\core" />
-      <recent name="I:\Code\PHP\Frameworks\spatial-core\src" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/core/Interface" />
@@ -62,7 +106,19 @@
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\core" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="PHP HTTP Request.Get Products">
+    <configuration name="PHP 8 dev Server" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$" port="5200">
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$" port="5200">
+      <method v="2" />
+    </configuration>
+    <configuration name="Get Products" type="PhpHttpRequestRunConfigurationType" factoryName="PHP HTTP Request" server_name="PHP 8 Dev Server">
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PhpHttpRequestRunConfigurationType" factoryName="PHP HTTP Request" server_name="PHP 8 Dev Server">
+      <method v="2" />
+    </configuration>
     <configuration name="phpdockerio php8" type="docker-deploy" factoryName="docker-image" server-name="Docker">
       <deployment type="docker-image">
         <settings>
@@ -75,6 +131,11 @@
       </deployment>
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Docker.phpdockerio php8" />
+      <item itemvalue="PHP Built-in Web Server.PHP 8 dev Server" />
+      <item itemvalue="PHP HTTP Request.Get Products" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -97,7 +158,7 @@
       <workItem from="1604926707650" duration="268000" />
       <workItem from="1604927176062" duration="117000" />
       <workItem from="1604941657837" duration="1969000" />
-      <workItem from="1605548389349" duration="1846000" />
+      <workItem from="1605548389349" duration="19777000" />
     </task>
     <servers />
   </component>

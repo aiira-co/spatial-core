@@ -12,18 +12,22 @@
     }
   ],
   "require": {
-    "php": "^8.0"
+    "php": "^8.0",
+    "psr/http-message": "^1.0",
+    "spatial/psr7": "dev-master"
   },
   "autoload": {
     "psr-4": {
       "Spatial\\Core\\": "src/core/",
       "Spatial\\Common\\": "src/common/",
       "Spatial\\Infrastructure\\": "src/infrastructure/",
-      "Spatial\\Swoole\\": "src/swoole/"
+      "Spatial\\Swoole\\": "src/swoole/",
+      "Spatial\\Router\\": "src/router/"
     }
   },
   "autoload-dev": {
     "psr-4": {
+      "Spatial\\Api\\": "test/"
     }
   },
   "minimum-stability": "dev",

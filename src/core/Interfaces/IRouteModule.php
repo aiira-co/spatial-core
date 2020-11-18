@@ -8,5 +8,5 @@ namespace Spatial\Core\Interfaces;
  */
 interface IRouteModule
 {
-    public function render(?string $uri = null): void;
+    public function render(array $route, object $defaults): void;
 }

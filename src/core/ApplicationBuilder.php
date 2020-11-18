@@ -4,6 +4,8 @@
 namespace Spatial\Core;
 
 use Spatial\Core\Interfaces\IApplicationBuilder;
+use Spatial\Router\Interfaces\IRouteBuilder;
+use Spatial\Router\RouteBuilder;
 
 /**
  * Class ApplicationBuilder
@@ -14,7 +16,13 @@ class ApplicationBuilder implements IApplicationBuilder
 
     public bool $isSwooleWebsocket = false;
     public bool $isSwooleHttp = false;
+    private IRouteBuilder $routeBuilder;
+    public array $routingType = [];
 
+    public function __construct()
+    {
+        $this->routeBuilder = new RouteBuilder();
+    }
 
     public function useSwooleHttp(): void
     {
@@ -43,7 +51,7 @@ class ApplicationBuilder implements IApplicationBuilder
 
     public function useEndpoints(callable $endpoint): void
     {
-        $endpoint();
+        $this->routingType = $endpoint($this->routeBuilder);
         // TODO: Implement useEndpoints() method.
     }
 }

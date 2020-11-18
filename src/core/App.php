@@ -21,6 +21,7 @@ use Spatial\Core\Attributes\Route;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Interfaces\IApplicationBuilder;
 use Spatial\Core\Interfaces\IRouteModule;
+use Spatial\Router\RouterModule;
 
 /**
  * Class App
@@ -29,6 +30,7 @@ use Spatial\Core\Interfaces\IRouteModule;
 class App
 {
     private IApplicationBuilder $applicationBuilder;
+    private IRouteModule $routerModule;
     /**
      * @var array|string[]
      */
@@ -93,28 +95,37 @@ class App
 
 
     private array $baseRouteTemplate = [''];
+    private string $uri;
     private array $patternArray;
     private object $defaults;
 
     public array $status = ['code' => 401, 'reason' => 'Unauthorized'];
 
     private array $routeTemplateArr = [];
+    private array $routeTemplateParams = [];
+    private bool $enableAttributeRouting = false;
+    private bool $enableConventionalRouting = false;
+    private int $routeType = 2;
+
+    private string $requestedMethod;
+    /**
+     * @var mixed
+     */
+    private array $routeActivated;
 
 
     public function __construct(
         ?string $uri = null
     ) {
-        $uri = $this->_formatRoute($uri ?? $_SERVER['REQUEST_URI']);
+        $this->uri = $this->_formatRoute($uri ?? $_SERVER['REQUEST_URI']);
 
-        $this->patternArray['uri'] = explode('/', trim(urldecode($uri), '/'));
+        $this->patternArray['uri'] = explode('/', trim(urldecode($this->uri), '/'));
         $this->patternArray['count'] = count($this->patternArray['uri']);
 
-//        prepare baseRoute
-//        To be moved to application builder to use endpoints
-        $this->convertRouteTemplateToPattern('{controller=Home}/{action=Index}/{id?}');
 
 //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
+        $this->routerModule = new RouterModule();
     }
 
     /**
@@ -246,56 +257,62 @@ class App
     }
 
     /**
-     * @param array $uriArr
+     * @param array $routeUriArr
      * @param string $token
      * @return bool
      */
-    public function isUriRoute(array $uriArr, string $token = '{}'): bool
+    public function isUriRoute(array $routeUriArr, string $token = '{}'): bool
     {
         $isMatch = true;
-        $isToken = false;
+//        print_r($this->patternArray);
+//        print_r($routeUriArr);
+        $routeArrCount = count($routeUriArr);
 
-        for ($i = 0; $i < $this->patternArray['count']; $i++) {
-            if (str_starts_with($this->patternArray['uri'][$i][0], $token[0])) {
-                $isToken = true;
+        if ($routeArrCount < $this->patternArray['count']) {
+            return false;
+        }
 
-                if (!isset($uriArr[$i]) || !($this->patternArray['uri'][$i] === $uriArr[$i])) {
+
+        for ($i = 0; $i < $routeArrCount; $i++) {
+            $isToken = str_starts_with($routeUriArr[$i], $token[0]);
+//            echo 'hello ghana';
+            if (!$isToken) {
+                if (
+                    !isset($this->patternArray['uri'][$i]) ||
+                    !($this->patternArray['uri'][$i] === $routeUriArr[$i])
+                ) {
                     $isMatch = false;
-                    $isToken = false;
                     break;
                 }
+//                echo $this->patternArray['uri'][$i] . '===' . $routeUriArr[$i];
+                continue;
             }
 
 
-            if ($isToken) {
-                $placeholder = str_replace(
+            $placeholder =
+                str_replace(
                     [$token[0], $token[1]],
                     '',
-                    $this->patternArray['uri'][$i]
+                    $routeUriArr[$i]
                 );
-//                verify token for only [], {} can be used for everything
-                if ($token === '[]' && !in_array($placeholder, $this->reservedRoutingNames, true)) {
-                    $this->status['reason'] = $placeholder . ' is not a reserved routing token';
-                    break;
-                }
-            } else {
-                $placeholder = $this->patternArray['uri'][$i];
-            }
+
+//            echo '<br/> placeholder for token is --> ' . $placeholder;
 
             // check to see if its the last placeholder
             // AND if the placeholder is prefixed with `...`
             // meaning the placeholder is an array of the rest of the uriArr member
-            if ($i === ($this->patternArray['count'] - 1) && str_starts_with($placeholder, '...')) {
+            if ($i === ($routeArrCount - 1) && str_starts_with($placeholder, '...')) {
                 $placeholder = ltrim($placeholder, '/././.');
-                if (isset($uriArr[$i])) {
-                    for ($uri = $i, $uriMax = count($uriArr); $uri < $uriMax; $uri++) {
-                        $this->replaceRouteToken($placeholder, $uriArr[$uri], true);
+                if (isset($this->patternArray['uri'][$i])) {
+                    for ($uri = $i, $uriMax = count($this->patternArray['uri']); $uri < $uriMax; $uri++) {
+                        $this->replaceRouteToken($placeholder, $this->patternArray['uri'][$uri], true);
                     }
                 }
                 break;
             }
-            $this->replaceRouteToken($placeholder, $uriArr[$i] ?? null);
+            $this->replaceRouteToken($placeholder, $this->patternArray['uri'][$i] ?? null);
         }
+
         return $isMatch;
     }
 
@@ -367,7 +384,7 @@ class App
     /**
      * @return string
      */
-    private function _getRequestedMethod(): string
+    private function getRequestedMethod(): string
     {
 //        $method = 'httpGet';
 
@@ -379,13 +396,7 @@ class App
         }
 
 
-        return match ($httpRequest) {
-            'GET' => 'httpGet',
-            'POST' => 'httpPost',
-            'PUT' => 'httpPut',
-            'DELETE' => 'httpDelete',
-            default => 'http' . ucfirst(strtolower($httpRequest)),
-        };
+        return strtolower($httpRequest);
     }
 
     /**
@@ -394,7 +405,50 @@ class App
      */
     private function runApp(): void
     {
-        $this->createRouteTable();
+        $this->resolveModuleRouting();
+
+
+        if (count($this->routetable) === 0) {
+            $this->createRouteTable();
+        }
+
+        $this->requestedMethod = $this->getRequestedMethod();
+        $this->defaults = new class {
+            public string $content;
+
+            public function __construct()
+            {
+                $this->content = file_get_contents('php://input');
+            }
+        };
+
+
+        $routeFound = false;
+//        $routeActivated;
+        foreach ($this->routetable as $route) {
+//            echo '<br> is ' . $this->uri . ' === ' . $route['route'];
+            $routeArr = explode('/', trim($route['route'], '/'));
+            $routeHttp = $route['httpMethod'];
+            if (
+                str_contains($routeHttp, $this->requestedMethod) ||
+                str_contains($routeHttp, 'all')
+            ) {
+                if ($this->isUriRoute($routeArr)) {
+                    $routeFound = true;
+                    $this->routeActivated = $route;
+                    break;
+                }
+            }
+        }
+
+        if ($routeFound) {
+//            echo 'route is found!!!';
+//            print_r($this->routeActivated);
+//            print_r($this->defaults);
+            $this->routerModule->render($this->routeActivated, $this->defaults);
+        } else {
+            echo 'route was not found, rely on bootstrap is any';
+        }
 
         if ($this->applicationBuilder->isSwooleHttp) {
             return;
@@ -405,12 +459,14 @@ class App
         }
     }
 
+
     /**
      * @throws Exception
      */
-    private function createRouteTable(): void
+    private
+    function createRouteTable(): void
     {
-        echo '<pre>';
+//        echo '<pre>';
 //        var_dump($this->declarations);
 
 //        separating declarations to
@@ -446,17 +502,15 @@ class App
                 }
             }
         }
-//        echo '<br /> Controllers are... <br/> >>';
-//        var_dump($this->controllers);
+//        $this->printRouteTable();
 
-        $this->printRouteTable();
-//        now resolve route
     }
 
     /**
      * Print route tables
      */
-    private function printRouteTable(): void
+    private
+    function printRouteTable(): void
     {
         echo '<p> Route Table <br/> >';
         echo '<table style="display: block; background-color: paleturquoise"> 
@@ -478,7 +532,7 @@ class App
 <th>' . $row['controller'] . '</th>
 <th>' . $row['action'] . '</th>
 <th>' . json_encode($row['params']) . '</th>
-<th>' . json_encode($row['httpMethod']) . '</th>
+<th>' . $row['httpMethod'] . '</th>
 
 </tr>';
         }
@@ -490,8 +544,10 @@ class App
      * @param ReflectionClass $controllerReflection
      * @throws Exception
      */
-    private function registerNewController(ReflectionClass $controllerReflection): void
-    {
+    private
+    function registerNewController(
+        ReflectionClass $controllerReflection
+    ): void {
         if (isset($this->controllers[$controllerReflection->getName()])) {
 //            var_dump($this->controllers);
             throw new \RuntimeException('Controller ' . $controllerReflection->getName() . ' cannot be declared twice');
@@ -499,17 +555,17 @@ class App
         }
         $this->controllers[$controllerReflection->getName()] = $controllerReflection;
 
-        $routeType = 2;
 
         $tokens = [
             'action' => '',
             'area' => $this->getAreaAttribute($controllerReflection->getAttributes(Area::class)) ?? '',
             'controller' => strtolower(str_replace('Controller', '', $controllerReflection->getShortName())),
             'handler' => '',
-            'page' => ''
+            'page' => '',
+            'httpVerb' => ''
         ];
 
-        switch ($routeType) {
+        switch ($this->routeType) {
             case 1:
                 $this->registerControllerRoutes($controllerReflection, $tokens);
                 break;
@@ -528,8 +584,10 @@ class App
     /**
      * @param string $routeTemplate
      */
-    private function convertRouteTemplateToPattern(string $routeTemplate): void
-    {
+    private
+    function convertRouteTemplateToPattern(
+        string $routeTemplate
+    ): void {
         $this->routeTemplateArr = explode('/', trim(urldecode($routeTemplate), '/'));
         $baseRoute = '';
 
@@ -559,8 +617,11 @@ class App
      * @param ReflectionClass $controllerReflection
      * @param array $tokens
      */
-    private function registerControllerRoutes(ReflectionClass $controllerReflection, array $tokens): void
-    {
+    private
+    function registerControllerRoutes(
+        ReflectionClass $controllerReflection,
+        array $tokens
+    ): void {
         $controllerActions = $controllerReflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($controllerActions as $action) {
@@ -583,8 +644,11 @@ class App
     /**
      * @param ReflectionClass $controllerReflection
      */
-    private function registerAttributeRoute(ReflectionClass $controllerReflection, array $tokens): void
-    {
+    private
+    function registerAttributeRoute(
+        ReflectionClass $controllerReflection,
+        array $tokens
+    ): void {
         $controllerBaseRoute = [''];
         $controllerRoutes = [];
         $controllerRouteAttributes = $controllerReflection->getAttributes(Route::class);
@@ -611,6 +675,8 @@ class App
                 continue;
             }
             $tokens['action'] = $action->getName();
+
+            $tokens['httpVerb'] = $this->getHttpVerbsFromMethods($action);
 
             $actionRouteReflectionAttributes = $action->getAttributes(Route::class);
             if (count($actionRouteReflectionAttributes) > 0) {
@@ -653,8 +719,10 @@ class App
      * @param array $areaAttribute
      * @return string|null
      */
-    private function getAreaAttribute(array $areaAttribute): ?string
-    {
+    private
+    function getAreaAttribute(
+        array $areaAttribute
+    ): ?string {
         if (count($areaAttribute) === 0) {
             return null;
         }
@@ -667,23 +735,63 @@ class App
      * @param array $tokens
      * @param ReflectionMethod|null $action
      */
-    private function setToRouteTable(
+    private
+    function setToRouteTable(
         string $controllerClassName,
         string $template,
         array $tokens,
         ?ReflectionMethod $action = null
     ): void {
+        $template = trim($template, '/');
 //        echo 'setting to route table';
 //        check for action area attribute. if it exists, overwrite else none
         $tokens['area'] = $this->getAreaAttribute($action->getAttributes(Area::class)) ?? $tokens['area'];
 
+//        go through httpverbs for routing and request methods
+        if (count($tokens['httpVerb']) > 0) {
+            foreach ($tokens['httpVerb'] as $http) {
+//                print_r($http);
+                $this->routetable[] = [
+                    'route' => $this->replaceTemplateTokens(
+
+                        $http['template'] ? $template . '/' . $http['template'] : $template,
+                        $tokens
+                    ),
+                    'controller' => $controllerClassName,
+                    'httpMethod' => $http['event'], // $action ? $this->getHttpVerbsFromMethods($action) : null,
+                    'action' => $tokens['action'],
+                    'params' => $action?->getParameters()
+                ];
+            }
+            return;
+        }
         $this->routetable[] = [
             'route' => $this->replaceTemplateTokens($template, $tokens),
             'controller' => $controllerClassName,
-            'httpMethod' => $action ? $this->getHttpVerbsFromMethods($action) : null,
+            'httpMethod' => $this->setDefaultHttpMethod($tokens['action']),
+            // $action ? $this->getHttpVerbsFromMethods($action) : null,
             'action' => $tokens['action'],
             'params' => $action?->getParameters()
         ];
+    }
+
+    /**
+     * @param string $actionName
+     * @return string
+     */
+    private
+    function setDefaultHttpMethod(
+        string $actionName
+    ): string {
+        return match ($actionName) {
+            'httpGet' => 'get',
+            'httpPost' => 'post',
+            'httpPut' => 'put',
+            'httpDelete' => 'delete',
+            'httpPatch' => 'patch',
+            'httpHead' => 'head',
+            default => 'all'
+        };
     }
 
     /**
@@ -692,8 +800,11 @@ class App
      * @param string $area
      * @return string
      */
-    private function replaceTemplateTokens(string $template, array $tokens): string
-    {
+    private
+    function replaceTemplateTokens(
+        string $template,
+        array $tokens
+    ): string {
 //                replace any part that is reserved with [...];
         foreach ($this->reservedRoutingNames as $tokenKey) {
             if ($tokens[$tokenKey] === null) {
@@ -703,15 +814,17 @@ class App
         }
 //        $template = str_replace('[controller]', $controller, $template);
 
-        return rtrim(strtolower($template), '/');
+        return '/' . trim(strtolower($template), '/');
     }
 
     /**
      * @param ReflectionMethod $action
      * @return array
      */
-    private function getHttpVerbsFromMethods(ReflectionMethod $action): array
-    {
+    private
+    function getHttpVerbsFromMethods(
+        ReflectionMethod $action
+    ): array {
         $verbs = [];
         $params = [];
 
@@ -720,7 +833,7 @@ class App
             $httpGetReflection = $action->getAttributes($this->httpVerbsClass[$httpMethod]);
 
             if (count($httpGetReflection) > 0) {
-                $verbs[$httpMethod] = [];
+//                $verbs[$httpMethod] = [];
 
                 foreach ($httpGetReflection as $verb) {
                     $verbInstance = $verb->newInstance();
@@ -730,12 +843,38 @@ class App
                         $params[$property->getName()] = $verbInstance->{$property->getName()};
                     };
 
-                    $verbs[$httpMethod][] = $params;
+                    $verbs[] = $params;
                 }
             }
         }
 
         return $verbs;
+    }
+
+    private
+    function resolveModuleRouting(): void
+    {
+//        get routing settings
+        foreach ($this->applicationBuilder->routingType as $routeEndpoint) {
+            if (!$routeEndpoint->useAttributeRouting) {
+                //        prepare baseRoute
+//        To be moved to application builder to use endpoints
+                $this->convertRouteTemplateToPattern($routeEndpoint->pattern);
+                $this->enableConventionalRouting = true;
+                print_r($routeEndpoint->name);
+            } else {
+                $this->enableAttributeRouting = true;
+            }
+        }
+
+
+        if ($this->enableAttributeRouting & $this->enableConventionalRouting) {
+            $this->routeType = 0;
+        } elseif (!$this->enableAttributeRouting & $this->enableConventionalRouting) {
+            $this->routeType = 1;
+        } elseif ($this->enableAttributeRouting & !$this->enableConventionalRouting) {
+            $this->routeType = 2;
+        }
     }
 }
 

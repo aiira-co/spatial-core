@@ -1,0 +1,26 @@
+{
+  "name": "spatial/psr7",
+  "description": "PSR 7 (GuzzleHttp) implementation for Spatial Framework. Request & Response Classes for spatial-mediator & spatial-route",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Kofi Owusu-Afriyie",
+      "email": "airdesign.code@gmail.com",
+      "homepage": "https://github.com/air-Design",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.0",
+    "psr/http-message": "^1.0",
+    "guzzlehttp/psr7": "^1.6",
+    "ext-json": "*",
+    "psr/http-server-handler": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Spatial\\Psr7\\": "src/"
+    }
+  }
+}

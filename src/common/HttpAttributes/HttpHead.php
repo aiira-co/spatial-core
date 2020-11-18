@@ -12,7 +12,7 @@ use Spatial\Core\HttpMethodAttribute;
  * Identifies an action that supports the HTTP HEAD action verb.
  * @package Spatial\Common\Http
  */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
+#[Attribute(Attribute::TARGET_METHOD)]
 class HttpHead extends HttpMethodAttribute
 {
     public string $event = 'head';

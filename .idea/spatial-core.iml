@@ -8,6 +8,14 @@
       <sourceFolder url="file://$MODULE_DIR$/src/swoole" isTestSource="false" packagePrefix="Spatial\Swoole\" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/infrastructure" isTestSource="false" packagePrefix="Spatial\Infrastructure\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/router" isTestSource="false" packagePrefix="Spatial\Router\" />
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" packagePrefix="Spatial\Api\" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/psr/http-message" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/guzzlehttp/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/ralouphie/getallheaders" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/spatial/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/psr/http-server-handler" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
