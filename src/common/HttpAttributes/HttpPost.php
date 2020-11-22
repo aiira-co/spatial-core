@@ -15,5 +15,5 @@ use Spatial\Core\HttpMethodAttribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 class HttpPost extends HttpMethodAttribute
 {
-    public string $event = 'created';
+    public string $event = 'post';
 }

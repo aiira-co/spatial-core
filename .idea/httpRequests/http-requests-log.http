@@ -1,0 +1,322 @@
+GET http://localhost:5200/store-api/products/4/?name=world
+Accept: application/json
+
+<> 2020-11-22T162053.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4/?name=world
+Accept: application/json
+
+<> 2020-11-22T162006.200.json
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T161924.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T161900.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-22T161857.200.json
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T161853.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4/?name=world
+Accept: application/json
+
+<> 2020-11-22T161844.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4/?name=world
+Accept: application/json
+
+<> 2020-11-22T161758.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T132536.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T132346.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T132337.200.html
+
+###
+
+POST http://localhost:5200/store-api/products/new
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T132328.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T132248.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T131844.200.json
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T130521.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T130413.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-11-22T130323.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{{postField}}
+
+<> 2020-11-22T130306.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+{{postField}}:
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+{{postField}}:
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{{postField}}
+
+<> 2020-11-22T130234.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{{postField}}
+
+<> 2020-11-22T130202.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{{postField}}
+
+<> 2020-11-22T130058.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{{postField}}
+
+<> 2020-11-22T125918.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{{postField}}
+
+<> 2020-11-22T125857.200.html
+
+###
+
+PUT http://localhost:5200/store-api/products/edit/4
+Content-Type: application/json
+
+{{postField}}
+
+<> 2020-11-22T125651.200.html
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-22T125633.200.json
+
+###
+
+GET http://{{host}}/store-api/products/4
+Accept: application/json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-18T141805.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-18T141804.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-18T141802.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-18T141800.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-18T141757.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4/?name=world
+Accept: application/json
+
+<> 2020-11-18T141737.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-11-18T141716.200.json
+
+###
+

@@ -3,8 +3,12 @@
 namespace Spatial\Api\Controllers;
 
 use JsonException;
+use Spatial\Common\BindSourceAttributes\FromBody;
+use Spatial\Common\BindSourceAttributes\FromQuery;
 use Spatial\Common\BindSourceAttributes\FromRoute;
 use Spatial\Common\HttpAttributes\HttpGet;
+use Spatial\Common\HttpAttributes\HttpPost;
+use Spatial\Common\HttpAttributes\HttpPut;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Attributes\Route;
@@ -59,13 +63,15 @@ class ProductController
 
     #[HttpGet('{id:int}')]
     public function getProduct(
-        #[FromRoute] int $id
+        #[FromRoute] int $id,
+        #[FromQuery] string $name
     ): Response {
         $data = [
             'app api',
             'value1',
             'value2',
-            $id
+            $id,
+            $name
         ];
         $payload = json_encode($data, JSON_THROW_ON_ERROR);
 
@@ -75,11 +81,29 @@ class ProductController
         // ->withHeader('Content-Disposition', 'attachment;filename="downloaded.pdf"');
     }
 
+
+    #[HttpPost]
+    public function createProduct(
+        #[FromBody] string $content
+    ): Response {
+        // code here
+        $data = ['success' => true, 'alert' => 'We have it at post', 'field' => $content];
+        $payload = json_encode($data, JSON_THROW_ON_ERROR);
+        $this->response->getBody()->write($payload);
+        return $this->response;
+    }
+
+
     #[Route('edit')]
-    #[Route('/home/more')]
-    #[HttpGet('{id:int}')]
+    #[HttpPut('{id:int}')]
     public function editProduct(
+        #[FromBody] string $content,
         int $id
-    ) {
+    ): Response {
+        // code here
+        $data = ['success' => true, 'alert' => 'We have it at put', 'id' => $id, 'field' => $content];
+        $payload = json_encode($data, JSON_THROW_ON_ERROR);
+        $this->response->getBody()->write($payload);
+        return $this->response;
     }
 }

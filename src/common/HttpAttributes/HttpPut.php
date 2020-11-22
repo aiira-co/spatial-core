@@ -15,5 +15,5 @@ use Spatial\Core\HttpMethodAttribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 class HttpPut extends HttpMethodAttribute
 {
-    public string $event = 'update';
+    public string $event = 'put';
 }

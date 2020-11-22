@@ -1,0 +1,115 @@
+<p> Route Table <br/> >
+<table style="display: block; background-color: paleturquoise">
+    <thead style="background-color: aliceblue">
+    <tr>
+        <th>Route</th>
+        <th>Controller</th>
+        <th>Action</th>
+        <th>Params</th>
+        <th>HttpVerb</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <tr style="background-color: bisque">
+        <th>/store-api/products</th>
+        <th>Spatial\Api\Controllers\ProductController</th>
+        <th>productList</th>
+        <th>[]</th>
+        <th>get</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/store-api/products/{id:int}</th>
+        <th>Spatial\Api\Controllers\ProductController</th>
+        <th>getProduct</th>
+        <th>[{"name":"id"}]</th>
+        <th>get</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/store-api/products/new</th>
+        <th>Spatial\Api\Controllers\ProductController</th>
+        <th>createProduct</th>
+        <th>[{"name":"content"}]</th>
+        <th>created</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/store-api/products/edit/{id:int}</th>
+        <th>Spatial\Api\Controllers\ProductController</th>
+        <th>editProduct</th>
+        <th>[{"name":"content"},{"name":"id"}]</th>
+        <th>update</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/test/httpget</th>
+        <th>Spatial\Api\Controllers\TestController</th>
+        <th>httpGet</th>
+        <th>[{"name":"id"}]</th>
+        <th>get</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/test/httppost</th>
+        <th>Spatial\Api\Controllers\TestController</th>
+        <th>httpPost</th>
+        <th>[{"name":"content"}]</th>
+        <th>post</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/test/httpput</th>
+        <th>Spatial\Api\Controllers\TestController</th>
+        <th>httpPut</th>
+        <th>[{"name":"content"},{"name":"id"}]</th>
+        <th>put</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/test/httpdelete</th>
+        <th>Spatial\Api\Controllers\TestController</th>
+        <th>httpDelete</th>
+        <th>[{"name":"id"}]</th>
+        <th>delete</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/aiira/values/secret/httpget</th>
+        <th>Spatial\Api\Controllers\ValuesController</th>
+        <th>httpGet</th>
+        <th>[{"name":"id"}]</th>
+        <th>get</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/studio/values/secret/httppost</th>
+        <th>Spatial\Api\Controllers\ValuesController</th>
+        <th>httpPost</th>
+        <th>[{"name":"content"}]</th>
+        <th>post</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/aiira/values/secret/httpput</th>
+        <th>Spatial\Api\Controllers\ValuesController</th>
+        <th>httpPut</th>
+        <th>[{"name":"content"},{"name":"id"}]</th>
+        <th>put</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>/aiira/values/secret/httpdelete</th>
+        <th>Spatial\Api\Controllers\ValuesController</th>
+        <th>httpDelete</th>
+        <th>[{"name":"id"}]</th>
+        <th>delete</th>
+
+    </tr>
+    </tbody>
+</table>route was not found, rely on bootstrap is any -> put - {
+"name": "Kofi",
+"age": 29,
+"gender": "Male"
+}

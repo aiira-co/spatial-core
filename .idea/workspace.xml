@@ -2,35 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/ActivatedRoute.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/ActiveRouteBuilder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/HttpMethodAttribute.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/Interfaces/CanActivate.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/Interfaces/IRouteBuilder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/Interfaces/IRoutingTemplateProvider.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/RouteBuilder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/router/Trait/SecurityTrait.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/RouterModule.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/TestModule.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/controllers/MyBaseController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/controllers/ProductController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/controllers/TestController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/controllers/ValuesController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api.http" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/http-client.env.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpDelete.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpDelete.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpGet.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpGet.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpHead.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpHead.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPatch.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPatch.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPost.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPost.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPut.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPut.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ApplicationBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ApplicationBuilder.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Interfaces/IRouteModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interfaces/IRouteModule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/controllers/ProductController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/controllers/ProductController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/controllers/ValuesController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/controllers/ValuesController.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +27,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="composer.json" />
+        <option value="HTTP Request" />
+        <option value="HTTP Public Environment File" />
       </list>
     </option>
   </component>
@@ -87,6 +69,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="php.override.implement.member.chooser.php.doc" value="NONE" />
+    <property name="rest.client.default.execution.environment" value="development" />
     <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -106,14 +89,196 @@
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\core" />
     </key>
   </component>
-  <component name="RunManager" selected="PHP HTTP Request.Get Products">
+  <component name="RestClientSettings">
+    <option name="REQUEST_HISTORY">
+      <list>
+        <RestClientRequest>
+          <option name="httpMethod" value="GET" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products/4/" />
+          <option name="urlPath" value="" />
+          <option name="headers">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="Accept" />
+                <option name="value" value="application/json" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="parameters">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="name" />
+                <option name="value" value="world" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="parametersEnabled" value="true" />
+          <option name="textToSend" value="" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="httpMethod" value="PUT" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products/edit/4" />
+          <option name="urlPath" value="" />
+          <option name="headers">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="Content-Type" />
+                <option name="value" value="application/json" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="haveTextToSend" value="true" />
+          <option name="textToSend" value="{&#10;  &quot;name&quot;: &quot;Kofi&quot;,&#10;  &quot;age&quot;: 29,&#10;  &quot;gender&quot;: &quot;Male&quot;&#10;}" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="httpMethod" value="POST" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products" />
+          <option name="urlPath" value="" />
+          <option name="haveTextToSend" value="true" />
+          <option name="textToSend" value="{&#10;  &quot;name&quot;: &quot;Kofi&quot;,&#10;  &quot;age&quot;: 29,&#10;  &quot;gender&quot;: &quot;Male&quot;&#10;}" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="httpMethod" value="GET" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products/4" />
+          <option name="urlPath" value="" />
+          <option name="headers">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="Accept" />
+                <option name="value" value="application/json" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="textToSend" value="" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="httpMethod" value="POST" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products/new" />
+          <option name="urlPath" value="" />
+          <option name="haveTextToSend" value="true" />
+          <option name="textToSend" value="{&#10;  &quot;name&quot;: &quot;Kofi&quot;,&#10;  &quot;age&quot;: 29,&#10;  &quot;gender&quot;: &quot;Male&quot;&#10;}" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="httpMethod" value="POST" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products" />
+          <option name="urlPath" value="" />
+          <option name="headers">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="Content-Type" />
+                <option name="value" value="application/json" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="haveTextToSend" value="true" />
+          <option name="textToSend" value="{&#10;  &quot;name&quot;: &quot;Kofi&quot;,&#10;  &quot;age&quot;: 29,&#10;  &quot;gender&quot;: &quot;Male&quot;&#10;}" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="httpMethod" value="PUT" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products/edit/4" />
+          <option name="urlPath" value="" />
+          <option name="headers">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="Content-Type" />
+                <option name="value" value="application/json" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="haveTextToSend" value="true" />
+          <option name="textToSend" value="{{postField}}" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="biscuits">
+            <list>
+              <Biscuit>
+                <option name="date" value="-1" />
+                <option name="domain" value="localhost" />
+                <option name="name" value="XDEBUG_SESSION" />
+                <option name="path" value="/" />
+                <option name="value" value="14880" />
+              </Biscuit>
+            </list>
+          </option>
+          <option name="httpMethod" value="GET" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products/4/" />
+          <option name="urlPath" value="" />
+          <option name="headers">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="Accept" />
+                <option name="value" value="application/json" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="parameters">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="name" />
+                <option name="value" value="world" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="parametersEnabled" value="true" />
+          <option name="textToSend" value="" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+        <RestClientRequest>
+          <option name="biscuits">
+            <list>
+              <Biscuit>
+                <option name="date" value="-1" />
+                <option name="domain" value="localhost" />
+                <option name="name" value="XDEBUG_SESSION" />
+                <option name="path" value="/" />
+                <option name="value" value="13115" />
+              </Biscuit>
+            </list>
+          </option>
+          <option name="httpMethod" value="GET" />
+          <option name="urlBase" value="http://localhost:5200/store-api/products/4" />
+          <option name="urlPath" value="" />
+          <option name="headers">
+            <list>
+              <KeyValuePair>
+                <option name="key" value="Accept" />
+                <option name="value" value="application/json" />
+              </KeyValuePair>
+            </list>
+          </option>
+          <option name="textToSend" value="" />
+          <option name="filesToSend" value="" />
+        </RestClientRequest>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="PHP Built-in Web Server.PHP 8 dev Server">
+    <configuration name="api#1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" debugger="PHP" path="$PROJECT_DIR$/api.http" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="api#2" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" debugger="PHP" path="$PROJECT_DIR$/api.http" index="2" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="api#3" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/api.http" index="3" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="api#4" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/api.http" index="4" runType="Run single request">
+      <method v="2" />
+    </configuration>
     <configuration name="PHP 8 dev Server" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$" port="5200">
       <method v="2" />
     </configuration>
     <configuration default="true" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$" port="5200">
       <method v="2" />
     </configuration>
-    <configuration name="Get Products" type="PhpHttpRequestRunConfigurationType" factoryName="PHP HTTP Request" server_name="PHP 8 Dev Server">
+    <configuration name="Get Products" type="PhpHttpRequestRunConfigurationType" factoryName="PHP HTTP Request" singleton="false" server_name="PHP 8 Dev Server" url="/store-api/products/3021">
       <method v="2" />
     </configuration>
     <configuration default="true" type="PhpHttpRequestRunConfigurationType" factoryName="PHP HTTP Request" server_name="PHP 8 Dev Server">
@@ -133,9 +298,21 @@
     </configuration>
     <list>
       <item itemvalue="Docker.phpdockerio php8" />
+      <item itemvalue="HTTP Request.api#1" />
+      <item itemvalue="HTTP Request.api#2" />
       <item itemvalue="PHP Built-in Web Server.PHP 8 dev Server" />
       <item itemvalue="PHP HTTP Request.Get Products" />
+      <item itemvalue="HTTP Request.api#4" />
+      <item itemvalue="HTTP Request.api#3" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="HTTP Request.api#3" />
+        <item itemvalue="HTTP Request.api#4" />
+        <item itemvalue="HTTP Request.api#1" />
+        <item itemvalue="HTTP Request.api#2" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -158,7 +335,10 @@
       <workItem from="1604926707650" duration="268000" />
       <workItem from="1604927176062" duration="117000" />
       <workItem from="1604941657837" duration="1969000" />
-      <workItem from="1605548389349" duration="19777000" />
+      <workItem from="1605548389349" duration="21913000" />
+      <workItem from="1605748484189" duration="1678000" />
+      <workItem from="1605765785983" duration="870000" />
+      <workItem from="1605989829491" duration="8561000" />
     </task>
     <servers />
   </component>

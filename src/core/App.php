@@ -9,6 +9,12 @@ use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use Spatial\Common\BindSourceAttributes\FromBody;
+use Spatial\Common\BindSourceAttributes\FromForm;
+use Spatial\Common\BindSourceAttributes\FromHeader;
+use Spatial\Common\BindSourceAttributes\FromQuery;
+use Spatial\Common\BindSourceAttributes\FromRoute;
+use Spatial\Common\BindSourceAttributes\FromServices;
 use Spatial\Common\HttpAttributes\HttpDelete;
 use Spatial\Common\HttpAttributes\HttpGet;
 use Spatial\Common\HttpAttributes\HttpHead;
@@ -35,15 +41,6 @@ class App
      * @var array|string[]
      */
     private array $httpVerbs = [
-        'HttpGet',
-        'HttpPost',
-        'HttpPut',
-        'HttpDelete',
-        'HttpHead',
-        'HttpPatch',
-    ];
-
-    private array $httpVerbsClass = [
         'HttpGet' => HttpGet::class,
         'HttpPost' => HttpPost::class,
         'HttpPut' => HttpPut::class,
@@ -51,6 +48,7 @@ class App
         'HttpHead' => HttpHead::class,
         'HttpPatch' => HttpPatch::class,
     ];
+
 
     /**
      * For Conventional routing -> pattern: "{controller=Home}/{action=Index}/{id?}"
@@ -65,6 +63,14 @@ class App
         'page'
     ];
 
+    private array $reservedBindingSourceAttributes = [
+        'FromBody' => FromBody::class,
+        'FromForm' => FromForm::class,
+        'FromHeader' => FromHeader::class,
+        'FromQuery' => FromQuery::class,
+        'FromRoute' => FromRoute::class,
+        'FromServices' => FromServices::class,
+    ];
     /**
      * Keep Track of Imported Modules,
      * Inherit their exports to one $declarations
@@ -413,14 +419,7 @@ class App
         }
 
         $this->requestedMethod = $this->getRequestedMethod();
-        $this->defaults = new class {
-            public string $content;
-
-            public function __construct()
-            {
-                $this->content = file_get_contents('php://input');
-            }
-        };
+        $this->defaults = new class {};
 
 
         $routeFound = false;
@@ -447,7 +446,8 @@ class App
 //            print_r($this->defaults);
             $this->routerModule->render($this->routeActivated, $this->defaults);
         } else {
-            echo 'route was not found, rely on bootstrap is any';
+            echo 'route was not found, rely on bootstrap is any -> ' .
+                $this->requestedMethod . ' - ' . $this->defaults->content;
         }
 
         if ($this->applicationBuilder->isSwooleHttp) {
@@ -503,7 +503,6 @@ class App
             }
         }
 //        $this->printRouteTable();
-
     }
 
     /**
@@ -760,7 +759,7 @@ class App
                     'controller' => $controllerClassName,
                     'httpMethod' => $http['event'], // $action ? $this->getHttpVerbsFromMethods($action) : null,
                     'action' => $tokens['action'],
-                    'params' => $action?->getParameters()
+                    'params' => $this->getActionParamsWithAttribute($action)
                 ];
             }
             return;
@@ -771,8 +770,43 @@ class App
             'httpMethod' => $this->setDefaultHttpMethod($tokens['action']),
             // $action ? $this->getHttpVerbsFromMethods($action) : null,
             'action' => $tokens['action'],
-            'params' => $action?->getParameters()
+            'params' => $this->getActionParamsWithAttribute($action)
         ];
+    }
+
+
+    /**
+     * @param ReflectionMethod|null $action
+     * @return array|null
+     */
+    private function getActionParamsWithAttribute(?ReflectionMethod $action): ?array
+    {
+        if ($action === null) {
+            return null;
+        }
+        $params = [];
+
+        foreach ($action->getParameters() as $parameter) {
+            $actionParam = [
+                'param' => $parameter,
+                'bindingSource' => null
+            ];
+            foreach (
+                $this->reservedBindingSourceAttributes as $bindName
+            => $bindingSource
+            ) {
+                $attribute = $parameter->getAttributes($bindingSource);
+                if (count($attribute) > 0) {
+                    $actionParam['bindingSource'] = $bindName;
+                    break;
+                }
+            }
+
+            $actionParam['bindingSource'] ??= 'FromRoute';
+            $params[] = $actionParam;
+        }
+
+        return $params;
     }
 
     /**
@@ -796,8 +830,7 @@ class App
 
     /**
      * @param string $template
-     * @param string $controller
-     * @param string $area
+     * @param array $tokens
      * @return string
      */
     private
@@ -828,9 +861,10 @@ class App
         $verbs = [];
         $params = [];
 
+
         foreach ($this->httpVerbs as $httpMethod) {
             $params = [];
-            $httpGetReflection = $action->getAttributes($this->httpVerbsClass[$httpMethod]);
+            $httpGetReflection = $action->getAttributes($httpMethod);
 
             if (count($httpGetReflection) > 0) {
 //                $verbs[$httpMethod] = [];
@@ -841,7 +875,7 @@ class App
 
                     foreach ($verbClassReflection->getProperties() as $property) {
                         $params[$property->getName()] = $verbInstance->{$property->getName()};
-                    };
+                    }
 
                     $verbs[] = $params;
                 }

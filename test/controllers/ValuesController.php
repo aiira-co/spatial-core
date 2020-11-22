@@ -71,7 +71,11 @@ class ValuesController
     {
         // code here
         $data = ['success' => true, 'alert' => 'We have it at put'];
+        $payload = json_encode($data); // code here
+        $data = ['success' => true, 'alert' => 'We have it at put'];
         $payload = json_encode($data);
+        $this->response->getBody()->write($payload);
+        return $this->response;
         $this->response->getBody()->write($payload);
         return $this->response;
     }

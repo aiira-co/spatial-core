@@ -1,0 +1,26 @@
+POST http://{{host}}/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+###
+http://{{host}}/store-api/products/4
+Accept: application/json
+
+###
+GET http://{{host}}/store-api/products/4/?name=world
+Accept: application/json
+
+###
+PUT http://{{host}}/store-api/products/edit/4
+Content-Type: application/json
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+

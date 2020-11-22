@@ -1,0 +1,112 @@
+<p> Route Table <br/> ><table style="display: block; background-color: paleturquoise">
+<thead style="background-color: aliceblue">
+<tr>
+<th>Route</th>
+<th>Controller</th>
+<th>Action</th>
+<th>Params</th>
+<th>HttpVerb</th>
+
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: bisque">
+<th>/store-api/products</th>
+<th>Spatial\Api\Controllers\ProductController</th>
+<th>productList</th>
+<th>[]</th>
+<th>get</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/store-api/products/{
+id: int
+}</th>
+<th>Spatial\Api\Controllers\ProductController</th>
+<th>getProduct</th>
+<th>[{"param": {"name": "id"}, "bindingSource": "FromRoute"}]</th>
+<th>get</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/store-api/products</th>
+<th>Spatial\Api\Controllers\ProductController</th>
+<th>createProduct</th>
+<th>[{"param": {"name": "content"}, "bindingSource": "FromBody"}]</th>
+<th>post</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/store-api/products/edit/{
+id: int
+}</th>
+<th>Spatial\Api\Controllers\ProductController</th>
+<th>editProduct</th>
+<th>[{"param": {"name": "content"}, "bindingSource": "FromBody"}, {"param": {"name":"id"}, "bindingSource": "FromRoute"}]</th>
+<th>put</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/test/httpget</th>
+<th>Spatial\Api\Controllers\TestController</th>
+<th>httpGet</th>
+<th>[{"param": {"name": "id"}, "bindingSource": "FromRoute"}]</th>
+<th>get</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/test/httppost</th>
+<th>Spatial\Api\Controllers\TestController</th>
+<th>httpPost</th>
+<th>[{"param": {"name": "content"}, "bindingSource": "FromRoute"}]</th>
+<th>post</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/test/httpput</th>
+<th>Spatial\Api\Controllers\TestController</th>
+<th>httpPut</th>
+<th>[{"param": {"name": "content"}, "bindingSource": "FromRoute"}, {"param": {"name":"id"}, "bindingSource": "FromRoute"}]</th>
+<th>put</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/test/httpdelete</th>
+<th>Spatial\Api\Controllers\TestController</th>
+<th>httpDelete</th>
+<th>[{"param": {"name": "id"}, "bindingSource": "FromRoute"}]</th>
+<th>delete</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/aiira/values/secret/httpget</th>
+<th>Spatial\Api\Controllers\ValuesController</th>
+<th>httpGet</th>
+<th>[{"param": {"name": "id"}, "bindingSource": "FromRoute"}]</th>
+<th>get</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/studio/values/secret/httppost</th>
+<th>Spatial\Api\Controllers\ValuesController</th>
+<th>httpPost</th>
+<th>[{"param": {"name": "content"}, "bindingSource": "FromRoute"}]</th>
+<th>post</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/aiira/values/secret/httpput</th>
+<th>Spatial\Api\Controllers\ValuesController</th>
+<th>httpPut</th>
+<th>[{"param": {"name": "content"}, "bindingSource": "FromRoute"}, {"param": {"name":"id"}, "bindingSource": "FromRoute"}]</th>
+<th>put</th>
+
+</tr>
+<tr style="background-color: bisque">
+<th>/aiira/values/secret/httpdelete</th>
+<th>Spatial\Api\Controllers\ValuesController</th>
+<th>httpDelete</th>
+<th>[{"param": {"name": "id"}, "bindingSource": "FromRoute"}]</th>
+<th>delete</th>
+
+</tr></tbody></table>["app api", "value1", "value2", 4]
