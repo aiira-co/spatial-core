@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spatial\Router;
 
 use Psr\Http\Message\ResponseInterface;
+use ReflectionException;
 use ReflectionParameter;
 use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Interfaces\IRouteModule;
@@ -56,7 +57,10 @@ class RouterModule implements IRouteModule
             $value = $this->getBindSourceValue($param['bindingSource'], $param['param']);
             //$param is an instance of ReflectionParameter
             if ($value === null && !$param['param']->isOptional()) {
-                die('argument ' . $param->getName() . ' required');
+                die(
+                    'Argument $' . $param['param']->getName(
+                    ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
+                );
             }
             // echo $args;
             $args[] = $value;
@@ -66,19 +70,24 @@ class RouterModule implements IRouteModule
     }
 
     /**
-     * @param string $bindingsource
+     * @param string $bindingSource
      * @param ReflectionParameter $paramName
      * @return mixed
+     * @throws ReflectionException
      */
-    private function getBindSourceValue(string $bindingsource, ReflectionParameter $paramName): mixed
-    {
-        return match ($bindingsource) {
+    private
+    function getBindSourceValue(
+        string $bindingSource,
+        ReflectionParameter $paramName
+    ): mixed {
+        return match ($bindingSource) {
             'FromBody' => file_get_contents('php://input'),
             'FromForm' => $_FILES[$paramName->getName()] ?? null,
             'FromHeader' => $_SERVER[$paramName->getName()] ?? null,
             'FromQuery' => $_GET[$paramName->getName()] ?? null,
             'FromRoute' => $this->defaults->{$paramName->getName()} ?? null,
             'FromServices' => $this->getServiceFromProvider($paramName),
+            default => $this->defaults->{$paramName->getName()} ?? $paramName->getDefaultValue() ?? null
         };
     }
 
@@ -86,8 +95,10 @@ class RouterModule implements IRouteModule
      * @param ReflectionParameter $parameter
      * @return object|null
      */
-    private function getServiceFromProvider(ReflectionParameter $parameter): ?object
-    {
+    private
+    function getServiceFromProvider(
+        ReflectionParameter $parameter
+    ): ?object {
         $serviceName = $parameter->getType();
 
 
@@ -105,8 +116,10 @@ class RouterModule implements IRouteModule
     }
 
 
-    private function instantiateService($serviceName): ?object
-    {
+    private
+    function instantiateService(
+        $serviceName
+    ): ?object {
         //        make sure it has injectable attribute
         $serviceReflection = new \ReflectionClass($serviceName);
         $serviceInjectableAttribute = $serviceReflection->getAttributes(Injectable::class);
@@ -132,8 +145,10 @@ class RouterModule implements IRouteModule
     /**
      * @param array $headers
      */
-    private function _setHeaders(array $headers): void
-    {
+    private
+    function _setHeaders(
+        array $headers
+    ): void {
         // $headerKeys = array_keys($header);
         if (!isset($headers['Content-Type'])) {
             $headers['Content-Type'] = [$this->_contentType];

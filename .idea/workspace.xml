@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/api.http" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/http-client.env.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPost.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPost.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPut.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/HttpAttributes/HttpPut.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/controllers/ProductController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/controllers/ProductController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/controllers/ValuesController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/controllers/ValuesController.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -338,7 +331,7 @@
       <workItem from="1605548389349" duration="21913000" />
       <workItem from="1605748484189" duration="1678000" />
       <workItem from="1605765785983" duration="870000" />
-      <workItem from="1605989829491" duration="8561000" />
+      <workItem from="1605989829491" duration="10541000" />
     </task>
     <servers />
   </component>
