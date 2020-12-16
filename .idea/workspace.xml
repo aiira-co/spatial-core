@@ -2,53 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/test/ArticleApi/ArticleApiModule.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/ArticleApi/Controller/ArticleController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/StoreApi/StoreApiModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/httpRequests/http-requests-log.http" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/httpRequests/http-requests-log.http" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/TestModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/TestModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/controllers/MyBaseController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/StoreApi/Controllers/MyBaseController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/controllers/ProductController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/StoreApi/Controllers/ProductController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/controllers/TestController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/StoreApi/Controllers/TestController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/controllers/ValuesController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/StoreApi/Controllers/ValuesController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/autoload.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/ClassLoader.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/InstalledVersions.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_classmap.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_files.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_namespaces.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_psr4.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_real.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_static.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/installed.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/installed.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/platform_check.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/guzzlehttp/psr7" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/psr/http-message" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/psr/http-server-handler" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/ralouphie/getallheaders/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/ralouphie/getallheaders/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/ralouphie/getallheaders/composer.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/ralouphie/getallheaders/src/getallheaders.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/.idea/php.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/.idea/spatial-psr7.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/composer.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/src/Request.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/src/RequestHandler.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/spatial/psr7/src/Response.php" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,11 +75,11 @@
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\interface" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="I:\Code\PHP\Frameworks\spatial-core" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\test\App1" />
       <recent name="$PROJECT_DIR$/src/core/Interface" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/core" />
-      <recent name="$PROJECT_DIR$/src/core/Attributes" />
     </key>
   </component>
   <component name="RestClientSettings">
@@ -380,7 +335,7 @@
       <workItem from="1606728135494" duration="93000" />
       <workItem from="1606728256299" duration="623000" />
       <workItem from="1607177268008" duration="1655000" />
-      <workItem from="1608117217172" duration="3715000" />
+      <workItem from="1608117217172" duration="4495000" />
     </task>
     <servers />
   </component>
