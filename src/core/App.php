@@ -23,6 +23,7 @@ use Spatial\Common\HttpAttributes\HttpPost;
 use Spatial\Common\HttpAttributes\HttpPut;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\ApiModule;
+use Spatial\Core\Attributes\Authorize;
 use Spatial\Core\Attributes\Route;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Interfaces\IApplicationBuilder;
@@ -561,6 +562,7 @@ class App
 <th>Action</th>
 <th>Params</th>
 <th>HttpVerb</th>
+<th>Authorize</th>
 <th>Module</th>
 
 </tr>
@@ -574,6 +576,7 @@ class App
 <th>' . $row['action'] . '</th>
 <th>' . json_encode($row['params'], JSON_THROW_ON_ERROR) . '</th>
 <th>' . $row['httpMethod'] . '</th>
+<th>' . json_encode($row['canActivate'], JSON_THROW_ON_ERROR) . '</th>
 <th>' . $row['module'] . '</th>
 
 </tr>';
@@ -606,7 +609,10 @@ class App
             'handler' => '',
             'page' => '',
             'httpVerb' => '',
-            'module' => $moduleName
+            'module' => $moduleName,
+            'canActivate' => $this->getAuthorizationAttribute(
+                $controllerReflection->getAttributes(Authorize::class)
+            ),
         ];
 
         switch ($this->routeType) {
@@ -687,6 +693,7 @@ class App
 
     /**
      * @param ReflectionClass $controllerReflection
+     * @param array $tokens
      */
     private
     function registerAttributeRoute(
@@ -774,6 +781,28 @@ class App
     }
 
     /**
+     * @param array $authorizationAttributes
+     * @return array|null
+     */
+    private
+    function getAuthorizationAttribute(
+        array $authorizationAttributes
+    ): ?array {
+        $authAttributes = [];
+        if (count($authorizationAttributes) === 0) {
+            return null;
+        }
+
+        foreach ($authorizationAttributes as $auth) {
+            $authGuards = $auth->newInstance()->authGuards;
+            foreach ($authGuards as $authGuard) {
+                $authAttributes[] = $authGuard;
+            }
+        }
+        return $authAttributes;
+    }
+
+    /**
      * @param string $controllerClassName
      * @param string $template
      * @param array $tokens
@@ -790,6 +819,19 @@ class App
 //        echo 'setting to route table';
 //        check for action area attribute. if it exists, overwrite else none
         $tokens['area'] = $this->getAreaAttribute($action->getAttributes(Area::class)) ?? $tokens['area'];
+//        authorization on mehtods
+
+        $actionAuth = $this->getAuthorizationAttribute(
+            $action->getAttributes(Authorize::class)
+        );
+        if ($actionAuth) {
+            if ($tokens['canActivate']) {
+                $tokens['canActivate'] = array_merge($tokens['canActivate'], $actionAuth);
+            } else {
+                $tokens['canActivate'] = $actionAuth;
+            }
+        }
+
 
 //        go through httpverbs for routing and request methods
         if (count($tokens['httpVerb']) > 0) {
@@ -805,7 +847,8 @@ class App
                     'httpMethod' => $http['event'], // $action ? $this->getHttpVerbsFromMethods($action) : null,
                     'action' => $tokens['action'],
                     'params' => $this->getActionParamsWithAttribute($action),
-                    'module' => $tokens['module']
+                    'canActivate' => $tokens['canActivate'],
+                    'module' => $tokens['module'],
                 ];
             }
             return;
@@ -817,7 +860,8 @@ class App
             // $action ? $this->getHttpVerbsFromMethods($action) : null,
             'action' => $tokens['action'],
             'params' => $this->getActionParamsWithAttribute($action),
-            'module' => $tokens['module']
+            'canActivate' => $tokens['canActivate'],
+            'module' => $tokens['module'],
         ];
     }
 

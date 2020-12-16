@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="" />
+    <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/core/Attributes/Authorize.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Services/AuthIP.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Services/AuthUser.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/StoreApi/Controllers/ProductController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/StoreApi/Controllers/ProductController.php" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -37,6 +47,7 @@
       <path value="$PROJECT_DIR$/vendor/psr/http-server-handler" />
       <path value="$PROJECT_DIR$/vendor/psr/http-message" />
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
     </include_path>
   </component>
   <component name="ProjectId" id="1jVRlvBcYX20DtOwa2bScSvgjQZ" />
@@ -49,7 +60,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/core/Attributes" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -64,18 +75,18 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="I:\Code\PHP\Frameworks\spatial-core\src\core\Attributes" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/src/router" />
       <recent name="$PROJECT_DIR$/src/common/BindSourceAttributes" />
       <recent name="$PROJECT_DIR$/src/core/Attributes" />
-      <recent name="I:\Code\PHP\Frameworks\spatial-core\src\interface" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="I:\Code\PHP\Frameworks\spatial-core\test\Services" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\test\App1" />
       <recent name="$PROJECT_DIR$/src/core/Interface" />
       <recent name="$PROJECT_DIR$/src" />
-      <recent name="$PROJECT_DIR$/src/core" />
     </key>
   </component>
   <component name="RestClientSettings">
@@ -332,6 +343,9 @@
       <workItem from="1606728256299" duration="623000" />
       <workItem from="1607177268008" duration="1655000" />
       <workItem from="1608117217172" duration="4665000" />
+      <workItem from="1608131336738" duration="728000" />
+      <workItem from="1608132602066" duration="168000" />
+      <workItem from="1608133408860" duration="4457000" />
     </task>
     <servers />
   </component>

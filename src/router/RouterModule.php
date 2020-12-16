@@ -10,6 +10,7 @@ use ReflectionParameter;
 use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Interfaces\IRouteModule;
 use Spatial\Psr7\Response;
+use Spatial\Router\Interfaces\CanActivate;
 use Spatial\Router\Trait\SecurityTrait;
 
 class RouterModule implements IRouteModule
@@ -22,18 +23,37 @@ class RouterModule implements IRouteModule
     private object $defaults;
 
     private array $diServices = [];
+    private array $authGuards = [];
+
+    private function isAuthorized(CanActivate ...$auhguard): bool
+    {
+        $allow = true;
+        foreach ($auhguard as $auth) {
+            if (!$auth->canActivate($_SERVER['REQUEST_URI'])) {
+                $allow = false;
+                break;
+            }
+        }
+        return $allow;
+    }
 
     /**
      * @param array $route
      * @param object $defaults
+     * @throws ReflectionException
      */
     public function render(array $route, object $defaults): void
     {
 //        check first fir authorization
-//        if (!$this->isAuthorized) {
-//            http_response_code(401);
-//            return;
-//        }
+
+        if (
+            $route['canActivate'] &&
+            !$this->isAuthorized(... $this->getAuthGuardInstance($route['canActivate']))
+        ) {
+            http_response_code(401);
+
+            return;
+        }
 //        $uri = $uri ?? $_SERVER['REQUEST_URI'];
         // echo $this->_resolve($uri)->getHeaderLine('Content-Type');
         $response = $this->getControllerMethod($route, $defaults);
@@ -46,6 +66,12 @@ class RouterModule implements IRouteModule
         // echo $this->_resolve($uri)->getBody()->getContents();
     }
 
+    /**
+     * @param array $route
+     * @param object $defaults
+     * @return Response
+     * @throws ReflectionException
+     */
     private function getControllerMethod(array $route, object $defaults): Response
     {
         $this->defaults = $defaults;
@@ -161,5 +187,21 @@ class RouterModule implements IRouteModule
                 header($header . ':' . $v);
             }
         }
+    }
+
+    /**
+     * @param $authorization
+     * @return array
+     */
+    private function getAuthGuardInstance($authorization): array
+    {
+        $routeAuthGuards = [];
+        foreach ($authorization as $authGaurd) {
+            if (!isset($this->diServices[$authGaurd])) {
+                $this->diServices[$authGaurd] = new $authGaurd();
+            }
+            $routeAuthGuards[] = $this->diServices[$authGaurd];
+        }
+        return $routeAuthGuards;
     }
 }
