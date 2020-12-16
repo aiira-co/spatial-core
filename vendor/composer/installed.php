@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '0d37853ea9205b027b89fdf056704d3622a365c6',
+    'reference' => 'f31036f15543880963798647e3f3293469f0c5f8',
     'name' => 'spatial/core',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '25f7f893f0b52b7b14e244a16679d72b1f0088de',
+      'reference' => 'f47ece9e6e8ce74e3be04bef47f46061dc18c095',
     ),
     'psr/http-message' => 
     array (
@@ -63,7 +63,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '0d37853ea9205b027b89fdf056704d3622a365c6',
+      'reference' => 'f31036f15543880963798647e3f3293469f0c5f8',
     ),
     'spatial/psr7' => 
     array (

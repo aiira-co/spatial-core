@@ -5,9 +5,11 @@ declare(strict_types=1);
 
 namespace Spatial\Api;
 
-use Spatial\Api\Controllers\ProductController;
-use Spatial\Api\Controllers\TestController;
-use Spatial\Api\Controllers\ValuesController;
+use Spatial\Api\ArticleApi\ArticleApiModule;
+use Spatial\Api\StoreApi\StoreApiModule;
+use Spatial\Api\StoreApi\Controllers\ProductController;
+use Spatial\Api\StoreApi\Controllers\TestController;
+use Spatial\Api\StoreApi\Controllers\ValuesController;
 use Spatial\Common\CommonModule;
 use Spatial\Core\Attributes\ApiModule;
 use Spatial\Core\Interfaces\IApplicationBuilder;
@@ -18,13 +20,10 @@ use Spatial\Router\RouteBuilder;
 
 #[ApiModule(
     imports: [
-    CommonModule::class
+    StoreApiModule::class,
+    ArticleApiModule::class
 ],
-    declarations: [
-    ProductController::class,
-    TestController::class,
-    ValuesController::class
-],
+    declarations: [],
     providers: [],
     /**
      * Bootstrap controller must contain an index() for bootstrap

@@ -1,3 +1,27 @@
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-12-16T113711.200.html
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-12-16T112205.200.json
+
+###
+
 GET http://localhost:5200/store-api/products/4/?name=world
 Accept: application/json
 

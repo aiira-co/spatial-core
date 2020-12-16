@@ -1,8 +1,9 @@
 <?php
 
-namespace Spatial\Api\Controllers;
+namespace Spatial\Api\StoreApi\Controllers;
 
 use JsonException;
+use Psr\Http\Message\ResponseInterface;
 use Spatial\Common\BindSourceAttributes\FromBody;
 use Spatial\Common\BindSourceAttributes\FromQuery;
 use Spatial\Common\BindSourceAttributes\FromRoute;
@@ -44,7 +45,7 @@ class ProductController
      * @throws JsonException
      */
     #[HttpGet]
-    public function productList(): Response
+    public function productList(): ResponseInterface
     {
         $data = [
             'app api',

@@ -1,10 +1,14 @@
 <?php
 
-namespace Spatial\Api\Controllers;
+namespace Spatial\Api\StoreApi\Controllers;
 
-use Spatial\Core\Attributes\ApiController;
-use Spatial\Core\Attributes\Area;
+use Core\Application\Logics\App\Queries\GetPersons;
+use Core\Application\Logics\App\Command\CreatePerson;
+use Core\Application\Logics\App\Command\UpdatePerson;
+use Core\Application\Logics\App\Command\DeletePerson;
 use Spatial\Core\Attributes\Route;
+use Spatial\Core\Controller;
+use Spatial\MediatR\Mediator;
 use Spatial\Psr7\Response;
 
 /**
@@ -14,17 +18,15 @@ use Spatial\Psr7\Response;
  *
  * @category Controller
  */
-#[ApiController]
-#[Area('aiira')]
-#[Route('[area]/[controller]/secret/[action]')]
-class ValuesController
+#[Route('[controller]/[action]')]
+class TestController extends MyBaseController
 {
     /**
      * Use constructor to Inject or instanciate dependecies
      */
     public function __construct()
     {
-        $this->response = new Response();
+        $this->mediator = new Mediator();
     }
 
     /**
@@ -34,31 +36,21 @@ class ValuesController
      */
     public function httpGet(int ...$id): ?Response
     {
-        $data = [
-            'value1',
-            'value2',
-        ];
-        $payload = json_encode($data);
-        $this->response->getBody()->write($payload);
-        return $this->response;
+        // mediator library. http server middleware
+        // returns a response
+        return $this->mediator->process(new GetPersonsQuery());
     }
 
     /**
      * The Method httpPost() called to handle a POST request
-     * This method requires a body(json) which is passed as the var array $content
+     * This method requires a body(json) which is passed as the var string $content
      * URI: POST: https://api.com/values
      */
-    #[Area('studio')]
-    public function httpPost(
-        string $content
-    ): Response {
-        $postId = null;
-
-        // code here
-        $data = ['success' => true, 'alert' => 'We have it at post', 'id' => $postId];
-        $payload = json_encode($data);
-        $this->response->getBody()->write($payload);
-        return $this->response;
+    public function httpPost(string $content): Response
+    {
+        $r = new CreatePerson();
+        $r->data = json_decode($content);
+        return $this->mediator->process($r);
     }
 
     /**
@@ -70,14 +62,10 @@ class ValuesController
     public function httpPut(string $content, int $id): Response
     {
         // code here
-        $data = ['success' => true, 'alert' => 'We have it at put'];
-        $payload = json_encode($data); // code here
-        $data = ['success' => true, 'alert' => 'We have it at put'];
-        $payload = json_encode($data);
-        $this->response->getBody()->write($payload);
-        return $this->response;
-        $this->response->getBody()->write($payload);
-        return $this->response;
+        $r = new UpdatePerson();
+        $r->data = json_decode($content);
+        $r->id = $id;
+        return $this->mediator->process($r);
     }
 
     /**
@@ -87,9 +75,8 @@ class ValuesController
     public function httpDelete(int $id): Response
     {
         // code here
-        $data = ['id' => $id];
-        $payload = json_encode($data);
-        $this->response->getBody()->write($payload);
-        return $this->response;
+        $r = new DeletePerson();
+        $r->id = $id;
+        return $this->mediator->process($r);
     }
 }

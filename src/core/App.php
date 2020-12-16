@@ -119,6 +119,9 @@ class App
      */
     private array $routeActivated;
 
+    private bool $hasColdBooted = false;
+    private bool $showRouteTable = false;
+
 
     public function __construct(
         ?string $uri = null
@@ -132,6 +135,16 @@ class App
 //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
         $this->routerModule = new RouterModule();
+    }
+
+    /**
+     * @param bool $value
+     * @return $this
+     */
+    public function showRouteTable(bool $value = true): self
+    {
+        $this->showRouteTable = $value;
+        return $this;
     }
 
     /**
@@ -175,11 +188,15 @@ class App
         $apiModuleAttributes = $reflectionClassApiAttributes[0]->newInstance();
 
 //        $apiModule = $apiModuleAttributes[0];
+        if ($this->hasColdBooted) {
+            $this->resolveRouteToController();
+            return null;
+        }
 
-//        load attribute metadata
-        $this->resolveAppModule($apiModuleAttributes);
+        //        load attribute metadata
+        $this->resolveAppModule('root', $apiModuleAttributes);
 
-//          load configs
+        //          load configs
         $baseModule = $reflectionClass->newInstance();
         $baseModule->configure($this->applicationBuilder);
         $this->runApp();
@@ -195,65 +212,107 @@ class App
      * @return void
      * @throws ReflectionException
      */
-    private function resolveAppModule(ApiModule $app): void
+    private function resolveAppModule(string $moduleName, ApiModule $app): void
     {
 //        find the import with routeModule
 //        echo 'resoliving imports \n';
-        $this->resolveImports($app->imports);
+        $this->resolveImports($moduleName, $app->imports);
 
 //        Dependency Injection Services
 //        echo 'resoliving providers \n';
-        $this->resolveProviders($app->providers);
+        $this->resolveProviders($moduleName, $app->providers);
 
 //        Declarations
 //        echo 'resoliving declarations \n';
-        $this->resolveDeclarations($app->declarations);
+        $this->resolveDeclarations($moduleName, $app->declarations);
 //        $routeModule->render();
 
     }
 
     /**
-     * @param array $moduleProviders
+     * @param string $moduleName
+     * @param array|null $moduleProviders
      * @throws ReflectionException
      */
-    private function resolveProviders(array $moduleProviders): void
+    private function resolveProviders(string $moduleName, ?array $moduleProviders): void
     {
+        if (!$moduleProviders) {
+            return;
+        }
+        //        create provider section
+        if (!isset($this->providers[$moduleName])) {
+            $this->providers[$moduleName] = [];
+        }
+
         foreach ($moduleProviders as $provider) {
-            if (!isset($this->providers[$provider])) {
+            if (!isset($this->providers[$moduleName][$provider])) {
                 //            check if it has DI for provider
-                $this->providers[$provider] = new ReflectionClass($provider);
+                $this->providers[$moduleName][$provider] = new ReflectionClass($provider);
             }
         }
     }
 
 
     /**
-     * @param array $moduleDeclarations
+     * @param string $moduleName
+     * @param array|null $moduleDeclarations
      * @throws ReflectionException
      */
-    private function resolveDeclarations(array $moduleDeclarations): void
+    private function resolveDeclarations(string $moduleName, ?array $moduleDeclarations): void
     {
+        if (!$moduleDeclarations) {
+            return;
+        }
+        //        create declarations section
+        if (!isset($this->declarations[$moduleName])) {
+            $this->declarations[$moduleName] = [];
+        }
+
         foreach ($moduleDeclarations as $declaration) {
-            if (!isset($this->declarations[$declaration])) {
+            if (!isset($this->declarations[$moduleName][$declaration])) {
                 //            check if it has DI for provider
-                $this->declarations[$declaration] = new ReflectionClass($declaration);
+                $this->declarations[$moduleName][$declaration] = new ReflectionClass($declaration);
             }
         }
     }
 
     /**
-     * @param array $moduleImports
+     * @param string $moduleName
+     * @param array|null $moduleImports
      * @return void
      * @throws ReflectionException
      */
-    private function resolveImports(array $moduleImports): void
+    private function resolveImports(string $moduleName, ?array $moduleImports): void
     {
+        if (!$moduleImports) {
+            return;
+        }
+//        create module section
+        if (!isset($this->importModules[$moduleName])) {
+            $this->importModules[$moduleName] = [];
+        }
+
+//    Loop though imports
         foreach ($moduleImports as $module) {
-            if (isset($this->importModules[$module])) {
+            if (isset($this->importModules[$moduleName][$module])) {
                 throw new \RuntimeException('Import Module ' . $module . ' is already imported in module');
             }
-//            check if it has DI for provider
-            $this->importModules[$module] = new ReflectionClass($module);
+
+//            check if it has ApiModule attr
+            $reflectionClass = new ReflectionClass($module);
+            $apiModuleAttributes = $reflectionClass->getAttributes(ApiModule::class);
+            if (count($apiModuleAttributes) === 0) {
+                throw new \RuntimeException(
+                    'Import Module ' . $module . ' is not module, Must have #[ApiModule] Attribute'
+                );
+            }
+
+            //  check if it has DI for provider
+            $this->importModules[$moduleName][$module] = new ReflectionClass($module);
+//            run throught its declarations and providers to record them
+            $apiModuleAttributes = $apiModuleAttributes[0]->newInstance();
+            //        load attribute metadata
+            $this->resolveAppModule($module, $apiModuleAttributes);
         }
     }
 
@@ -415,40 +474,19 @@ class App
 
 
         if (count($this->routetable) === 0) {
-            $this->createRouteTable();
-        }
-
-        $this->requestedMethod = $this->getRequestedMethod();
-        $this->defaults = new class {};
-
-
-        $routeFound = false;
-//        $routeActivated;
-        foreach ($this->routetable as $route) {
-//            echo '<br> is ' . $this->uri . ' === ' . $route['route'];
-            $routeArr = explode('/', trim($route['route'], '/'));
-            $routeHttp = $route['httpMethod'];
-            if (
-                str_contains($routeHttp, $this->requestedMethod) ||
-                str_contains($routeHttp, 'all')
-            ) {
-                if ($this->isUriRoute($routeArr)) {
-                    $routeFound = true;
-                    $this->routeActivated = $route;
-                    break;
-                }
+            foreach ($this->declarations as $module => $declarations) {
+                $this->createRouteTable($module, $declarations);
             }
+
+//            Print Route Table
+            if ($this->showRouteTable) {
+                $this->printRouteTable();
+            }
+
+            $this->hasColdBooted = true;
         }
 
-        if ($routeFound) {
-//            echo 'route is found!!!';
-//            print_r($this->routeActivated);
-//            print_r($this->defaults);
-            $this->routerModule->render($this->routeActivated, $this->defaults);
-        } else {
-            echo 'route was not found, rely on bootstrap is any -> ' .
-                $this->requestedMethod . ' - ' . $this->defaults->content;
-        }
+        $this->resolveRouteToController();
 
         if ($this->applicationBuilder->isSwooleHttp) {
             return;
@@ -461,11 +499,15 @@ class App
 
 
     /**
+     * @param string $module
+     * @param array $declarations
      * @throws Exception
      */
     private
-    function createRouteTable(): void
-    {
+    function createRouteTable(
+        string $module,
+        array $declarations
+    ): void {
 //        echo '<pre>';
 //        var_dump($this->declarations);
 
@@ -474,11 +516,11 @@ class App
 //        pipes
 //        directive
 
-        foreach ($this->declarations as $declaration) {
+        foreach ($declarations as $declaration) {
 //            echo '<br/> >> Declaration checking is ' . $declaration->getShortName();
             $attr = $declaration->getAttributes(ApiController::class);
             if (count($attr) > 0) {
-                $this->registerNewController($declaration);
+                $this->registerNewController($module, $declaration);
                 // Now try do draw route table
 
             } else {
@@ -489,20 +531,19 @@ class App
                         $parent->getName() === "Spatial\Core\ControllerBase" ||
                         $parent->getName() === "Spatial\Core\Controller"
                     ) {
-                        $this->registerNewController($declaration);
+                        $this->registerNewController($module, $declaration);
                         break;
                     } else {
 //                        echo '<br /> checking parent attribute';
                         $parentAttr = $parent->getAttributes(ApiController::class);
                         if (count($parentAttr) > 0) {
-                            $this->registerNewController($declaration);
+                            $this->registerNewController($module, $declaration);
                         }
                         break;
                     }
                 }
             }
         }
-//        $this->printRouteTable();
     }
 
     /**
@@ -520,6 +561,7 @@ class App
 <th>Action</th>
 <th>Params</th>
 <th>HttpVerb</th>
+<th>Module</th>
 
 </tr>
 </thead>
@@ -530,8 +572,9 @@ class App
 <th>' . $row['route'] . '</th>
 <th>' . $row['controller'] . '</th>
 <th>' . $row['action'] . '</th>
-<th>' . json_encode($row['params']) . '</th>
+<th>' . json_encode($row['params'], JSON_THROW_ON_ERROR) . '</th>
 <th>' . $row['httpMethod'] . '</th>
+<th>' . $row['module'] . '</th>
 
 </tr>';
         }
@@ -545,6 +588,7 @@ class App
      */
     private
     function registerNewController(
+        string $moduleName,
         ReflectionClass $controllerReflection
     ): void {
         if (isset($this->controllers[$controllerReflection->getName()])) {
@@ -561,7 +605,8 @@ class App
             'controller' => strtolower(str_replace('Controller', '', $controllerReflection->getShortName())),
             'handler' => '',
             'page' => '',
-            'httpVerb' => ''
+            'httpVerb' => '',
+            'module' => $moduleName
         ];
 
         switch ($this->routeType) {
@@ -759,7 +804,8 @@ class App
                     'controller' => $controllerClassName,
                     'httpMethod' => $http['event'], // $action ? $this->getHttpVerbsFromMethods($action) : null,
                     'action' => $tokens['action'],
-                    'params' => $this->getActionParamsWithAttribute($action)
+                    'params' => $this->getActionParamsWithAttribute($action),
+                    'module' => $tokens['module']
                 ];
             }
             return;
@@ -770,7 +816,8 @@ class App
             'httpMethod' => $this->setDefaultHttpMethod($tokens['action']),
             // $action ? $this->getHttpVerbsFromMethods($action) : null,
             'action' => $tokens['action'],
-            'params' => $this->getActionParamsWithAttribute($action)
+            'params' => $this->getActionParamsWithAttribute($action),
+            'module' => $tokens['module']
         ];
     }
 
@@ -908,6 +955,42 @@ class App
             $this->routeType = 1;
         } elseif ($this->enableAttributeRouting & !$this->enableConventionalRouting) {
             $this->routeType = 2;
+        }
+    }
+
+    private function resolveRouteToController(): void
+    {
+        $this->requestedMethod = $this->getRequestedMethod();
+        $this->defaults = new class {
+        };
+
+
+        $routeFound = false;
+//        $routeActivated;
+        foreach ($this->routetable as $route) {
+//            echo '<br> is ' . $this->uri . ' === ' . $route['route'];
+            $routeArr = explode('/', trim($route['route'], '/'));
+            $routeHttp = $route['httpMethod'];
+            if (
+                str_contains($routeHttp, $this->requestedMethod) ||
+                str_contains($routeHttp, 'all')
+            ) {
+                if ($this->isUriRoute($routeArr)) {
+                    $routeFound = true;
+                    $this->routeActivated = $route;
+                    break;
+                }
+            }
+        }
+
+        if ($routeFound) {
+//            echo 'route is found!!!';
+//            print_r($this->routeActivated);
+//            print_r($this->defaults);
+            $this->routerModule->render($this->routeActivated, $this->defaults);
+        } else {
+            echo 'route was not found, rely on bootstrap is any -> ' .
+                $this->requestedMethod . ' - ' . $this->defaults->content;
         }
     }
 }

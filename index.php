@@ -18,7 +18,8 @@ use Spatial\Router\RouterModule;
 //main
 $app = new App();
 try {
-    $app->bootstrapModule(TestModule::class)
+    $app->showRouteTable()
+        ->bootstrapModule(TestModule::class)
         ?->catch(fn() => die('error'));
 } catch (ReflectionException $e) {
 }
@@ -63,8 +64,6 @@ try {
 //    http_response_code($e->getCode());
 //    echo $e->getMessage();
 //}
-
-
 
 
 // $name ='Api';

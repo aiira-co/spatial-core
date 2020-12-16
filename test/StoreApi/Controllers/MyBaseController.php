@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Spatial\Api\controllers;
+namespace Spatial\Api\StoreApi\Controllers;
 
 use Spatial\Core\Attributes\ApiController;
 
