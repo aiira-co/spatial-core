@@ -479,6 +479,8 @@ class App
                 $this->createRouteTable($module, $declarations);
             }
 
+//            Sort RouteTable in order of segments
+            usort($this->routetable, static fn($a, $b) => strcmp($a["routeSegments"], $b["routeSegments"]));
 //            Print Route Table
             if ($this->showRouteTable) {
                 $this->printRouteTable();
@@ -557,6 +559,7 @@ class App
         echo '<table style="display: block; background-color: paleturquoise"> 
 <thead style="background-color: aliceblue">
 <tr>
+<th>Segments</th>
 <th>Route</th>
 <th>Controller</th>
 <th>Action</th>
@@ -571,6 +574,7 @@ class App
         foreach ($this->routetable as $row) {
             echo '
             <tr style="background-color: bisque">
+<th>' . $row['routeSegments'] . '</th>
 <th>' . $row['route'] . '</th>
 <th>' . $row['controller'] . '</th>
 <th>' . $row['action'] . '</th>
@@ -836,13 +840,15 @@ class App
 //        go through httpverbs for routing and request methods
         if (count($tokens['httpVerb']) > 0) {
             foreach ($tokens['httpVerb'] as $http) {
+                $routeTemplate = $this->replaceTemplateTokens(
+                    $http['template'] ? $template . '/' . $http['template'] : $template,
+                    $tokens
+                );
+                $routeSegments = count(explode('/', $routeTemplate));
 //                print_r($http);
                 $this->routetable[] = [
-                    'route' => $this->replaceTemplateTokens(
-
-                        $http['template'] ? $template . '/' . $http['template'] : $template,
-                        $tokens
-                    ),
+                    'routeSegments' => $routeSegments,
+                    'route' => $routeTemplate,
                     'controller' => $controllerClassName,
                     'httpMethod' => $http['event'], // $action ? $this->getHttpVerbsFromMethods($action) : null,
                     'action' => $tokens['action'],
@@ -853,8 +859,12 @@ class App
             }
             return;
         }
+
+        $routeTemplate = $this->replaceTemplateTokens($template, $tokens);
+        $routeSegments = count(explode('/', $routeTemplate));
         $this->routetable[] = [
-            'route' => $this->replaceTemplateTokens($template, $tokens),
+            'routeSegments' => $routeSegments,
+            'route' => $routeTemplate,
             'controller' => $controllerClassName,
             'httpMethod' => $this->setDefaultHttpMethod($tokens['action']),
             // $action ? $this->getHttpVerbsFromMethods($action) : null,

@@ -2,15 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/core/Attributes/Authorize.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/Services/AuthIP.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/Services/AuthUser.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/StoreApi/Controllers/ProductController.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/StoreApi/Controllers/ProductController.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -345,7 +339,7 @@
       <workItem from="1608117217172" duration="4665000" />
       <workItem from="1608131336738" duration="728000" />
       <workItem from="1608132602066" duration="168000" />
-      <workItem from="1608133408860" duration="4457000" />
+      <workItem from="1608133408860" duration="7156000" />
     </task>
     <servers />
   </component>

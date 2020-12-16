@@ -82,7 +82,7 @@ class RouterModule implements IRouteModule
         foreach ($route['params'] as $param) {
             $value = $this->getBindSourceValue($param['bindingSource'], $param['param']);
             //$param is an instance of ReflectionParameter
-            if ($value === null && !$param['param']->isOptional()) {
+            if ($value === null && !$param['param']->allowsNull()) {
                 die(
                     'Argument $' . $param['param']->getName(
                     ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
