@@ -333,11 +333,16 @@ class App
 //        print_r($this->patternArray);
 //        print_r($routeUriArr);
         $routeArrCount = count($routeUriArr);
+//        echo '<br/> ' . $routeArrCount . ' - patc' . $this->patternArray['count'];
 
-        if ($routeArrCount < $this->patternArray['count']) {
+        if ($routeArrCount < $this->patternArray['count'] && !str_starts_with(
+                $routeUriArr[$routeArrCount - 1],
+                '{...'
+            )) {
             return false;
         }
 
+//        echo 'start routing';
 
         for ($i = 0; $i < $routeArrCount; $i++) {
             $isToken = str_starts_with($routeUriArr[$i], $token[0]);
@@ -368,6 +373,7 @@ class App
             // AND if the placeholder is prefixed with `...`
             // meaning the placeholder is an array of the rest of the uriArr member
             if ($i === ($routeArrCount - 1) && str_starts_with($placeholder, '...')) {
+//                echo 'checking last seg';
                 $placeholder = ltrim($placeholder, '/././.');
                 if (isset($this->patternArray['uri'][$i])) {
                     for ($uri = $i, $uriMax = count($this->patternArray['uri']); $uri < $uriMax; $uri++) {
@@ -555,7 +561,8 @@ class App
     private
     function printRouteTable(): void
     {
-        echo '<p> Route Table <br/> >';
+        echo '<h2> Route Table </h2> >';
+        echo '<pre> ' . $this->uri . ' </pre> >';
         echo '<table style="display: block; background-color: paleturquoise"> 
 <thead style="background-color: aliceblue">
 <tr>
