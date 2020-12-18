@@ -1,0 +1,181 @@
+<h2> Route Table </h2> >
+<pre> /store-api/products/4 </pre> >
+<table style="display: block; background-color: paleturquoise">
+    <thead style="background-color: aliceblue">
+    <tr>
+        <th>Segments</th>
+        <th>Route</th>
+        <th>Controller</th>
+        <th>Action</th>
+        <th>Params</th>
+        <th>HttpVerb</th>
+        <th>Authorize</th>
+        <th>Module</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <tr style="background-color: bisque">
+        <th>3</th>
+        <th>/store-api/products</th>
+        <th>Spatial\Api\StoreApi\Controllers\ProductController</th>
+        <th>productList</th>
+        <th>[]</th>
+        <th>get</th>
+        <th>["Spatial\\Api\\Services\\AuthIP"]</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>3</th>
+        <th>/store-api/products</th>
+        <th>Spatial\Api\StoreApi\Controllers\ProductController</th>
+        <th>createProduct</th>
+        <th>[{"param":{"name":"content"},"bindingSource":"FromBody"}]</th>
+        <th>post</th>
+        <th>["Spatial\\Api\\Services\\AuthIP","Spatial\\Api\\AuthUser"]</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>3</th>
+        <th>/test/httpget</th>
+        <th>Spatial\Api\StoreApi\Controllers\TestController</th>
+        <th>httpGet</th>
+        <th>[{"param":{"name":"id"},"bindingSource":"FromRoute"}]</th>
+        <th>get</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>3</th>
+        <th>/test/httppost</th>
+        <th>Spatial\Api\StoreApi\Controllers\TestController</th>
+        <th>httpPost</th>
+        <th>[{"param":{"name":"content"},"bindingSource":"FromRoute"}]</th>
+        <th>post</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>3</th>
+        <th>/test/httpput</th>
+        <th>Spatial\Api\StoreApi\Controllers\TestController</th>
+        <th>httpPut</th>
+        <th>
+            [{"param":{"name":"content"},"bindingSource":"FromRoute"},{"param":{"name":"id"},"bindingSource":"FromRoute"}]
+        </th>
+        <th>put</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>3</th>
+        <th>/test/httpdelete</th>
+        <th>Spatial\Api\StoreApi\Controllers\TestController</th>
+        <th>httpDelete</th>
+        <th>[{"param":{"name":"id"},"bindingSource":"FromRoute"}]</th>
+        <th>delete</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>4</th>
+        <th>/store-api/products/{id:int}</th>
+        <th>Spatial\Api\StoreApi\Controllers\ProductController</th>
+        <th>getProduct</th>
+        <th>
+            [{"param":{"name":"id"},"bindingSource":"FromRoute"},{"param":{"name":"name"},"bindingSource":"FromQuery"}]
+        </th>
+        <th>get</th>
+        <th>["Spatial\\Api\\Services\\AuthIP"]</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>4</th>
+        <th>/article-api/article/getallarticles</th>
+        <th>Spatial\Api\ArticleApi\Controller\ArticleController</th>
+        <th>getAllArticles</th>
+        <th>[]</th>
+        <th>get</th>
+        <th>null</th>
+        <th>Spatial\Api\ArticleApi\ArticleApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>5</th>
+        <th>/store-api/products/edit/{id:int}</th>
+        <th>Spatial\Api\StoreApi\Controllers\ProductController</th>
+        <th>editProduct</th>
+        <th>
+            [{"param":{"name":"content"},"bindingSource":"FromBody"},{"param":{"name":"id"},"bindingSource":"FromRoute"}]
+        </th>
+        <th>put</th>
+        <th>["Spatial\\Api\\Services\\AuthIP"]</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>5</th>
+        <th>/aiira/values/secret/httpget</th>
+        <th>Spatial\Api\StoreApi\Controllers\ValuesController</th>
+        <th>httpGet</th>
+        <th>[{"param":{"name":"id"},"bindingSource":"FromRoute"}]</th>
+        <th>get</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>5</th>
+        <th>/studio/values/secret/httppost</th>
+        <th>Spatial\Api\StoreApi\Controllers\ValuesController</th>
+        <th>httpPost</th>
+        <th>[{"param":{"name":"content"},"bindingSource":"FromRoute"}]</th>
+        <th>post</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>5</th>
+        <th>/aiira/values/secret/httpput</th>
+        <th>Spatial\Api\StoreApi\Controllers\ValuesController</th>
+        <th>httpPut</th>
+        <th>
+            [{"param":{"name":"content"},"bindingSource":"FromRoute"},{"param":{"name":"id"},"bindingSource":"FromRoute"}]
+        </th>
+        <th>put</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>5</th>
+        <th>/aiira/values/secret/httpdelete</th>
+        <th>Spatial\Api\StoreApi\Controllers\ValuesController</th>
+        <th>httpDelete</th>
+        <th>[{"param":{"name":"id"},"bindingSource":"FromRoute"}]</th>
+        <th>delete</th>
+        <th>null</th>
+        <th>Spatial\Api\StoreApi\StoreApiModule</th>
+
+    </tr>
+    <tr style="background-color: bisque">
+        <th>5</th>
+        <th>/article-api/article/getsinglearticle/{id:int}</th>
+        <th>Spatial\Api\ArticleApi\Controller\ArticleController</th>
+        <th>getSingleArticle</th>
+        <th>[{"param":{"name":"id"},"bindingSource":"FromRoute"}]</th>
+        <th>get</th>
+        <th>null</th>
+        <th>Spatial\Api\ArticleApi\ArticleApiModule</th>
+
+    </tr>
+    </tbody>
+</table>

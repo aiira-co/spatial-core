@@ -44,15 +44,11 @@ class TestModule
 //            $app->useDeveloperExceptionPage();
 //        }
 
-//        $endpoints = new RouteBuilder();
 
-
+//        $app->usePhpDiProduction();
         $app->useHttpsRedirection();
-
         $app->useRouting();
-
         $app->useAuthorization();
-
         $app->useEndpoints(
             fn(IRouteBuilder $endpoints) => [
                 $endpoints->mapControllers()

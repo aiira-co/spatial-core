@@ -18,7 +18,8 @@ use Spatial\Router\RouterModule;
 //main
 $app = new App();
 try {
-    $app->showRouteTable()
+    $app
+//        ->showRouteTable()
         ->bootstrapModule(TestModule::class)
         ?->catch(fn() => die('error'));
 } catch (ReflectionException $e) {

@@ -135,7 +135,13 @@ class App
 
 //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
-        $this->routerModule = new RouterModule();
+        $this->routerModule = new RouterModule($this->applicationBuilder->container);
+
+        if ($this->applicationBuilder->container->has('routeTable')) {
+//            echo 'routeTable Found in container';
+            $this->routetable = (array)$this->applicationBuilder->container->has('routeTable');
+            $this->hasColdBooted = true;
+        }
     }
 
     /**
@@ -492,6 +498,8 @@ class App
                 $this->printRouteTable();
             }
 
+//            store route table to diContainer
+            $this->applicationBuilder->container->set('routeTable', $this->routetable);
             $this->hasColdBooted = true;
         }
 

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Spatial\Router;
 
+use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionException;
 use ReflectionParameter;
@@ -24,6 +27,11 @@ class RouterModule implements IRouteModule
 
     private array $diServices = [];
     private array $authGuards = [];
+
+
+    public function __construct(private Container $container)
+    {
+    }
 
     private function isAuthorized(CanActivate ...$auhguard): bool
     {
@@ -92,7 +100,13 @@ class RouterModule implements IRouteModule
             $args[] = $value;
         }
 //        var_dump($args);
-        return (new $route['controller'])->{$route['action']}(...$args);
+        try {
+            return ($this->container->get($route['controller']))->{$route['action']}(...$args);
+        } catch (DependencyException $e) {
+            die ('Controller DI Error ');
+        } catch (NotFoundException) {
+            die ('Controller ' . $route['controller'] . 'Not Found ');
+        }
     }
 
     /**
@@ -127,18 +141,26 @@ class RouterModule implements IRouteModule
     ): ?object {
         $serviceName = $parameter->getType();
 
-
-        if (isset($this->diServices['$serviceName'])) {
-            return $this->diServices['$serviceName'];
+        try {
+            return $this->container->get($serviceName);
+        } catch (DependencyException $e) {
+            die('Service DI Error');
+        } catch (NotFoundException $e) {
+            die('Service ' . $serviceName . ' Error');
         }
 
-        if (!class_exists($this->diServices['$serviceName'])) {
-            return null;
-        }
 
-        $this->diServices['$serviceName'] = new $serviceName;
-
-        return $this->diServices['$serviceName'];
+//        if (isset($this->diServices['$serviceName'])) {
+//            return $this->diServices['$serviceName'];
+//        }
+//
+//        if (!class_exists($this->diServices['$serviceName'])) {
+//            return null;
+//        }
+//
+//        $this->diServices['$serviceName'] = new $serviceName;
+//
+//        return $this->diServices['$serviceName'];
     }
 
 
@@ -198,7 +220,13 @@ class RouterModule implements IRouteModule
         $routeAuthGuards = [];
         foreach ($authorization as $authGaurd) {
             if (!isset($this->diServices[$authGaurd])) {
-                $this->diServices[$authGaurd] = new $authGaurd();
+                try {
+                    $this->diServices[$authGaurd] = $this->container->get($authGaurd);
+                } catch (DependencyException $e) {
+                    die('Service DI Error' . $e->getMessage());
+                } catch (NotFoundException $e) {
+                    die('Service ' . $authGaurd . ' Error Not Found' . $e->getMessage());
+                }
             }
             $routeAuthGuards[] = $this->diServices[$authGaurd];
         }

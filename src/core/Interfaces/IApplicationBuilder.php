@@ -10,6 +10,8 @@ namespace Spatial\Core\Interfaces;
  */
 interface IApplicationBuilder
 {
+    public function usePhpDiProduction(): void;
+
     public function useSwooleHttp(): void;
 
     public function useDeveloperExceptionPage(): void;

@@ -3,6 +3,8 @@
 
 namespace Spatial\Core;
 
+use DI\Container;
+use DI\ContainerBuilder;
 use Spatial\Core\Interfaces\IApplicationBuilder;
 use Spatial\Router\Interfaces\IRouteBuilder;
 use Spatial\Router\RouteBuilder;
@@ -18,10 +20,25 @@ class ApplicationBuilder implements IApplicationBuilder
     public bool $isSwooleHttp = false;
     private IRouteBuilder $routeBuilder;
     public array $routingType = [];
+    public Container $container;
 
     public function __construct()
     {
         $this->routeBuilder = new RouteBuilder();
+        $this->container = new Container();
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function usePhpDiProduction(): void
+    {
+        $builder = new ContainerBuilder();
+        $builder->enableCompilation(__DIR__ . '/tmp');
+        $builder->writeProxiesToFile(true, __DIR__ . '/tmp/proxies');
+
+        $this->container = $builder->build();
     }
 
     public function useSwooleHttp(): void

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Spatial\Api;
+namespace Spatial\Api\Services;
 
 
 use Spatial\Router\Interfaces\CanActivate;

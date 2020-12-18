@@ -1,3 +1,142 @@
+GET http://localhost:5200/store-api/products/4/?name=world
+Accept: application/json
+
+<> 2020-12-18T101555.200.json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-12-18T101532.200.html
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-12-18T101449.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-12-18T101334.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-12-18T101331.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-12-18T101325.200.json
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+<> 2020-12-18T101037.200.html
+
+###
+
+POST http://localhost:5200/store-api/products
+
+{
+  "name": "Kofi",
+  "age": 29,
+  "gender": "Male"
+}
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-12-18T100604.200.html
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-12-18T100519.200.html
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-12-18T100408.200.html
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-12-18T100330.200.html
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+<> 2020-12-18T095956.200.html
+
+###
+
+GET http://localhost:5200/store-api/products/4
+Accept: application/json
+
+###
+
 POST http://localhost:5200/store-api/products
 
 {
@@ -320,27 +459,6 @@ GET http://localhost:5200/store-api/products/4
 Accept: application/json
 
 <> 2020-11-18T141800.200.json
-
-###
-
-GET http://localhost:5200/store-api/products/4
-Accept: application/json
-
-<> 2020-11-18T141757.200.json
-
-###
-
-GET http://localhost:5200/store-api/products/4/?name=world
-Accept: application/json
-
-<> 2020-11-18T141737.200.json
-
-###
-
-GET http://localhost:5200/store-api/products/4
-Accept: application/json
-
-<> 2020-11-18T141716.200.json
 
 ###
 

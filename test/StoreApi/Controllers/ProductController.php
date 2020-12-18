@@ -4,7 +4,7 @@ namespace Spatial\Api\StoreApi\Controllers;
 
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
-use Spatial\Api\AuthUser;
+use Spatial\Api\Services\AuthUser;
 use Spatial\Api\Services\AuthIP;
 use Spatial\Common\BindSourceAttributes\FromBody;
 use Spatial\Common\BindSourceAttributes\FromQuery;
@@ -20,7 +20,7 @@ use Spatial\Psr7\Response;
 
 /**
  * ValuesController Class exists in the Api\Controllers namespace
- * A Controller represets the individual URIs client apps access to interact with data
+ * A Controller represents the individual URIs client apps access to interact with data
  * URI:  https://api.com/values
  *
  * @category Controller
