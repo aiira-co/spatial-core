@@ -1058,8 +1058,7 @@ class App
 //            print_r($this->defaults);
             $this->routerModule->render($this->routeActivated, $this->defaults);
         } else {
-            echo 'route was not found, rely on bootstrap is any -> ' .
-                $this->requestedMethod . ' - ' . $this->defaults->content;
+            $this->routerModule->routeNotFound();
         }
     }
 }

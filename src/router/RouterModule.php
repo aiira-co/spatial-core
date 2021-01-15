@@ -7,6 +7,7 @@ namespace Spatial\Router;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionException;
 use ReflectionParameter;
@@ -44,6 +45,29 @@ class RouterModule implements IRouteModule
         }
         return $allow;
     }
+
+
+    /**
+     *
+     * @throws JsonException
+     */
+    public function routeNotFound(): void
+    {
+        http_response_code(404);
+        $msg = [
+            'status' => 404,
+            'message' => 'Controller Not Found'
+        ];
+
+
+        $json = json_encode(
+            $msg,
+            JSON_THROW_ON_ERROR
+        );
+
+        echo $json;
+    }
+
 
     /**
      * @param array $route
