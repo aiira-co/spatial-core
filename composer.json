@@ -14,8 +14,8 @@
   "require": {
     "php": "^8.0",
     "psr/http-message": "^1.0",
-    "spatial/psr7": "dev-master",
-    "php-di/php-di": "dev-master"
+    "spatial/psr7": "^2.0.0",
+    "php-di/php-di": "7.*"
   },
   "autoload": {
     "psr-4": {
