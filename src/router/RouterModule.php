@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace Spatial\Router;
 
-use DI\Container;
-use DI\DependencyException;
-use DI\NotFoundException;
-use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionException;
 use ReflectionParameter;
 use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Interfaces\IRouteModule;
 use Spatial\Psr7\Response;
-use Spatial\Router\Interfaces\CanActivate;
 use Spatial\Router\Trait\SecurityTrait;
 
 class RouterModule implements IRouteModule
@@ -26,85 +21,32 @@ class RouterModule implements IRouteModule
     private string $_contentType = 'application/json';
     private object $defaults;
 
+    private Response $response;
+
     private array $diServices = [];
-    private array $authGuards = [];
-
-
-    public function __construct(private Container $container)
-    {
-    }
-
-    private function isAuthorized(CanActivate ...$auhguard): bool
-    {
-        $allow = true;
-        foreach ($auhguard as $auth) {
-            if (!$auth->canActivate($_SERVER['REQUEST_URI'])) {
-                $allow = false;
-                break;
-            }
-        }
-        return $allow;
-    }
-
 
     /**
-     *
-     * @throws JsonException
+     * @param string $body
+     * @param int $statusCode
+     * @return Resoponse
+     * @throws \JsonException
      */
-    public function routeNotFound(): void
+    public function controllerNotFound(string $body, int $statusCode): ResponseInterface
     {
-        http_response_code(404);
-        $msg = [
-            'status' => 404,
-            'message' => 'Controller Not Found'
-        ];
+        $payload = json_encode(['message' => $body, 'status' => $statusCode], JSON_THROW_ON_ERROR);
 
-
-        $json = json_encode(
-            $msg,
-            JSON_THROW_ON_ERROR
-        );
-
-        echo $json;
-    }
-
-
-    /**
-     * @param array $route
-     * @param object $defaults
-     * @throws ReflectionException
-     */
-    public function render(array $route, object $defaults): void
-    {
-//        check first fir authorization
-
-        if (
-            $route['canActivate'] &&
-            !$this->isAuthorized(... $this->getAuthGuardInstance($route['canActivate']))
-        ) {
-            http_response_code(401);
-
-            return;
-        }
-//        $uri = $uri ?? $_SERVER['REQUEST_URI'];
-        // echo $this->_resolve($uri)->getHeaderLine('Content-Type');
-        $response = $this->getControllerMethod($route, $defaults);
-        $this->_setHeaders($response->getHeaders());
-
-        // $this->_contentType = $this->_resolve($uri)->getHeaderLine('Content-Type') ?? $this->_contentType;
-        // var_dump($response->getHeaders());
-        http_response_code($response->getStatusCode());
-        echo $response->getBody();
-        // echo $this->_resolve($uri)->getBody()->getContents();
+        $this->response = new Response();
+        $this->response->getBody()->write($payload);
+        return $response;
     }
 
     /**
      * @param array $route
      * @param object $defaults
-     * @return Response
+     * @return ResponseInterface
      * @throws ReflectionException
      */
-    private function getControllerMethod(array $route, object $defaults): Response
+    public function getControllerMethod(array $route, object $defaults): ResponseInterface
     {
         $this->defaults = $defaults;
         //                check for authguard
@@ -114,7 +56,7 @@ class RouterModule implements IRouteModule
         foreach ($route['params'] as $param) {
             $value = $this->getBindSourceValue($param['bindingSource'], $param['param']);
             //$param is an instance of ReflectionParameter
-            if ($value === null && !$param['param']->allowsNull()) {
+            if ($value === null && !$param['param']->isOptional()) {
                 die(
                     'Argument $' . $param['param']->getName(
                     ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
@@ -124,13 +66,7 @@ class RouterModule implements IRouteModule
             $args[] = $value;
         }
 //        var_dump($args);
-        try {
-            return ($this->container->get($route['controller']))->{$route['action']}(...$args);
-        } catch (DependencyException $e) {
-            die ('Controller DI Error ');
-        } catch (NotFoundException) {
-            die ('Controller ' . $route['controller'] . 'Not Found ');
-        }
+        return (new $route['controller'])->{$route['action']}(...$args);
     }
 
     /**
@@ -165,29 +101,24 @@ class RouterModule implements IRouteModule
     ): ?object {
         $serviceName = $parameter->getType();
 
-        try {
-            return $this->container->get($serviceName);
-        } catch (DependencyException $e) {
-            die('Service DI Error');
-        } catch (NotFoundException $e) {
-            die('Service ' . $serviceName . ' Error');
+
+        if (isset($this->diServices['$serviceName'])) {
+            return $this->diServices['$serviceName'];
         }
 
+        if (!class_exists($this->diServices['$serviceName'])) {
+            return null;
+        }
 
-//        if (isset($this->diServices['$serviceName'])) {
-//            return $this->diServices['$serviceName'];
-//        }
-//
-//        if (!class_exists($this->diServices['$serviceName'])) {
-//            return null;
-//        }
-//
-//        $this->diServices['$serviceName'] = new $serviceName;
-//
-//        return $this->diServices['$serviceName'];
+        $this->diServices['$serviceName'] = new $serviceName;
+
+        return $this->diServices['$serviceName'];
     }
 
-
+    /**
+     * @param $serviceName
+     * @return object|null
+     */
     private
     function instantiateService(
         $serviceName
@@ -221,39 +152,14 @@ class RouterModule implements IRouteModule
     function _setHeaders(
         array $headers
     ): void {
-        // $headerKeys = array_keys($header);
         if (!isset($headers['Content-Type'])) {
             $headers['Content-Type'] = [$this->_contentType];
         }
 
-        // var_dump($headers);
         foreach ($headers as $header => $values) {
             foreach ($values as $v) {
-                # code...
                 header($header . ':' . $v);
             }
         }
-    }
-
-    /**
-     * @param $authorization
-     * @return array
-     */
-    private function getAuthGuardInstance($authorization): array
-    {
-        $routeAuthGuards = [];
-        foreach ($authorization as $authGaurd) {
-            if (!isset($this->diServices[$authGaurd])) {
-                try {
-                    $this->diServices[$authGaurd] = $this->container->get($authGaurd);
-                } catch (DependencyException $e) {
-                    die('Service DI Error' . $e->getMessage());
-                } catch (NotFoundException $e) {
-                    die('Service ' . $authGaurd . ' Error Not Found' . $e->getMessage());
-                }
-            }
-            $routeAuthGuards[] = $this->diServices[$authGaurd];
-        }
-        return $routeAuthGuards;
     }
 }

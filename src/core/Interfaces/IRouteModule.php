@@ -8,5 +8,5 @@ namespace Spatial\Core\Interfaces;
  */
 interface IRouteModule
 {
-    public function render(array $route, object $defaults): void;
+    public function render(array $route, object $defaults): \Spatial\Psr7\Response;
 }

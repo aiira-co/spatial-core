@@ -4,8 +4,6 @@ namespace Spatial\Api\StoreApi\Controllers;
 
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
-use Spatial\Api\Services\AuthUser;
-use Spatial\Api\Services\AuthIP;
 use Spatial\Common\BindSourceAttributes\FromBody;
 use Spatial\Common\BindSourceAttributes\FromQuery;
 use Spatial\Common\BindSourceAttributes\FromRoute;
@@ -14,13 +12,12 @@ use Spatial\Common\HttpAttributes\HttpPost;
 use Spatial\Common\HttpAttributes\HttpPut;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\Area;
-use Spatial\Core\Attributes\Authorize;
 use Spatial\Core\Attributes\Route;
 use Spatial\Psr7\Response;
 
 /**
  * ValuesController Class exists in the Api\Controllers namespace
- * A Controller represents the individual URIs client apps access to interact with data
+ * A Controller represets the individual URIs client apps access to interact with data
  * URI:  https://api.com/values
  *
  * @category Controller
@@ -28,7 +25,6 @@ use Spatial\Psr7\Response;
 #[ApiController]
 #[Area('store-api')]
 #[Route('[area]/products/')]
-#[Authorize(AuthIP::class)]
 class ProductController
 {
 
@@ -88,7 +84,6 @@ class ProductController
 
 
     #[HttpPost]
-    #[Authorize(AuthUser::class)]
     public function createProduct(
         #[FromBody] string $content
     ): Response {

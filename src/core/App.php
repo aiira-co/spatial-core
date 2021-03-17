@@ -6,6 +6,11 @@ namespace Spatial\Core;
 
 use Exception;
 use JetBrains\PhpStorm\Pure;
+use Presentation\AppModule;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -23,18 +28,20 @@ use Spatial\Common\HttpAttributes\HttpPost;
 use Spatial\Common\HttpAttributes\HttpPut;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\ApiModule;
-use Spatial\Core\Attributes\Authorize;
 use Spatial\Core\Attributes\Route;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Interfaces\IApplicationBuilder;
 use Spatial\Core\Interfaces\IRouteModule;
+use Spatial\Psr7\Request;
 use Spatial\Router\RouterModule;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class App
  * @package Spatial\Core
  */
-class App
+class App implements MiddlewareInterface
 {
     private IApplicationBuilder $applicationBuilder;
     private IRouteModule $routerModule;
@@ -102,9 +109,7 @@ class App
 
 
     private array $baseRouteTemplate = [''];
-    private string $uri;
-    private array $patternArray;
-    private object $defaults;
+
 
     public array $status = ['code' => 401, 'reason' => 'Unauthorized'];
 
@@ -123,24 +128,38 @@ class App
     private bool $hasColdBooted = false;
     private bool $showRouteTable = false;
 
-
-    public function __construct(
-        ?string $uri = null
-    ) {
-        $this->uri = $this->_formatRoute($uri ?? $_SERVER['REQUEST_URI']);
-
-        $this->patternArray['uri'] = explode('/', trim(urldecode($this->uri), '/'));
-        $this->patternArray['count'] = count($this->patternArray['uri']);
+    private ResponseInterface $response;
+    private ServerRequestInterface $request;
 
 
+    /**
+     * App constructor.
+     * @param string|null $uri
+     * @throws ReflectionException
+     */
+    public function __construct()
+    {
+//        read ymls for parameters
+        $this->defineConstantsAndParameters();
 //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
-        $this->routerModule = new RouterModule($this->applicationBuilder->container);
+    }
 
-        if ($this->applicationBuilder->container->has('routeTable')) {
-//            echo 'routeTable Found in container';
-            $this->routetable = (array)$this->applicationBuilder->container->has('routeTable');
-            $this->hasColdBooted = true;
+    /**
+     * @throws ReflectionException|Exception
+     */
+    private function defineConstantsAndParameters(): void
+    {
+        $configDir = '..' . DS . 'config' . DS;
+        try {
+//    config/service.yml
+            $services = Yaml::parseFile($configDir . 'services.yaml');
+            define('SpatialServices', $services['parameters']);
+//    config/packages/doctrine.yaml
+            $doctrineConfigs = Yaml::parseFile($configDir . DS . 'packages' . DS . 'doctrine.yaml');
+            define('DoctrineConfig', $doctrineConfigs);
+        } catch (ParseException $exception) {
+            printf('Unable to parse the YAML string: %s', $exception->getMessage());
         }
     }
 
@@ -154,26 +173,25 @@ class App
         return $this;
     }
 
-    /**
-     * @param $uri
-     * @return string
-     */
-    #[Pure]
-    private function _formatRoute(
-        $uri
-    ): string {
-        // Strip query string (?foo=bar) and decode URI
-        if (false !== $pos = strpos($uri, '?')) {
-            $uri = substr($uri, 0, $pos);
-        }
-        $uri = rawurldecode($uri);
 
-        if ($uri === '') {
-            return '/';
-        }
-        return $uri;
+    /**
+     * Render Results
+     */
+    public function processX(): ResponseInterface
+    {
+        return $response = $this->process(new Request(), new AppModule);
     }
 
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        return $handler->handler($request);
+    }
 
     /**
      * @param string $appModule
@@ -182,8 +200,12 @@ class App
      * @throws ReflectionException
      * @throws Exception
      */
-    public function bootstrapModule(string $appModule): ?self
+    public function boot(string $appModule): ?self
     {
+        if ($this->hasColdBooted) {
+            return;
+        }
+
         $reflectionClass = new ReflectionClass($appModule);
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
 
@@ -191,14 +213,8 @@ class App
             return $this;
         }
 
-//        print_r($reflectionClassApiAttributes[0]->newInstance());
         $apiModuleAttributes = $reflectionClassApiAttributes[0]->newInstance();
 
-//        $apiModule = $apiModuleAttributes[0];
-        if ($this->hasColdBooted) {
-            $this->resolveRouteToController();
-            return null;
-        }
 
         //        load attribute metadata
         $this->resolveAppModule('root', $apiModuleAttributes);
@@ -207,9 +223,6 @@ class App
         $baseModule = $reflectionClass->newInstance();
         $baseModule->configure($this->applicationBuilder);
         $this->runApp();
-
-
-        return null;
     }
 
 
@@ -222,15 +235,12 @@ class App
     private function resolveAppModule(string $moduleName, ApiModule $app): void
     {
 //        find the import with routeModule
-//        echo 'resoliving imports \n';
         $this->resolveImports($moduleName, $app->imports);
 
 //        Dependency Injection Services
-//        echo 'resoliving providers \n';
         $this->resolveProviders($moduleName, $app->providers);
 
 //        Declarations
-//        echo 'resoliving declarations \n';
         $this->resolveDeclarations($moduleName, $app->declarations);
 //        $routeModule->render();
 
@@ -329,107 +339,6 @@ class App
     }
 
     /**
-     * @param array $routeUriArr
-     * @param string $token
-     * @return bool
-     */
-    public function isUriRoute(array $routeUriArr, string $token = '{}'): bool
-    {
-        $isMatch = true;
-//        print_r($this->patternArray);
-//        print_r($routeUriArr);
-        $routeArrCount = count($routeUriArr);
-//        echo '<br/> ' . $routeArrCount . ' - patc' . $this->patternArray['count'];
-
-        if ($routeArrCount < $this->patternArray['count'] && !str_starts_with(
-                $routeUriArr[$routeArrCount - 1],
-                '{...'
-            )) {
-            return false;
-        }
-
-//        echo 'start routing';
-
-        for ($i = 0; $i < $routeArrCount; $i++) {
-            $isToken = str_starts_with($routeUriArr[$i], $token[0]);
-//            echo 'hello ghana';
-            if (!$isToken) {
-                if (
-                    !isset($this->patternArray['uri'][$i]) ||
-                    !($this->patternArray['uri'][$i] === $routeUriArr[$i])
-                ) {
-                    $isMatch = false;
-                    break;
-                }
-//                echo $this->patternArray['uri'][$i] . '===' . $routeUriArr[$i];
-                continue;
-            }
-
-
-            $placeholder =
-                str_replace(
-                    [$token[0], $token[1]],
-                    '',
-                    $routeUriArr[$i]
-                );
-
-//            echo '<br/> placeholder for token is --> ' . $placeholder;
-
-            // check to see if its the last placeholder
-            // AND if the placeholder is prefixed with `...`
-            // meaning the placeholder is an array of the rest of the uriArr member
-            if ($i === ($routeArrCount - 1) && str_starts_with($placeholder, '...')) {
-//                echo 'checking last seg';
-                $placeholder = ltrim($placeholder, '/././.');
-                if (isset($this->patternArray['uri'][$i])) {
-                    for ($uri = $i, $uriMax = count($this->patternArray['uri']); $uri < $uriMax; $uri++) {
-                        $this->replaceRouteToken($placeholder, $this->patternArray['uri'][$uri], true);
-                    }
-                }
-                break;
-            }
-            $this->replaceRouteToken($placeholder, $this->patternArray['uri'][$i] ?? null);
-        }
-
-        return $isMatch;
-    }
-
-    /**
-     * @param string $placeholderString
-     * @param string|null $uriValue
-     * @param bool $isList
-     */
-    private function replaceRouteToken(string $placeholderString, ?string $uriValue, bool $isList = false): void
-    {
-        // separate constraints
-        $placeholder = explode(':', $placeholderString);
-
-        $value = $uriValue ?? $this->defaults->{$placeholder[0]} ?? null;
-
-        if (isset($placeholder[1])) {
-            $typeValue = explode('=', $placeholder[1]);
-            if (isset($typeValue[1])) {
-                $value = $value ?? $typeValue[1];
-            }
-            if ($value !== null) {
-                $value = match ($placeholder[1]) {
-                    'int' => (int)$value,
-                    'bool' => (bool)$value,
-                    'array' => (array)$value,
-                    'float' => (float)$value,
-                    'object' => (object)$value,
-                    default => (string)$value,
-                };
-            }
-        }
-        // set value
-        $isList ?
-            $this->defaults->{$placeholder[0]}[] = $value :
-            $this->defaults->{$placeholder[0]} = $value;
-    }
-
-
-    /**
      * @param string $controllerClass
      * @return array
      * @throws ReflectionException
@@ -464,17 +373,10 @@ class App
      */
     private function getRequestedMethod(): string
     {
-//        $method = 'httpGet';
-
-
-        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-            $httpRequest = $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'];
-        } else {
-            $httpRequest = $_SERVER['REQUEST_METHOD'];
-        }
-
-
-        return strtolower($httpRequest);
+        return strtolower(
+            $_SERVER['REQUEST_METHOD'] === 'OPTIONS' ? $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'] :
+                $_SERVER['REQUEST_METHOD']
+        );
     }
 
     /**
@@ -491,26 +393,12 @@ class App
                 $this->createRouteTable($module, $declarations);
             }
 
-//            Sort RouteTable in order of segments
-            usort($this->routetable, static fn($a, $b) => strcmp($a["routeSegments"], $b["routeSegments"]));
 //            Print Route Table
             if ($this->showRouteTable) {
                 $this->printRouteTable();
             }
 
-//            store route table to diContainer
-            $this->applicationBuilder->container->set('routeTable', $this->routetable);
             $this->hasColdBooted = true;
-        }
-
-        $this->resolveRouteToController();
-
-        if ($this->applicationBuilder->isSwooleHttp) {
-            return;
-        }
-
-        if ($this->applicationBuilder->isSwooleWebsocket) {
-            return;
         }
     }
 
@@ -525,9 +413,6 @@ class App
         string $module,
         array $declarations
     ): void {
-//        echo '<pre>';
-//        var_dump($this->declarations);
-
 //        separating declarations to
 //        controllers
 //        pipes
@@ -569,18 +454,15 @@ class App
     private
     function printRouteTable(): void
     {
-        echo '<h2> Route Table </h2> >';
-        echo '<pre> ' . $this->uri . ' </pre> >';
+        echo '<p> Route Table <br/> >';
         echo '<table style="display: block; background-color: paleturquoise"> 
 <thead style="background-color: aliceblue">
 <tr>
-<th>Segments</th>
 <th>Route</th>
 <th>Controller</th>
 <th>Action</th>
 <th>Params</th>
 <th>HttpVerb</th>
-<th>Authorize</th>
 <th>Module</th>
 
 </tr>
@@ -589,13 +471,11 @@ class App
         foreach ($this->routetable as $row) {
             echo '
             <tr style="background-color: bisque">
-<th>' . $row['routeSegments'] . '</th>
 <th>' . $row['route'] . '</th>
 <th>' . $row['controller'] . '</th>
 <th>' . $row['action'] . '</th>
 <th>' . json_encode($row['params'], JSON_THROW_ON_ERROR) . '</th>
 <th>' . $row['httpMethod'] . '</th>
-<th>' . json_encode($row['canActivate'], JSON_THROW_ON_ERROR) . '</th>
 <th>' . $row['module'] . '</th>
 
 </tr>';
@@ -614,7 +494,6 @@ class App
         ReflectionClass $controllerReflection
     ): void {
         if (isset($this->controllers[$controllerReflection->getName()])) {
-//            var_dump($this->controllers);
             throw new \RuntimeException('Controller ' . $controllerReflection->getName() . ' cannot be declared twice');
             return;
         }
@@ -628,10 +507,7 @@ class App
             'handler' => '',
             'page' => '',
             'httpVerb' => '',
-            'module' => $moduleName,
-            'canActivate' => $this->getAuthorizationAttribute(
-                $controllerReflection->getAttributes(Authorize::class)
-            ),
+            'module' => $moduleName
         ];
 
         switch ($this->routeType) {
@@ -712,7 +588,6 @@ class App
 
     /**
      * @param ReflectionClass $controllerReflection
-     * @param array $tokens
      */
     private
     function registerAttributeRoute(
@@ -800,28 +675,6 @@ class App
     }
 
     /**
-     * @param array $authorizationAttributes
-     * @return array|null
-     */
-    private
-    function getAuthorizationAttribute(
-        array $authorizationAttributes
-    ): ?array {
-        $authAttributes = [];
-        if (count($authorizationAttributes) === 0) {
-            return null;
-        }
-
-        foreach ($authorizationAttributes as $auth) {
-            $authGuards = $auth->newInstance()->authGuards;
-            foreach ($authGuards as $authGuard) {
-                $authAttributes[] = $authGuard;
-            }
-        }
-        return $authAttributes;
-    }
-
-    /**
      * @param string $controllerClassName
      * @param string $template
      * @param array $tokens
@@ -838,55 +691,34 @@ class App
 //        echo 'setting to route table';
 //        check for action area attribute. if it exists, overwrite else none
         $tokens['area'] = $this->getAreaAttribute($action->getAttributes(Area::class)) ?? $tokens['area'];
-//        authorization on mehtods
-
-        $actionAuth = $this->getAuthorizationAttribute(
-            $action->getAttributes(Authorize::class)
-        );
-        if ($actionAuth) {
-            if ($tokens['canActivate']) {
-                $tokens['canActivate'] = array_merge($tokens['canActivate'], $actionAuth);
-            } else {
-                $tokens['canActivate'] = $actionAuth;
-            }
-        }
-
 
 //        go through httpverbs for routing and request methods
         if (count($tokens['httpVerb']) > 0) {
             foreach ($tokens['httpVerb'] as $http) {
-                $routeTemplate = $this->replaceTemplateTokens(
-                    $http['template'] ? $template . '/' . $http['template'] : $template,
-                    $tokens
-                );
-                $routeSegments = count(explode('/', $routeTemplate));
 //                print_r($http);
                 $this->routetable[] = [
-                    'routeSegments' => $routeSegments,
-                    'route' => $routeTemplate,
+                    'route' => $this->replaceTemplateTokens(
+
+                        $http['template'] ? $template . '/' . $http['template'] : $template,
+                        $tokens
+                    ),
                     'controller' => $controllerClassName,
                     'httpMethod' => $http['event'], // $action ? $this->getHttpVerbsFromMethods($action) : null,
                     'action' => $tokens['action'],
                     'params' => $this->getActionParamsWithAttribute($action),
-                    'canActivate' => $tokens['canActivate'],
-                    'module' => $tokens['module'],
+                    'module' => $tokens['module']
                 ];
             }
             return;
         }
-
-        $routeTemplate = $this->replaceTemplateTokens($template, $tokens);
-        $routeSegments = count(explode('/', $routeTemplate));
         $this->routetable[] = [
-            'routeSegments' => $routeSegments,
-            'route' => $routeTemplate,
+            'route' => $this->replaceTemplateTokens($template, $tokens),
             'controller' => $controllerClassName,
             'httpMethod' => $this->setDefaultHttpMethod($tokens['action']),
             // $action ? $this->getHttpVerbsFromMethods($action) : null,
             'action' => $tokens['action'],
             'params' => $this->getActionParamsWithAttribute($action),
-            'canActivate' => $tokens['canActivate'],
-            'module' => $tokens['module'],
+            'module' => $tokens['module']
         ];
     }
 
@@ -961,8 +793,6 @@ class App
             }
             $template = str_replace('[' . $tokenKey . ']', $tokens[$tokenKey], $template);
         }
-//        $template = str_replace('[controller]', $controller, $template);
-
         return '/' . trim(strtolower($template), '/');
     }
 
@@ -1001,6 +831,7 @@ class App
         return $verbs;
     }
 
+
     private
     function resolveModuleRouting(): void
     {
@@ -1027,39 +858,6 @@ class App
         }
     }
 
-    private function resolveRouteToController(): void
-    {
-        $this->requestedMethod = $this->getRequestedMethod();
-        $this->defaults = new class {
-        };
 
-
-        $routeFound = false;
-//        $routeActivated;
-        foreach ($this->routetable as $route) {
-//            echo '<br> is ' . $this->uri . ' === ' . $route['route'];
-            $routeArr = explode('/', trim($route['route'], '/'));
-            $routeHttp = $route['httpMethod'];
-            if (
-                str_contains($routeHttp, $this->requestedMethod) ||
-                str_contains($routeHttp, 'all')
-            ) {
-                if ($this->isUriRoute($routeArr)) {
-                    $routeFound = true;
-                    $this->routeActivated = $route;
-                    break;
-                }
-            }
-        }
-
-        if ($routeFound) {
-//            echo 'route is found!!!';
-//            print_r($this->routeActivated);
-//            print_r($this->defaults);
-            $this->routerModule->render($this->routeActivated, $this->defaults);
-        } else {
-            $this->routerModule->routeNotFound();
-        }
-    }
 }
 

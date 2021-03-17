@@ -2,15 +2,14 @@
 <project version="4">
   <component name="PhpIncludePathManager">
     <include_path>
+      <path value="$PROJECT_DIR$/vendor/php-di/invoker" />
       <path value="$PROJECT_DIR$/vendor/spatial/psr7" />
       <path value="$PROJECT_DIR$/vendor/ralouphie/getallheaders" />
-      <path value="$PROJECT_DIR$/vendor/psr/http-server-handler" />
-      <path value="$PROJECT_DIR$/vendor/psr/http-message" />
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/psr7" />
       <path value="$PROJECT_DIR$/vendor/composer" />
-      <path value="$PROJECT_DIR$/vendor/php-di/phpdoc-reader" />
+      <path value="$PROJECT_DIR$/vendor/psr/http-message" />
       <path value="$PROJECT_DIR$/vendor/psr/container" />
-      <path value="$PROJECT_DIR$/vendor/php-di/invoker" />
+      <path value="$PROJECT_DIR$/vendor/psr/http-server-handler" />
       <path value="$PROJECT_DIR$/vendor/opis/closure" />
       <path value="$PROJECT_DIR$/vendor/php-di/php-di" />
     </include_path>
