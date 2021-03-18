@@ -16,8 +16,7 @@
     "psr/http-message": "^1.0",
     "psr/http-factory": "^1.0",
     "dflydev/fig-cookies": "^3.0",
-    "http-interop/http-factory-guzzle": "^1.0",
-    "spatial/psr7": "dev-master"
+    "http-interop/http-factory-guzzle": "^1.0"
   },
   "autoload": {
     "psr-4": {

@@ -32,7 +32,6 @@ use Spatial\Core\Attributes\Route;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Interfaces\IApplicationBuilder;
 use Spatial\Core\Interfaces\IRouteModule;
-use Spatial\Psr7\Request;
 use Spatial\Router\RouterModule;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -119,7 +118,6 @@ class App implements MiddlewareInterface
     private bool $enableConventionalRouting = false;
     private int $routeType = 2;
 
-    private string $requestedMethod;
     /**
      * @var mixed
      */
@@ -181,7 +179,7 @@ class App implements MiddlewareInterface
      */
     public function processX(): ResponseInterface
     {
-        return $response = $this->process(new Request(), new AppModule);
+        return  $this->process(new \Spatial\Psr7\Request(), new AppModule);
     }
 
 
