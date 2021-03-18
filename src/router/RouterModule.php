@@ -34,7 +34,7 @@ class RouterModule implements IRouteModule
 
         $response = new \GuzzleHttp\Psr7\Response();
         $response->getBody()->write($payload);
-        return $response;
+        return $response->withHeader('Content-Type', $this->_contentType);
     }
 
     /**

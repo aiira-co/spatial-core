@@ -15,12 +15,25 @@ use Swoole\Http\Request as SwooleRequest;
 class ServerRequestTransformer extends RequestTransformer implements ServerRequestInterface
 {
     public $attributes = [];
+    protected SwooleRequest $swooleRequest;
 
     public function __construct(
-        SwooleRequest $swooleRequest,
+        UriFactoryInterface $uriFactory,
+        StreamFactoryInterface $streamFactory,
+        UploadedFileFactoryInterface $uploadedFileFactory
     ) {
-        parent::__construct($swooleRequest, $uriFactory, $streamFactory);
+        parent::__construct($uriFactory, $streamFactory);
         $this->uploadedFileFactory = $uploadedFileFactory;
+    }
+
+    /**
+     * @param SwooleRequest $swooleRequest
+     * @return $this
+     */
+    public function toSwoole(SwooleRequest $swooleRequest): self
+    {
+        parent::toSwoole($swooleRequest);
+        return $this;
     }
 
     public function getServerParams()

@@ -13,10 +13,13 @@ use Spatial\Router\RouterModule;
 
 class AppHandler implements RequestHandlerInterface
 {
+    private string $requestedMethod;
     private string $uri;
     private array $patternArray;
     private object $defaults;
     private object $routerModule;
+    private array $routeActivated;
+    private array $routeTable;
 
     public function __construct()
     {
@@ -25,14 +28,20 @@ class AppHandler implements RequestHandlerInterface
         };
     }
 
+    public function setRouteTable(array $routeTable): void
+    {
+        $this->routeTable = $routeTable;
+    }
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $this->requestedMethod = strtolower($request->getMethod());
         $this->formatRoute($request->getUri()->getPath());
 
 
         $routeFound = false;
 //        $routeActivated;
-        foreach ($this->routetable as $route) {
+        foreach ($this->routeTable as $route) {
 //            echo '<br> is ' . $this->uri . ' === ' . $route['route'];
             $routeArr = explode('/', trim($route['route'], '/'));
             $routeHttp = $route['httpMethod'];

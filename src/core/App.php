@@ -179,7 +179,7 @@ class App implements MiddlewareInterface
      */
     public function processX(): ResponseInterface
     {
-        return  $this->process(new \Spatial\Psr7\Request(), new AppModule);
+        return $this->process(new \Spatial\Psr7\Request(), new AppModule);
     }
 
 
@@ -190,7 +190,8 @@ class App implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        return $handler->handler($request);
+        $handler->setRouteTable($this->routetable);
+        return $handler->handle($request);
     }
 
     /**

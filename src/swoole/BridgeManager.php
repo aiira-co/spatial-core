@@ -12,6 +12,7 @@ use Spatial\Core\App;
 
 use Http\Factory\Guzzle\UriFactory;
 use Http\Factory\Guzzle\StreamFactory;
+use Http\Factory\Guzzle\UploadedFileFactory;
 
 class BridgeManager
 {
@@ -42,9 +43,10 @@ class BridgeManager
         Bridge\ResponseMergerInterface $responseMerger = null
     ) {
         $this->app = $app;
-        $this->requestTransformer = $requestTransformer ?: new Bridge\RequestTransformer(
-            new UriFactor(),
-            new StreamFactory()
+        $this->requestTransformer = $requestTransformer ?: new Bridge\ServerRequestTransformer(
+            new UriFactory(),
+            new StreamFactory(),
+            new UploadedFileFactory()
         );
         $this->responseMerger = $responseMerger ?: new Bridge\ResponseMerger();
     }
