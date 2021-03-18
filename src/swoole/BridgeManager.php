@@ -61,7 +61,7 @@ class BridgeManager
         Request $swooleRequest,
         Response $swooleResponse
     ): Response {
-        $psr7Request = $this->requestTransformer->toSwoole($swooleRequest);
+        $psr7Request = clone ($this->requestTransformer)->toSwoole($swooleRequest);
         $psr7Response = $this->app->process($psr7Request, new AppHandler());
 
         return $this->responseMerger->toSwoole($psr7Response, $swooleResponse);

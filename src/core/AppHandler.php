@@ -14,7 +14,6 @@ use Spatial\Router\RouterModule;
 
 class AppHandler implements RequestHandlerInterface
 {
-    private string $requestedMethod;
     private string $uri;
     private array $patternArray;
     private object $defaults;
@@ -35,9 +34,13 @@ class AppHandler implements RequestHandlerInterface
         $this->routeTable = $routeTable;
     }
 
+    /**
+     * @throws \ReflectionException
+     * @throws \JsonException
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requestedMethod = strtolower($request->getMethod());
+        $requestedMethod = strtolower($request->getMethod());
         $this->formatRoute($request->getUri()->getPath());
 
 //        store to a static file
@@ -55,7 +58,7 @@ class AppHandler implements RequestHandlerInterface
             $routeArr = explode('/', trim($route['route'], '/'));
             $routeHttp = $route['httpMethod'];
             if (
-                str_contains($routeHttp, $this->requestedMethod) ||
+                str_contains($routeHttp, $requestedMethod) ||
                 str_contains($routeHttp, 'all')
             ) {
                 if ($this->isUriRoute($routeArr)) {
@@ -68,33 +71,30 @@ class AppHandler implements RequestHandlerInterface
 
 
         return $routeFound ?
-            $this->routerModule->getControllerMethod($this->routeActivated, $this->defaults) :
+            $this->routerModule->getControllerMethod($this->routeActivated, $this->defaults, $request) :
 
             $this->routerModule->controllerNotFound(
-                'No Controller was routed to the uri ' . $this->uri . ' on a ' . $this->requestedMethod . ' method',
+                'No Controller was routed to the uri ' . $this->uri . ' on a ' . $requestedMethod . ' method',
                 404
             );
     }
 
 
     /**
-     * @param $uri
-     * @return string
+     * @param string $uri
+     * @return void
      */
-    #[Pure]
     private function formatRoute(
         string $uri
-    ) {
+    ): void {
         // Strip query string (?foo=bar) and decode URI
         if (false !== $pos = strpos($uri, '?')) {
             $uri = substr($uri, 0, $pos);
         }
         $uri = rawurldecode($uri);
 
-        if ($uri === '') {
-            return '/';
-        }
-        $this->uri = $uri;
+
+        $this->uri = $uri === '' ? '/' : $uri;
         $this->patternArray['uri'] = explode('/', trim(urldecode($this->uri), '/'));
         $this->patternArray['count'] = count($this->patternArray['uri']);
     }

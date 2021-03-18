@@ -8,10 +8,12 @@ use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
 use ReflectionException;
 use ReflectionParameter;
 use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Interfaces\IRouteModule;
+use Spatial\Router\Interfaces\CanActivate;
 use Spatial\Router\Trait\SecurityTrait;
 
 class RouterModule implements IRouteModule
@@ -24,6 +26,9 @@ class RouterModule implements IRouteModule
     private object $defaults;
 
     private array $diServices = [];
+
+    private RequestInterface $request;
+
 
     /**
      * @param string $body
@@ -46,10 +51,11 @@ class RouterModule implements IRouteModule
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function getControllerMethod(array $route, object $defaults): ResponseInterface
+    public function getControllerMethod(array $route, object $defaults, RequestInterface $request): ResponseInterface
     {
         $this->container = new Container();
         $this->defaults = $defaults;
+        $this->request = $request;
         //                check for authguard
         if (
             $route['authGuard'] &&
@@ -76,15 +82,27 @@ class RouterModule implements IRouteModule
 //        var_dump($args);
         try {
             $response = ($this->container->get($route['controller']))->{$route['action']}(...$args);
-            $this->setHeaders($response->getHeaders());
+//            $this->setHeaders($response->getHeaders());
+
         } catch (DependencyException $e) {
-            throw new DependencyException('Controller DI Error ' . $e);
-        } catch (NotFoundException) {
-            throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ');
+            throw new DependencyException('Controller DI Error ' . $e->getMessage());
+        } catch (NotFoundException $e) {
+            throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
         }
 
+//            set default content type
+//        if (!isset($response->getHeaders()['Content-Type'])) {
+//            $response->withHeader('Content-Type', $this->_contentType);
 
-        return $response;
+//        print_r($response->getHeaders());
+//        }
+
+
+        return $response->hasHeader('Content-Type') ? $response :
+            $response->withHeader(
+                'Content-Type',
+                $this->_contentType
+            );
     }
 
     /**
@@ -193,13 +211,25 @@ class RouterModule implements IRouteModule
                 try {
                     $this->diServices[$authGaurd] = $this->container->get($authGaurd);
                 } catch (DependencyException $e) {
-                    die('Service DI Error' . $e->getMessage());
+                    throw new DependencyException('Service DI Error' . $e->getMessage());
                 } catch (NotFoundException $e) {
-                    die('Service ' . $authGaurd . ' Error Not Found' . $e->getMessage());
+                    throw new NotFoundException('Service ' . $authGaurd . ' Error Not Found' . $e->getMessage());
                 }
             }
             $routeAuthGuards[] = $this->diServices[$authGaurd];
         }
         return $routeAuthGuards;
+    }
+
+    private function isAuthorized(CanActivate ...$auhguard): bool
+    {
+        $allow = true;
+        foreach ($auhguard as $auth) {
+            if (!$auth->canActivate($this->request->getUri()->getPath())) {
+                $allow = false;
+                break;
+            }
+        }
+        return $allow;
     }
 }
