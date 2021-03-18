@@ -28,6 +28,7 @@ use Spatial\Common\HttpAttributes\HttpPost;
 use Spatial\Common\HttpAttributes\HttpPut;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\ApiModule;
+use Spatial\Core\Attributes\Authorize;
 use Spatial\Core\Attributes\Route;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Interfaces\IApplicationBuilder;
@@ -103,7 +104,7 @@ class App implements MiddlewareInterface
     private array $declarations = [];
 
     private array $controllers = [];
-    private array $routetable = [];
+    private array $routeTable = [];
     private array $pipes = [];
 
 
@@ -190,7 +191,7 @@ class App implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $handler->setRouteTable($this->routetable);
+        $handler->setRouteTable($this->routeTable);
         return $handler->handle($request);
     }
 
@@ -203,9 +204,10 @@ class App implements MiddlewareInterface
      */
     public function boot(string $appModule): void
     {
-        if ($this->hasColdBooted) {
-            return;
-        }
+//        print_r('booting app \n');
+//        if ($this->hasColdBooted) {
+//            return;
+//        }
 
         $reflectionClass = new ReflectionClass($appModule);
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
@@ -224,6 +226,9 @@ class App implements MiddlewareInterface
         $baseModule = $reflectionClass->newInstance();
         $baseModule->configure($this->applicationBuilder);
         $this->runApp();
+
+        print_r('booting done \n');
+//        print_r(json_encode($this->routeTable));
     }
 
 
@@ -389,7 +394,7 @@ class App implements MiddlewareInterface
         $this->resolveModuleRouting();
 
 
-        if (count($this->routetable) === 0) {
+        if (count($this->routeTable) === 0) {
             foreach ($this->declarations as $module => $declarations) {
                 $this->createRouteTable($module, $declarations);
             }
@@ -455,15 +460,18 @@ class App implements MiddlewareInterface
     private
     function printRouteTable(): void
     {
-        echo '<p> Route Table <br/> >';
+        echo '<h2> Route Table </h2> >';
+        echo '<pre> ' . $this->uri . ' </pre> >';
         echo '<table style="display: block; background-color: paleturquoise"> 
 <thead style="background-color: aliceblue">
 <tr>
+<th>Segments</th>
 <th>Route</th>
 <th>Controller</th>
 <th>Action</th>
 <th>Params</th>
 <th>HttpVerb</th>
+<th>Authorize</th>
 <th>Module</th>
 
 </tr>
@@ -472,11 +480,13 @@ class App implements MiddlewareInterface
         foreach ($this->routetable as $row) {
             echo '
             <tr style="background-color: bisque">
+<th>' . $row['routeSegments'] . '</th>
 <th>' . $row['route'] . '</th>
 <th>' . $row['controller'] . '</th>
 <th>' . $row['action'] . '</th>
 <th>' . json_encode($row['params'], JSON_THROW_ON_ERROR) . '</th>
 <th>' . $row['httpMethod'] . '</th>
+<th>' . json_encode($row['authGuard'], JSON_THROW_ON_ERROR) . '</th>
 <th>' . $row['module'] . '</th>
 
 </tr>';
@@ -508,7 +518,10 @@ class App implements MiddlewareInterface
             'handler' => '',
             'page' => '',
             'httpVerb' => '',
-            'module' => $moduleName
+            'module' => $moduleName,
+            'authGuard' => $this->getAuthorizationAttribute(
+                $controllerReflection->getAttributes(Authorize::class)
+            )
         ];
 
         switch ($this->routeType) {
@@ -675,6 +688,30 @@ class App implements MiddlewareInterface
         return $areaAttribute[0]->newInstance()->name;
     }
 
+
+    /**
+     * @param array $authorizationAttributes
+     * @return array|null
+     */
+    private
+    function getAuthorizationAttribute(
+        array $authorizationAttributes
+    ): ?array {
+        $authAttributes = [];
+        if (count($authorizationAttributes) === 0) {
+            return null;
+        }
+
+        foreach ($authorizationAttributes as $auth) {
+            $authGuards = $auth->newInstance()->authGuards;
+            foreach ($authGuards as $authGuard) {
+                $authAttributes[] = $authGuard;
+            }
+        }
+        return $authAttributes;
+    }
+
+
     /**
      * @param string $controllerClassName
      * @param string $template
@@ -692,34 +729,54 @@ class App implements MiddlewareInterface
 //        echo 'setting to route table';
 //        check for action area attribute. if it exists, overwrite else none
         $tokens['area'] = $this->getAreaAttribute($action->getAttributes(Area::class)) ?? $tokens['area'];
+//        authorization on mehtods
+
+        $actionAuth = $this->getAuthorizationAttribute(
+            $action->getAttributes(Authorize::class)
+        );
+        if ($actionAuth) {
+            if ($tokens['authGuard']) {
+                $tokens['authGuard'] = array_merge($tokens['authGuard'], $actionAuth);
+            } else {
+                $tokens['authGuard'] = $actionAuth;
+            }
+        }
 
 //        go through httpverbs for routing and request methods
         if (count($tokens['httpVerb']) > 0) {
             foreach ($tokens['httpVerb'] as $http) {
+                $routeTemplate = $this->replaceTemplateTokens(
+                    $http['template'] ? $template . '/' . $http['template'] : $template,
+                    $tokens
+                );
+                $routeSegments = count(explode('/', $routeTemplate));
 //                print_r($http);
-                $this->routetable[] = [
-                    'route' => $this->replaceTemplateTokens(
-
-                        $http['template'] ? $template . '/' . $http['template'] : $template,
-                        $tokens
-                    ),
+                $this->routeTable[] = [
+                    'routeSegments' => $routeSegments,
+                    'route' => $routeTemplate,
                     'controller' => $controllerClassName,
                     'httpMethod' => $http['event'], // $action ? $this->getHttpVerbsFromMethods($action) : null,
                     'action' => $tokens['action'],
                     'params' => $this->getActionParamsWithAttribute($action),
-                    'module' => $tokens['module']
+                    'authGuard' => $tokens['authGuard'],
+                    'module' => $tokens['module'],
                 ];
             }
             return;
         }
-        $this->routetable[] = [
-            'route' => $this->replaceTemplateTokens($template, $tokens),
+
+        $routeTemplate = $this->replaceTemplateTokens($template, $tokens);
+        $routeSegments = count(explode('/', $routeTemplate));
+        $this->routeTable[] = [
+            'routeSegments' => $routeSegments,
+            'route' => $routeTemplate,
             'controller' => $controllerClassName,
             'httpMethod' => $this->setDefaultHttpMethod($tokens['action']),
             // $action ? $this->getHttpVerbsFromMethods($action) : null,
             'action' => $tokens['action'],
             'params' => $this->getActionParamsWithAttribute($action),
-            'module' => $tokens['module']
+            'authGuard' => $tokens['authGuard'],
+            'module' => $tokens['module'],
         ];
     }
 

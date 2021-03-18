@@ -33,9 +33,10 @@ class BridgeManager
     private $responseMerger;
 
     /**
+     * BridgeManager constructor.
      * @param App $app
-     * @param Bridge\RequestTransformerInterface $requestTransformer
-     * @param Bridge\ResponseMergerInterface $responseMerger
+     * @param Bridge\RequestTransformerInterface|null $requestTransformer
+     * @param Bridge\ResponseMergerInterface|null $responseMerger
      */
     public function __construct(
         App $app,
@@ -52,10 +53,9 @@ class BridgeManager
     }
 
     /**
-     * @param swoole_http_request $swooleRequest
-     * @param swoole_http_response $swooleResponse
-     *
-     * @return swoole_http_response
+     * @param Request $swooleRequest
+     * @param Response $swooleResponse
+     * @return Response
      */
     public function process(
         Request $swooleRequest,

@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spatial\Core\Interfaces\IRouteModule;
+use Spatial\Infrastructure\Storage;
 use Spatial\Router\RouterModule;
 
 class AppHandler implements RequestHandlerInterface
@@ -30,6 +31,7 @@ class AppHandler implements RequestHandlerInterface
 
     public function setRouteTable(array $routeTable): void
     {
+//        var_dump($routeTable);
         $this->routeTable = $routeTable;
     }
 
@@ -38,6 +40,13 @@ class AppHandler implements RequestHandlerInterface
         $this->requestedMethod = strtolower($request->getMethod());
         $this->formatRoute($request->getUri()->getPath());
 
+//        store to a static file
+//        $GLOBALS['spatialUri'] = $this->uri;
+//        $GLOBALS['spatialRequestedMethod'] = $this->requestedMethod;
+
+
+        print_r('another request sent');
+//        print_r(json_encode($this->routeTable));
 
         $routeFound = false;
 //        $routeActivated;
@@ -62,8 +71,7 @@ class AppHandler implements RequestHandlerInterface
             $this->routerModule->getControllerMethod($this->routeActivated, $this->defaults) :
 
             $this->routerModule->controllerNotFound(
-                'route was not found, rely on bootstrap is any -> ' .
-                $this->requestedMethod . ' - ',
+                'No Controller was routed to the uri ' . $this->uri . ' on a ' . $this->requestedMethod . ' method',
                 404
             );
     }
