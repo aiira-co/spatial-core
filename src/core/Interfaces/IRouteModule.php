@@ -2,11 +2,15 @@
 
 namespace Spatial\Core\Interfaces;
 
+use Psr\Http\Message\ResponseInterface;
+
 /**
  * Interfaces IRouteModule
  * @package Spatial\Interfaces
  */
 interface IRouteModule
 {
-    public function render(array $route, object $defaults): \Spatial\Psr7\Response;
+    public function getControllerMethod(array $route, object $defaults): ResponseInterface;
+
+    public function controllerNotFound(string $body, int $statusCode): ResponseInterface;
 }

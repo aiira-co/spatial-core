@@ -141,6 +141,7 @@ class App implements MiddlewareInterface
     {
 //        read ymls for parameters
         $this->defineConstantsAndParameters();
+
 //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
     }
@@ -150,7 +151,8 @@ class App implements MiddlewareInterface
      */
     private function defineConstantsAndParameters(): void
     {
-        $configDir = '..' . DS . 'config' . DS;
+        $configDir = getcwd() . DS . 'config' . DS;
+//        print_r(getcwd());
         try {
 //    config/service.yml
             $services = Yaml::parseFile($configDir . 'services.yaml');
@@ -200,7 +202,7 @@ class App implements MiddlewareInterface
      * @throws ReflectionException
      * @throws Exception
      */
-    public function boot(string $appModule): ?self
+    public function boot(string $appModule): void
     {
         if ($this->hasColdBooted) {
             return;
@@ -210,7 +212,7 @@ class App implements MiddlewareInterface
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
 
         if (count($reflectionClassApiAttributes) === 0) {
-            return $this;
+            throw ReflectionException();
         }
 
         $apiModuleAttributes = $reflectionClassApiAttributes[0]->newInstance();

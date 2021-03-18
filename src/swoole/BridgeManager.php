@@ -10,6 +10,9 @@ use Swoole\Http\Request;
 use Swoole\Http\Response;
 use Spatial\Core\App;
 
+use Http\Factory\Guzzle\UriFactory;
+use Http\Factory\Guzzle\StreamFactory;
+
 class BridgeManager
 {
 
@@ -39,7 +42,10 @@ class BridgeManager
         Bridge\ResponseMergerInterface $responseMerger = null
     ) {
         $this->app = $app;
-        $this->requestTransformer = $requestTransformer ?: new Bridge\RequestTransformer();
+        $this->requestTransformer = $requestTransformer ?: new Bridge\RequestTransformer(
+            new UriFactor(),
+            new StreamFactory()
+        );
         $this->responseMerger = $responseMerger ?: new Bridge\ResponseMerger();
     }
 
@@ -53,7 +59,7 @@ class BridgeManager
         Request $swooleRequest,
         Response $swooleResponse
     ): Response {
-        $psr7Request = $this->requestTransformer->toSlim($swooleRequest);
+        $psr7Request = $this->requestTransformer->toSwoole($swooleRequest);
         $psr7Response = $this->app->process($psr7Request, new AppHandler());
 
         return $this->responseMerger->toSwoole($psr7Response, $swooleResponse);

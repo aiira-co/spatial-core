@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Spatial\Swoole\Bridge;
 
 use Psr\Http\Message\RequestInterface;
@@ -10,31 +13,32 @@ use Swoole\Http\Request as SwooleRequest;
 
 class RequestTransformer implements RequestInterface
 {
-    public function __construct(
-        SwooleRequest $swooleRequest,
-        UriFactoryInterface $uriFactory,
-        StreamFactoryInterface $streamFactory
-    ) {
+    private SwooleRequest $swooleRequest;
 
+    public function __construct(
+        private UriFactoryInterface $uriFactory,
+        private StreamFactoryInterface $streamFactory
+    ) {
+    }
+
+    public function toSwoole(SwooleRequest $swooleRequest): self
+    {
         $this->swooleRequest = $swooleRequest;
-        $this->uriFactory = $uriFactory;
-        $this->streamFactory = $streamFactory;
+        return $this;
     }
 
     public function getRequestTarget()
     {
         return !empty($this->requestTarget)
             ? $this->requestTarget
-            : ($this->requestTarget = $this->buildRequestTarget())
-            ;
+            : ($this->requestTarget = $this->buildRequestTarget());
     }
 
     private function buildRequestTarget()
     {
         $queryString = !empty($this->swooleRequest->server['query_string'])
             ? '?' . $this->swooleRequest->server['query_string']
-            : ''
-        ;
+            : '';
 
         return $this->swooleRequest->server['request_uri']
             . $queryString;
@@ -51,13 +55,12 @@ class RequestTransformer implements RequestInterface
     {
         return !empty($this->method)
             ? $this->method
-            : ($this->method = $this->swooleRequest->server['request_method'])
-            ;
+            : ($this->method = $this->swooleRequest->server['request_method']);
     }
 
     public function withMethod($method)
     {
-        $validMethods = ['options','get','head','post','put','delete','trace','connect'];
+        $validMethods = ['options', 'get', 'head', 'post', 'put', 'delete', 'trace', 'connect'];
         if (!in_array(strtolower($method), $validMethods)) {
             throw new \InvalidArgumentException('Invalid HTTP method');
         }
@@ -77,8 +80,7 @@ class RequestTransformer implements RequestInterface
 
         $uri = (!empty($userInfo) ? '//' . $userInfo . '@' : '')
             . $this->swooleRequest->header['host']
-            . $this->getRequestTarget()
-        ;
+            . $this->getRequestTarget();
 
         return $this->uri = $this->uriFactory->createUri(
             $uri
@@ -142,8 +144,7 @@ class RequestTransformer implements RequestInterface
             if (strtolower($name) == strtolower($key)) {
                 return is_array($value)
                     ? $value
-                    : [$value]
-                    ;
+                    : [$value];
             }
         }
     }

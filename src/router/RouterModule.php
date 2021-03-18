@@ -9,7 +9,6 @@ use ReflectionException;
 use ReflectionParameter;
 use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Interfaces\IRouteModule;
-use Spatial\Psr7\Response;
 use Spatial\Router\Trait\SecurityTrait;
 
 class RouterModule implements IRouteModule
@@ -21,22 +20,20 @@ class RouterModule implements IRouteModule
     private string $_contentType = 'application/json';
     private object $defaults;
 
-    private Response $response;
-
     private array $diServices = [];
 
     /**
      * @param string $body
      * @param int $statusCode
-     * @return Resoponse
+     * @return ResponseInterface
      * @throws \JsonException
      */
     public function controllerNotFound(string $body, int $statusCode): ResponseInterface
     {
         $payload = json_encode(['message' => $body, 'status' => $statusCode], JSON_THROW_ON_ERROR);
 
-        $this->response = new Response();
-        $this->response->getBody()->write($payload);
+        $response = new \GuzzleHttp\Psr7\Response();
+        $response->getBody()->write($payload);
         return $response;
     }
 
