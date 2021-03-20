@@ -31,9 +31,9 @@ use Spatial\Core\Attributes\ApiModule;
 use Spatial\Core\Attributes\Authorize;
 use Spatial\Core\Attributes\Route;
 use Spatial\Core\Attributes\Area;
-use Spatial\Core\Interfaces\IApplicationBuilder;
-use Spatial\Core\Interfaces\IRouteModule;
-use Spatial\Router\RouterModule;
+use Spatial\Core\Interfaces\ApplicationBuilderInterface;
+use Spatial\Core\Interfaces\RouteModuleInterface;
+use Spatial\Router\RouterModuleInterface;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -43,8 +43,8 @@ use Symfony\Component\Yaml\Yaml;
  */
 class App implements MiddlewareInterface
 {
-    private IApplicationBuilder $applicationBuilder;
-    private IRouteModule $routerModule;
+    private ApplicationBuilderInterface $applicationBuilder;
+    private RouteModuleInterface $routerModule;
     /**
      * @var array|string[]
      */
@@ -142,7 +142,7 @@ class App implements MiddlewareInterface
         $this->defineConstantsAndParameters();
 
 //        bootstraps app
-        $this->applicationBuilder = new ApplicationBuilder();
+        $this->applicationBuilder = new ApplicationBuilderInterface();
     }
 
     /**

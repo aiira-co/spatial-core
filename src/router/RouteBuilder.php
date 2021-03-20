@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Spatial\Router;
 
 
-use Spatial\Router\Interfaces\IRouteBuilder;
+use Spatial\Router\Interfaces\RouteBuilderInterface;
 use Spatial\Router\Trait\SecurityTrait;
 
-class RouteBuilder implements IRouteBuilder
+class RouteBuilder implements RouteBuilderInterface
 {
     use SecurityTrait;
 

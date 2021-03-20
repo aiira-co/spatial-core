@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Spatial\Router;
 
 
-class ActiveRouteBuilder extends RouteBuilder
+class ActiveRouteBuilder extends RouteBuilderInterface
 {
     private array $_routeMaps = [];
 
     /**
-     * @param RouteBuilder ...$routeMap
+     * @param RouteBuilderInterface ...$routeMap
      */
-    public function setHttpRoutes(RouteBuilder ...$routeMap): void
+    public function setHttpRoutes(RouteBuilderInterface ...$routeMap): void
     {
         $this->_routeMaps = $routeMap;
     }

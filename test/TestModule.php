@@ -12,9 +12,9 @@ use Spatial\Api\StoreApi\Controllers\TestController;
 use Spatial\Api\StoreApi\Controllers\ValuesController;
 use Spatial\Common\CommonModule;
 use Spatial\Core\Attributes\ApiModule;
-use Spatial\Core\Interfaces\IApplicationBuilder;
-use Spatial\Core\Interfaces\IWebHostEnvironment;
-use Spatial\Router\Interfaces\IRouteBuilder;
+use Spatial\Core\Interfaces\ApplicationBuilderInterface;
+use Spatial\Core\Interfaces\WebHostEnvironmentInterface;
+use Spatial\Router\Interfaces\RouteBuilderInterface;
 use Spatial\Router\RouteBuilder;
 
 
@@ -35,10 +35,10 @@ class TestModule
     /**
      * Method is called for app configuration
      * configure routing here
-     * @param IApplicationBuilder $app
-     * @param IWebHostEnvironment|null $env
+     * @param ApplicationBuilderInterface $app
+     * @param WebHostEnvironmentInterface|null $env
      */
-    public function configure(IApplicationBuilder $app, ?IWebHostEnvironment $env = null): void
+    public function configure(ApplicationBuilderInterface $app, ?WebHostEnvironmentInterface $env = null): void
     {
 //        if ($env->isDevelopment()) {
 //            $app->useDeveloperExceptionPage();
@@ -54,7 +54,7 @@ class TestModule
         $app->useAuthorization();
 
         $app->useEndpoints(
-            fn(IRouteBuilder $endpoints) => [
+            fn(RouteBuilderInterface $endpoints) => [
                 $endpoints->mapControllers()
             ]
 

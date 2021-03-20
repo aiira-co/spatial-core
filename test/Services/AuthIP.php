@@ -4,9 +4,9 @@
 namespace Spatial\Api\Services;
 
 
-use Spatial\Router\Interfaces\CanActivate;
+use Spatial\Router\Interfaces\IsAuthorizeInterface;
 
-class AuthIP implements CanActivate
+class AuthIP implements IsAuthorizeInterface
 {
 
     public function canActivate(string $url): bool

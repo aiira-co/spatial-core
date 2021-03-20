@@ -8,15 +8,15 @@ use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
 use ReflectionParameter;
 use Spatial\Core\Attributes\Injectable;
-use Spatial\Core\Interfaces\IRouteModule;
-use Spatial\Router\Interfaces\CanActivate;
+use Spatial\Core\Interfaces\RouteModuleInterface;
+use Spatial\Router\Interfaces\IsAuthorizeInterface;
 use Spatial\Router\Trait\SecurityTrait;
 
-class RouterModule implements IRouteModule
+class RouterModule implements RouteModuleInterface
 {
     use SecurityTrait;
 
@@ -27,7 +27,8 @@ class RouterModule implements IRouteModule
 
     private array $diServices = [];
 
-    private RequestInterface $request;
+    private ServerRequestInterface $request;
+    private Container $container;
 
 
     /**
@@ -50,8 +51,9 @@ class RouterModule implements IRouteModule
      * @param object $defaults
      * @return ResponseInterface
      * @throws ReflectionException
+     * @throws \Exception
      */
-    public function getControllerMethod(array $route, object $defaults, RequestInterface $request): ResponseInterface
+    public function getControllerMethod(array $route, object $defaults, ServerRequestInterface $request): ResponseInterface
     {
         $this->container = new Container();
         $this->defaults = $defaults;
@@ -221,11 +223,11 @@ class RouterModule implements IRouteModule
         return $routeAuthGuards;
     }
 
-    private function isAuthorized(CanActivate ...$auhguard): bool
+    private function isAuthorized(IsAuthorizeInterface ...$auhguard): bool
     {
         $allow = true;
         foreach ($auhguard as $auth) {
-            if (!$auth->canActivate($this->request->getUri()->getPath())) {
+            if (!$auth->isAuthorized($this->request)) {
                 $allow = false;
                 break;
             }

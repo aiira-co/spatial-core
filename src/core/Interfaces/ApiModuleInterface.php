@@ -6,6 +6,6 @@ namespace Spatial\Core\Interfaces;
  * Interfaces IApiModule
  * @package Spatial\Interfaces
  */
-interface IApiModule
+interface ApiModuleInterface
 {
 }

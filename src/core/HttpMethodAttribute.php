@@ -11,13 +11,13 @@ namespace Spatial\Core;
 //page
 
 
-use Spatial\Core\Interfaces\IApiModule;
+use Spatial\Core\Interfaces\ApiModuleInterface;
 
 /**
  * Class HttpMethodAttribute
  * @package Spatial\Core
  */
-class HttpMethodAttribute implements IApiModule
+class HttpMethodAttribute implements ApiModuleInterface
 {
     public string $event;
 

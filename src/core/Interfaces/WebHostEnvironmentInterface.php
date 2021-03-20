@@ -4,7 +4,7 @@
 namespace Spatial\Core\Interfaces;
 
 
-interface IWebHostEnvironment
+interface WebHostEnvironmentInterface
 {
     public function isDevelopment(): bool;
 }

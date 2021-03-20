@@ -8,7 +8,7 @@ namespace Spatial\Core\Interfaces;
  * Interfaces IApplicationBuilder
  * @package Spatial\Interfaces
  */
-interface IApplicationBuilder
+interface ApplicationBuilderInterface
 {
     public function useSwooleHttp(): void;
 

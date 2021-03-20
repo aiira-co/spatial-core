@@ -8,8 +8,6 @@ use JetBrains\PhpStorm\Pure;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Spatial\Core\Interfaces\IRouteModule;
-use Spatial\Infrastructure\Storage;
 use Spatial\Router\RouterModule;
 
 class AppHandler implements RequestHandlerInterface
@@ -43,13 +41,6 @@ class AppHandler implements RequestHandlerInterface
         $requestedMethod = strtolower($request->getMethod());
         $this->formatRoute($request->getUri()->getPath());
 
-//        store to a static file
-//        $GLOBALS['spatialUri'] = $this->uri;
-//        $GLOBALS['spatialRequestedMethod'] = $this->requestedMethod;
-
-
-        print_r('another request sent');
-//        print_r(json_encode($this->routeTable));
 
         $routeFound = false;
 //        $routeActivated;

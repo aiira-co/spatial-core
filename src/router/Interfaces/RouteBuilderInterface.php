@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spatial\Router\Interfaces;
 
-interface IRouteBuilder
+interface RouteBuilderInterface
 {
     public function mapDefaultControllerRoute();
 
