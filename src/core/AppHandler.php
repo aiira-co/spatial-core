@@ -51,7 +51,9 @@ class AppHandler implements RequestHandlerInterface
             if (
                 str_contains($routeHttp, $requestedMethod) ||
                 str_contains($routeHttp, 'all')
+
             ) {
+//                print_r('match found to check route');
                 if ($this->isUriRoute($routeArr)) {
                     $routeFound = true;
                     $this->routeActivated = $route;
@@ -101,10 +103,16 @@ class AppHandler implements RequestHandlerInterface
 //        print_r($this->patternArray);
 //        print_r($routeUriArr);
         $routeArrCount = count($routeUriArr);
+//        print_r('routeCount -> ' . $routeArrCount . ' uri count is ->' . $this->patternArray['count']);
 
-        if ($routeArrCount < $this->patternArray['count']) {
+        if ($routeArrCount < $this->patternArray['count'] && !str_starts_with(
+                $routeUriArr[$routeArrCount - 1],
+                $token[0] . '...'
+            )) {
             return false;
         }
+
+//        print_r('started to match uri to route');
 
 
         for ($i = 0; $i < $routeArrCount; $i++) {
@@ -128,7 +136,7 @@ class AppHandler implements RequestHandlerInterface
                     $routeUriArr[$i]
                 );
 
-//            echo '<br/> placeholder for token is --> ' . $placeholder;
+//            print_r('n\ placeholder for token is --> ' . $placeholder);
 
             // check to see if its the last placeholder
             // AND if the placeholder is prefixed with `...`
