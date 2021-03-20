@@ -4,22 +4,7 @@
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/AppHandler.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/AppHandler.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ApplicationBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ApplicationBuilderInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/HttpMethodAttribute.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/HttpMethodAttribute.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Interfaces/IApiModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interfaces/ApiModuleInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Interfaces/IApplicationBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interfaces/ApplicationBuilderInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Interfaces/IRouteModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interfaces/RouteModuleInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Interfaces/IWebHostEnvironment.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Interfaces/WebHostEnvironmentInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/router/ActiveRouteBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/ActiveRouteBuilder.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/router/Interfaces/CanActivate.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/Interfaces/IsAuthorizeInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/router/Interfaces/IRouteBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/Interfaces/RouteBuilderInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/router/Interfaces/IRoutingTemplateProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/Interfaces/RoutingTemplateProviderInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/router/RouteBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouteBuilder.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/Services/AuthIP.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/Services/AuthIP.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/Services/AuthUser.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/Services/AuthUser.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/TestModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/test/TestModule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ApplicationBuilderInterface.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ApplicationBuilderInterface.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -373,7 +358,8 @@
       <workItem from="1616034417178" duration="1361000" />
       <workItem from="1616076426221" duration="939000" />
       <workItem from="1616080379334" duration="1894000" />
-      <workItem from="1616244647099" duration="1480000" />
+      <workItem from="1616244647099" duration="1549000" />
+      <workItem from="1616247903126" duration="1184000" />
     </task>
     <task id="LOCAL-00001" summary="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <created>1610707692170</created>

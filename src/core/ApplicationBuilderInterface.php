@@ -5,13 +5,13 @@ namespace Spatial\Core;
 
 use Spatial\Core\Interfaces\ApplicationBuilderInterface;
 use Spatial\Router\Interfaces\RouteBuilderInterface;
-use Spatial\Router\RouteBuilderInterface;
+use Spatial\Router\RouteBuilder;
 
 /**
  * Class ApplicationBuilder
  * @package Spatial\Core
  */
-class ApplicationBuilderInterface implements ApplicationBuilderInterface
+class ApplicationBuilder implements ApplicationBuilderInterface
 {
 
     public bool $isSwooleWebsocket = false;
@@ -21,7 +21,7 @@ class ApplicationBuilderInterface implements ApplicationBuilderInterface
 
     public function __construct()
     {
-        $this->routeBuilder = new RouteBuilderInterface();
+        $this->routeBuilder = new RouteBuilder();
     }
 
     public function useSwooleHttp(): void

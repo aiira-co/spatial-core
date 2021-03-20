@@ -5,8 +5,6 @@ namespace Spatial\Core;
 
 
 use Exception;
-use JetBrains\PhpStorm\Pure;
-use Presentation\AppModule;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -107,33 +105,17 @@ class App implements MiddlewareInterface
     private array $routeTable = [];
     private array $pipes = [];
 
-
     private array $baseRouteTemplate = [''];
 
-
-    public array $status = ['code' => 401, 'reason' => 'Unauthorized'];
-
     private array $routeTemplateArr = [];
-    private array $routeTemplateParams = [];
     private bool $enableAttributeRouting = false;
     private bool $enableConventionalRouting = false;
     private int $routeType = 2;
-
-    /**
-     * @var mixed
-     */
-    private array $routeActivated;
-
-    private bool $hasColdBooted = false;
     private bool $showRouteTable = false;
-
-    private ResponseInterface $response;
-    private ServerRequestInterface $request;
 
 
     /**
      * App constructor.
-     * @param string|null $uri
      * @throws ReflectionException
      */
     public function __construct()
@@ -142,7 +124,7 @@ class App implements MiddlewareInterface
         $this->defineConstantsAndParameters();
 
 //        bootstraps app
-        $this->applicationBuilder = new ApplicationBuilderInterface();
+        $this->applicationBuilder = new ApplicationBuilder();
     }
 
     /**
@@ -404,7 +386,7 @@ class App implements MiddlewareInterface
                 $this->printRouteTable();
             }
 
-            $this->hasColdBooted = true;
+//            $this->hasColdBooted = true;
         }
     }
 
@@ -461,7 +443,7 @@ class App implements MiddlewareInterface
     function printRouteTable(): void
     {
         echo '<h2> Route Table </h2> >';
-        echo '<pre> ' . $this->uri . ' </pre> >';
+        echo '<pre> uri here </pre> >';
         echo '<table style="display: block; background-color: paleturquoise"> 
 <thead style="background-color: aliceblue">
 <tr>
