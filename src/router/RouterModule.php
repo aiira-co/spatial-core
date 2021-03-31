@@ -53,8 +53,11 @@ class RouterModule implements RouteModuleInterface
      * @throws ReflectionException
      * @throws \Exception
      */
-    public function getControllerMethod(array $route, object $defaults, ServerRequestInterface $request): ResponseInterface
-    {
+    public function getControllerMethod(
+        array $route,
+        object $defaults,
+        ServerRequestInterface $request
+    ): ResponseInterface {
         $this->container = new Container();
         $this->defaults = $defaults;
         $this->request = $request;
@@ -119,10 +122,10 @@ class RouterModule implements RouteModuleInterface
         ReflectionParameter $paramName
     ): mixed {
         return match ($bindingSource) {
-            'FromBody' => file_get_contents('php://input'),
-            'FromForm' => $_FILES[$paramName->getName()] ?? null,
-            'FromHeader' => $_SERVER[$paramName->getName()] ?? null,
-            'FromQuery' => $_GET[$paramName->getName()] ?? null,
+            'FromBody' => $this->request->getParsedBody(),
+            'FromForm' => $this->request->getUploadedFiles()[$paramName->getName()],
+            'FromHeader' => $this->request->getHeaderLine($paramName->getName()),
+            'FromQuery' => $this->request->getQueryParams($paramName->getName()),
             'FromRoute' => $this->defaults->{$paramName->getName()} ?? null,
             'FromServices' => $this->getServiceFromProvider($paramName),
             default => $this->defaults->{$paramName->getName()} ?? $paramName->getDefaultValue() ?? null
