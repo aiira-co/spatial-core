@@ -32,7 +32,7 @@ class AppHandler implements RequestHandlerInterface
     {
 //        var_dump($routeTable);
         $this->routeTable = $routeTable;
-        $this->RouterModule->setContainer($diContainer);
+        $this->routerModule->setContainer($diContainer);
     }
 
     /**
