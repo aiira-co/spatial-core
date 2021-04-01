@@ -20,9 +20,10 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
     public function __construct(
         UriFactoryInterface $uriFactory,
         StreamFactoryInterface $streamFactory,
-        UploadedFileFactoryInterface $uploadedFileFactory
+        UploadedFileFactoryInterface $uploadedFileFactory,
+        SwooleRequest $swooleRequest
     ) {
-        parent::__construct($uriFactory, $streamFactory);
+        parent::__construct($uriFactory, $streamFactory, $swooleRequest);
         $this->uploadedFileFactory = $uploadedFileFactory;
     }
 
@@ -102,6 +103,7 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         if (!empty($this->swooleRequest->post)) {
             return $this->swooleRequest->post;
         }
+
 
         return null;
     }

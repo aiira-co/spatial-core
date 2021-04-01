@@ -4,6 +4,7 @@
 namespace Spatial\Core;
 
 
+use DI\Container;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -18,6 +19,7 @@ class AppHandler implements RequestHandlerInterface
     private object $routerModule;
     private array $routeActivated;
     private array $routeTable;
+    private Container $diContainer;
 
     public function __construct()
     {
@@ -26,10 +28,11 @@ class AppHandler implements RequestHandlerInterface
         };
     }
 
-    public function setRouteTable(array $routeTable): void
+    public function passParams(array $routeTable, Container &$diContainer): void
     {
 //        var_dump($routeTable);
         $this->routeTable = $routeTable;
+        $this->RouterModule->setContainer($diContainer);
     }
 
     /**
@@ -40,6 +43,8 @@ class AppHandler implements RequestHandlerInterface
     {
         $requestedMethod = strtolower($request->getMethod());
         $this->formatRoute($request->getUri()->getPath());
+
+//        print_r($request->getParsedBody() ?? file_get_contents('php://input'));
 
 
         $routeFound = false;

@@ -44,11 +44,7 @@ class BridgeManager
         Bridge\ResponseMergerInterface $responseMerger = null
     ) {
         $this->app = $app;
-        $this->requestTransformer = $requestTransformer ?: new Bridge\ServerRequestTransformer(
-            new UriFactory(),
-            new StreamFactory(),
-            new UploadedFileFactory()
-        );
+        $this->requestTransformer = $requestTransformer;
         $this->responseMerger = $responseMerger ?: new Bridge\ResponseMerger();
     }
 
@@ -61,7 +57,15 @@ class BridgeManager
         Request $swooleRequest,
         Response $swooleResponse
     ): Response {
-        $psr7Request = clone ($this->requestTransformer)->toSwoole($swooleRequest);
+        $psr7Request = new Bridge\ServerRequestTransformer(
+            new UriFactory(),
+            new StreamFactory(),
+            new UploadedFileFactory(),
+            $swooleRequest
+        );
+
+//        print_r((string)$psr7Request->getBody());
+//        $psr7Request = clone ($this->requestTransformer)->toSwoole($swooleRequest);
         $psr7Response = $this->app->process($psr7Request, new AppHandler());
 
         return $this->responseMerger->toSwoole($psr7Response, $swooleResponse);

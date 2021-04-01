@@ -4,6 +4,7 @@
 namespace Spatial\Core;
 
 
+use DI\Container;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -113,6 +114,8 @@ class App implements MiddlewareInterface
     private int $routeType = 2;
     private bool $showRouteTable = false;
 
+    private Container $diContainer;
+
 
     /**
      * App constructor.
@@ -120,6 +123,8 @@ class App implements MiddlewareInterface
      */
     public function __construct()
     {
+//         Initiate DI Container
+        $this->diContainer = new Container();
 //        read ymls for parameters
         $this->defineConstantsAndParameters();
 
@@ -173,7 +178,7 @@ class App implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $handler->setRouteTable($this->routeTable);
+        $handler->passParams($this->routeTable, $this->diContainer);
         return $handler->handle($request);
     }
 
@@ -251,7 +256,9 @@ class App implements MiddlewareInterface
 
         foreach ($moduleProviders as $provider) {
             if (!isset($this->providers[$moduleName][$provider])) {
-                //            check if it has DI for provider
+                // suppose to set it on DI Container
+                $this->diContainer->get($provider);
+//                record
                 $this->providers[$moduleName][$provider] = new ReflectionClass($provider);
             }
         }
@@ -385,7 +392,6 @@ class App implements MiddlewareInterface
             if ($this->showRouteTable) {
                 $this->printRouteTable();
             }
-
 //            $this->hasColdBooted = true;
         }
     }

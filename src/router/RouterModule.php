@@ -31,6 +31,11 @@ class RouterModule implements RouteModuleInterface
     private Container $container;
 
 
+    public function setContainer(Container &$diContainer): void
+    {
+        $this->container = $diContainer;
+    }
+
     /**
      * @param string $body
      * @param int $statusCode
@@ -58,7 +63,6 @@ class RouterModule implements RouteModuleInterface
         object $defaults,
         ServerRequestInterface $request
     ): ResponseInterface {
-        $this->container = new Container();
         $this->defaults = $defaults;
         $this->request = $request;
         //                check for authguard
@@ -122,10 +126,12 @@ class RouterModule implements RouteModuleInterface
         ReflectionParameter $paramName
     ): mixed {
         return match ($bindingSource) {
-            'FromBody' => $this->request->getParsedBody(),
+            'FromBody' => (string)$this->request->getBody(),
             'FromForm' => $this->request->getUploadedFiles()[$paramName->getName()],
-            'FromHeader' => $this->request->getHeaderLine($paramName->getName()),
-            'FromQuery' => $this->request->getQueryParams($paramName->getName()),
+            'FromHeader' => $this->request->hasHeader($paramName->getName()) ? $this->request->getHeaderLine(
+                $paramName->getName()
+            ) : null,
+            'FromQuery' => $this->request->getQueryParams()[$paramName->getName()],
             'FromRoute' => $this->defaults->{$paramName->getName()} ?? null,
             'FromServices' => $this->getServiceFromProvider($paramName),
             default => $this->defaults->{$paramName->getName()} ?? $paramName->getDefaultValue() ?? null

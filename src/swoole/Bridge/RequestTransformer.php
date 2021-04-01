@@ -13,11 +13,12 @@ use Swoole\Http\Request as SwooleRequest;
 
 class RequestTransformer implements RequestInterface
 {
-    private SwooleRequest $swooleRequest;
+
 
     public function __construct(
         private UriFactoryInterface $uriFactory,
-        private StreamFactoryInterface $streamFactory
+        private StreamFactoryInterface $streamFactory,
+        private SwooleRequest $swooleRequest
     ) {
     }
 
