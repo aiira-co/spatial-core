@@ -22,11 +22,6 @@ class RequestTransformer implements RequestInterface
     ) {
     }
 
-    public function toSwoole(SwooleRequest $swooleRequest): self
-    {
-        $this->swooleRequest = $swooleRequest;
-        return $this;
-    }
 
     public function getRequestTarget()
     {
@@ -70,6 +65,7 @@ class RequestTransformer implements RequestInterface
         $new->method = $method;
         return $new;
     }
+
 
     public function getUri()
     {

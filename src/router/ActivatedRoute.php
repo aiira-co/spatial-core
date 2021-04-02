@@ -14,45 +14,48 @@ namespace Spatial\Router;
  */
 class ActivatedRoute
 {
-    protected array $params = [];
+    protected static array $params = [];
 
-    /**
-     * Converts $_GET global  members into variables of this class
-     */
-    public function __construct()
+
+    public static function setParams(array $queryParams)
     {
-        foreach ($_REQUEST as $key => $value) {
+//        reset param
+        self::$params = [];
+        $tmpParams =[];
+//        load params
+        foreach ($queryParams as $key => $value) {
             // clean it of any html params
             // for $_GET only: Remove an html tags and quotes
             if (!is_iterable($value)) {
-                $this->params[$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                $tmpParams[$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
             } else {
-                $this->params[$key] = $value;
+                $tmpParams[$key] = $value;
             }
+
         }
+        self::$params = $tmpParams;
+//        print_r(self::$params);
     }
 
-    /**
-     * Getter Method for the class
-     *
-     * @param string $key
-     * @return void
-     */
-    public function __get(string $key)
-    {
-        return $this->_getParam($key);
-    }
+
+//    /**
+//     * Setter Method for the class
+//     *
+//     * @param string $key
+//     * @param $value
+//     * @return void
+//     */
+//    public function set(string $key, mixed $value): void
+//    {
+//        self::params[$key] = $value;
+//    }
 
     /**
-     * Setter Method for the class
-     *
-     * @param string $key
-     * @param $value
-     * @return void
+     * @return array
      */
-    public function __set(string $key, $value)
+    public static function get(): array
     {
-        $this->params[$key] = $value;
+        return self::$params;
     }
 
     /**
@@ -61,17 +64,17 @@ class ActivatedRoute
      * @param array $args
      * @return mixed|null
      */
-    private function _getParam(string $param, array $args = [])
+    public static function getParam(string $param, array $args = []): mixed
     {
         // Check if the param exists
-        if (!array_key_exists($param, $this->params)) {
+        if (!array_key_exists($param, self::params)) {
             return null;
             // throw new \Exception("The REQUEST Parameter: $param does not exist.");
         }
 //        if (!empty($args)) {
-//            return $this->$param[$param]($args);
+//            return self::param[$param]($args);
 //        }
         // Return the existing Param
-        return $this->params[$param];
+        return self::$params[$param];
     }
 }

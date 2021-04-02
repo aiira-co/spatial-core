@@ -65,6 +65,12 @@ class RouterModule implements RouteModuleInterface
     ): ResponseInterface {
         $this->defaults = $defaults;
         $this->request = $request;
+
+        //        set activated route
+//        $_REQUEST = $request->get;
+//        print_r($request->getUri()->getQuery());
+        ActivatedRoute::setParams($request->getQueryParams());
+
         //                check for authguard
         if (
             $route['authGuard'] &&
