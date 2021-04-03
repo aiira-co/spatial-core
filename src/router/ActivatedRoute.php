@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spatial\Router;
 
+use JetBrains\PhpStorm\Pure;
+
 /**
  * ActivatedRoute Class exists in the Spatial\Router namespace
  * This class initialized $_GET global.
@@ -14,67 +16,41 @@ namespace Spatial\Router;
  */
 class ActivatedRoute
 {
-    protected static array $params = [];
+    protected array $params = [];
 
 
-    public static function setParams(array $queryParams)
+    public function setParams(array $queryParams): void
     {
-//        reset param
-        self::$params = [];
-        $tmpParams =[];
 //        load params
         foreach ($queryParams as $key => $value) {
             // clean it of any html params
             // for $_GET only: Remove an html tags and quotes
             if (!is_iterable($value)) {
-                $tmpParams[$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                $this->params[$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
             } else {
-                $tmpParams[$key] = $value;
+                $this->params[$key] = $value;
             }
-
         }
-        self::$params = $tmpParams;
-//        print_r(self::$params);
     }
 
-
-//    /**
-//     * Setter Method for the class
-//     *
-//     * @param string $key
-//     * @param $value
-//     * @return void
-//     */
-//    public function set(string $key, mixed $value): void
-//    {
-//        self::params[$key] = $value;
-//    }
-
-    /**
-     * @return array
-     */
-    public static function get(): array
+    public function __isset(string $name): bool
     {
-        return self::$params;
+        return $this->params[$name];
+    }
+
+    public function __set(string $name, $value): void
+    {
+        $this->params[$name] = $value;
     }
 
     /**
      * Method to get local variables of this class
      * @param string $param
-     * @param array $args
-     * @return mixed|null
+     * @return mixed
      */
-    public static function getParam(string $param, array $args = []): mixed
+    #[Pure] public function __get(string $param): mixed
     {
         // Check if the param exists
-        if (!array_key_exists($param, self::params)) {
-            return null;
-            // throw new \Exception("The REQUEST Parameter: $param does not exist.");
-        }
-//        if (!empty($args)) {
-//            return self::param[$param]($args);
-//        }
-        // Return the existing Param
-        return self::$params[$param];
+        return $this->params[$param] ?? null;
     }
 }

@@ -28,7 +28,7 @@ class AppHandler implements RequestHandlerInterface
         };
     }
 
-    public function passParams(array $routeTable, Container &$diContainer): void
+    public function passParams(array $routeTable, Container $diContainer): void
     {
 //        var_dump($routeTable);
         $this->routeTable = $routeTable;
@@ -36,8 +36,10 @@ class AppHandler implements RequestHandlerInterface
     }
 
     /**
-     * @throws \ReflectionException
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
      * @throws \JsonException
+     * @throws \ReflectionException
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {

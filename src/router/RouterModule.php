@@ -7,6 +7,7 @@ namespace Spatial\Router;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
@@ -31,7 +32,7 @@ class RouterModule implements RouteModuleInterface
     private Container $container;
 
 
-    public function setContainer(Container &$diContainer): void
+    public function setContainer(Container $diContainer): void
     {
         $this->container = $diContainer;
     }
@@ -40,7 +41,7 @@ class RouterModule implements RouteModuleInterface
      * @param string $body
      * @param int $statusCode
      * @return ResponseInterface
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function controllerNotFound(string $body, int $statusCode): ResponseInterface
     {
@@ -69,7 +70,7 @@ class RouterModule implements RouteModuleInterface
         //        set activated route
 //        $_REQUEST = $request->get;
 //        print_r($request->getUri()->getQuery());
-        ActivatedRoute::setParams($request->getQueryParams());
+//        ActivatedRoute::setParams($request->getQueryParams());
 
         //                check for authguard
         if (
@@ -89,14 +90,16 @@ class RouterModule implements RouteModuleInterface
                     'Argument $' . $param['param']->getName(
                     ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
                 );
-                return $this->controllerNotFound('Controller Action Argument $' . $param['param'] . ' required', 500);
+//                return $this->controllerNotFound('Controller Action Argument $' . $param['param'] . ' required', 500);
             }
             // echo $args;
             $args[] = $value;
         }
 //        var_dump($args);
         try {
-            $response = ($this->container->get($route['controller']))->{$route['action']}(...$args);
+            $controller = ($this->container->get($route['controller']));
+            $controller($request); // __invoke
+            $response = $controller->{$route['action']}(...$args);
 //            $this->setHeaders($response->getHeaders());
 
         } catch (DependencyException $e) {
@@ -219,6 +222,7 @@ class RouterModule implements RouteModuleInterface
     /**
      * @param $authorization
      * @return array
+     * @throws DependencyException|NotFoundException
      */
     private function getAuthGuardInstance($authorization): array
     {

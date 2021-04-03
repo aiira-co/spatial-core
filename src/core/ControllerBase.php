@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Spatial\Core;
 
+use Psr\Http\Message\ServerRequestInterface;
+use Spatial\Mediator\Mediator;
+
 /**
  * Class ControllerBase
  * For Web api
@@ -44,22 +47,24 @@ abstract class ControllerBase
      * Gets or sets the IObjectModelValidator.
      */
     public string $objectValidator;
+
+
     public string $problemDetailsFactory;
     /**
-     * @var string
+     * @var ServerRequestInterface
      * Gets the HttpRequest for the executing action.
      */
-    public string $request;
+    public ServerRequestInterface $request;
     /**
      * @var string
      * Gets the HttpResponse for the executing action.
      */
     public string $response;
     /**
-     * @var string
+     * @var array
      * Gets the RouteData for the executing action.
      */
-    public string $routeData;
+    public array $routeData;
     /**
      * @var string
      * Gets or sets the IUrlHelper.
@@ -70,4 +75,18 @@ abstract class ControllerBase
      * Gets the ClaimsPrincipal for user associated with the executing action.
      */
     public string $user;
+
+    /**
+     * Use constructor to Inject or instantiate dependencies
+     * @param Mediator $mediator
+     */
+    public function __construct(protected Mediator $mediator)
+    {
+    }
+
+    public function __invoke(ServerRequestInterface $request)
+    {
+        $this->request = $request;
+        $this->routeData = $request->getQueryParams();
+    }
 }
