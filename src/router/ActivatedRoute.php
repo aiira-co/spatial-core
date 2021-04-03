@@ -35,7 +35,7 @@ class ActivatedRoute
 
     public function __isset(string $name): bool
     {
-        return $this->params[$name];
+        return isset($this->params[$name]);
     }
 
     public function __set(string $name, $value): void
