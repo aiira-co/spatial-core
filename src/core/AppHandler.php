@@ -8,6 +8,7 @@ use DI\Container;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spatial\Router\RouterModule;
 
@@ -44,7 +45,7 @@ class AppHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestedMethod = strtolower($request->getMethod());
-        $this->formatRoute($request->getUri()->getPath());
+        $this->formatRoute($request->getUri());
 
 //        print_r($request->getParsedBody() ?? file_get_contents('php://input'));
 
@@ -81,16 +82,28 @@ class AppHandler implements RequestHandlerInterface
 
 
     /**
-     * @param string $uri
+     * @param UriInterface $requestUri
      * @return void
      */
     private function formatRoute(
-        string $uri
+        UriInterface $requestUri
     ): void {
+        $host = $requestUri->getHost();
+        $uri = $requestUri->getPath();
+
         // Strip query string (?foo=bar) and decode URI
         if (false !== $pos = strpos($uri, '?')) {
             $uri = substr($uri, 0, $pos);
         }
+
+        print_r('host is ' . $host . ' --  uri path is ' . $uri);
+
+
+//        strip host & domain from uri
+        if (str_starts_with($uri, $host)) {
+            $uri = ltrim($uri, $host);
+        }
+
         $uri = rawurldecode($uri);
 
 
