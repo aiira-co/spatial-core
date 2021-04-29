@@ -96,7 +96,7 @@ class AppHandler implements RequestHandlerInterface
             $uri = substr($uri, 0, $pos);
         }
 
-        print_r('host is ' . $host . ' --  uri path is ' . $uri);
+//        print_r('host is ' . $host . ' --  uri path is ' . $uri);
 
 
 //        strip host & domain from uri
