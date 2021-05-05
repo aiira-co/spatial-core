@@ -115,6 +115,7 @@ class App implements MiddlewareInterface
     private bool $showRouteTable = false;
 
     private Container $diContainer;
+    private bool $isProdMode;
 
 
     /**
@@ -143,9 +144,16 @@ class App implements MiddlewareInterface
 //    config/service.yml
             $services = Yaml::parseFile($configDir . 'services.yaml');
             define('SpatialServices', $services['parameters']);
-//    config/packages/doctrine.yaml
-            $doctrineConfigs = Yaml::parseFile($configDir . DS . 'packages' . DS . 'doctrine.yaml');
 
+            //    config/packages/framework.yaml
+            $appConfigs = Yaml::parseFile($configDir . DS . 'packages' . DS . 'framework.yaml');
+            define('AppConfig', $appConfigs);
+
+            $this->isProdMode = $appConfigs['enableProdMode'];
+//    config/packages/doctrine.yaml
+            $doctrineConfigs = Yaml::parseFile(
+                $configDir . DS . 'packages' . DS . ($this->isProdMode ? 'doctrine.yaml' : 'doctrine.dev.yaml')
+            );
             define('DoctrineConfig', $doctrineConfigs);
         } catch (ParseException $exception) {
             printf('Unable to parse the YAML string: %s', $exception->getMessage());

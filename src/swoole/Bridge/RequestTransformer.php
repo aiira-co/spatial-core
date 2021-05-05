@@ -74,8 +74,8 @@ class RequestTransformer implements RequestInterface
         }
 
         $userInfo = $this->parseUserInfo() ?? null;
-
-        $uri = (!empty($userInfo) ? '//' . $userInfo . '@' : $this->swooleRequest->header['x-forwarded-proto'] . '://')
+        $http = isset($this->swooleRequest->header['x-forwarded-proto']) ? $this->swooleRequest->header['x-forwarded-proto'] . '://' : '';
+        $uri = (!empty($userInfo) ? '//' . $userInfo . '@' : $http)
             . $this->swooleRequest->header['host']
             . $this->getRequestTarget();
 

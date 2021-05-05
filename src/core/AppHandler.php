@@ -76,7 +76,8 @@ class AppHandler implements RequestHandlerInterface
 
             $this->routerModule->controllerNotFound(
                 'No Controller was routed to the uri ' . $this->uri . ' on a ' . $requestedMethod . ' method',
-                404
+                404,
+                $request
             );
     }
 

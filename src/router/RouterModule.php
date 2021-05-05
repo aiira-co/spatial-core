@@ -43,12 +43,19 @@ class RouterModule implements RouteModuleInterface
      * @return ResponseInterface
      * @throws JsonException
      */
-    public function controllerNotFound(string $body, int $statusCode): ResponseInterface
-    {
+    public function controllerNotFound(
+        string $body,
+        int $statusCode,
+        ServerRequestInterface $request
+    ): ResponseInterface {
+        $this->request = $request;
+
         $payload = json_encode(['message' => $body, 'status' => $statusCode], JSON_THROW_ON_ERROR);
 
         $response = new \GuzzleHttp\Psr7\Response();
         $response->getBody()->write($payload);
+        $response = $this->setCors($response);
+
         return $response->withHeader('Content-Type', $this->_contentType);
     }
 
@@ -108,26 +115,46 @@ class RouterModule implements RouteModuleInterface
             throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
         }
 
-//            set default content type
-//        if (!isset($response->getHeaders()['Content-Type'])) {
-//            $response->withHeader('Content-Type', $this->_contentType);
 
-//        print_r($response->getHeaders());
-//        }
-        if (!$response->hasHeader('Access-Control-Allow-Origin')) {
-//            only allow access if request origin appears in framework.header.origins
-            
-            $response->withHeader(
-                'Access-Control-Allow-Origin',
-                '*'
-            );
-        }
-
+        $response = $this->setCors($response);
         return $response->hasHeader('Content-Type') ? $response :
             $response->withHeader(
                 'Content-Type',
                 $this->_contentType
             );
+    }
+
+    private function setCors(ResponseInterface $response): ResponseInterface
+    {
+        if ($this->request->hasHeader('origin')) {
+            $origin = $this->request->getHeader('origin')[0];
+        } else {
+            if ($this->request->hasHeader('referer')) {
+                $origin = $this->request->getHeader('referer')[0];
+            } else {
+                $origin = $_SERVER['REMOTE_ADDR'];
+            }
+        }
+
+
+        $parsedOrigin = parse_url($origin);
+        $origin = $parsedOrigin['scheme'] . '://' . $parsedOrigin['host'];
+        if (isset($parsedOrigin['port']) && $parsedOrigin['port'] !== null) {
+            $origin .= ':' . $parsedOrigin['port'];
+        }
+
+//        print_r('origin is ' . $origin);
+
+        if (in_array($origin, AppConfig['header']['allowed_domains'], true)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        }
+
+        $response->withHeader(
+            'Access-Control-Allow-Origin',
+            $origin
+        );
+
+        return $response;
     }
 
     /**
