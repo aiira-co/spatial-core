@@ -145,6 +145,7 @@ class App implements MiddlewareInterface
             define('SpatialServices', $services['parameters']);
 //    config/packages/doctrine.yaml
             $doctrineConfigs = Yaml::parseFile($configDir . DS . 'packages' . DS . 'doctrine.yaml');
+
             define('DoctrineConfig', $doctrineConfigs);
         } catch (ParseException $exception) {
             printf('Unable to parse the YAML string: %s', $exception->getMessage());

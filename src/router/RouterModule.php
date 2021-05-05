@@ -114,7 +114,14 @@ class RouterModule implements RouteModuleInterface
 
 //        print_r($response->getHeaders());
 //        }
-
+        if (!$response->hasHeader('Access-Control-Allow-Origin')) {
+//            only allow access if request origin appears in framework.header.origins
+            
+            $response->withHeader(
+                'Access-Control-Allow-Origin',
+                '*'
+            );
+        }
 
         return $response->hasHeader('Content-Type') ? $response :
             $response->withHeader(
