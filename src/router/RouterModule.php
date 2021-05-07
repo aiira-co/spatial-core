@@ -165,10 +165,13 @@ class RouterModule implements RouteModuleInterface
             $res = $res->withAddedHeader('Access-Control-Allow-Headers', $value);
         }
 
-        //        allowed methods
-        foreach (AppConfig['header']['allowed_methods'] as $value) {
-            $res = $res->withAddedHeader('Access-Control-Allow-Methods', $value);
+        if (!strtolower($this->request->getMethod()) === 'options') {
+            //        allowed methods
+            foreach (AppConfig['header']['allowed_methods'] as $value) {
+                $res = $res->withAddedHeader('Access-Control-Allow-Methods', $value);
+            }
         }
+
 //        print_r($res->getHeaders());
 
 
