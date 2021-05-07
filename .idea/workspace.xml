@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -387,7 +387,7 @@
       <workItem from="1620172711945" duration="440000" />
       <workItem from="1620204343376" duration="3893000" />
       <workItem from="1620396585883" duration="5448000" />
-      <workItem from="1620403009712" duration="1377000" />
+      <workItem from="1620403009712" duration="2590000" />
     </task>
     <task id="LOCAL-00001" summary="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <created>1610707692170</created>

@@ -124,6 +124,10 @@ class RouterModule implements RouteModuleInterface
             );
     }
 
+    /**
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @return \Psr\Http\Message\ResponseInterface
+     */
     private function setCors(ResponseInterface $response): ResponseInterface
     {
         if ($this->request->hasHeader('origin')) {
@@ -140,22 +144,22 @@ class RouterModule implements RouteModuleInterface
             $origin = $parsedOrigin['scheme'] . '://' . $parsedOrigin['host'];
         }
 
+
         if (isset($parsedOrigin['port']) && $parsedOrigin['port'] !== null) {
             $origin .= ':' . $parsedOrigin['port'];
         }
 
-        print_r($response->getHeaders());
+        $res = $response;
 //        print_r('origin is ' . $origin);
 //
 //        print_r('request method is ' . $this->request->getMethod());
-
+//        Check If Origin is Allowed
         if (in_array($origin, AppConfig['header']['allowed_domains'], true)) {
 //            print_r('allow origin');
 //            header('Access-Control-Allow-Origin: ' . $origin);
-            $response->withHeader(
-                'Access-Control-Allow-Origin',
-                '*'
-            )
+           $res = $response->withHeader('Access-Control-Allow-Origin', '*')
+                ->withHeader('Access-Control-Allow-Credentials', 'true')
+                ->withHeader('Access-Control-Max-Age', '86400')
                 ->withHeader('Access-Control-Allow-Methods', 'GET')
                 ->withAddedHeader('Access-Control-Allow-Methods', 'POST')
                 ->withAddedHeader('Access-Control-Allow-Methods', 'PUT')
@@ -163,10 +167,10 @@ class RouterModule implements RouteModuleInterface
                 ->withAddedHeader('Access-Control-Allow-Methods', 'OPTIONS');
         }
 
-        print_r($response->getHeaders());
+        print_r($res->getHeaders());
 
 
-        return $response;
+        return $res;
     }
 
     /**
