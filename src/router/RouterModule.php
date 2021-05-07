@@ -144,32 +144,23 @@ class RouterModule implements RouteModuleInterface
             $origin .= ':' . $parsedOrigin['port'];
         }
 
-        print_r('origin is ' . $origin);
-
-        print_r('request method is ' . $this->request->getMethod());
+        print_r($response->getHeaders());
+//        print_r('origin is ' . $origin);
+//
+//        print_r('request method is ' . $this->request->getMethod());
 
         if (in_array($origin, AppConfig['header']['allowed_domains'], true)) {
-            print_r('allow origin');
+//            print_r('allow origin');
 //            header('Access-Control-Allow-Origin: ' . $origin);
             $response->withHeader(
                 'Access-Control-Allow-Origin',
                 '*'
-            )->withHeader(
-                'Access-Control-Allow-Methods',
-                'GET'
-            )->withAddedHeader(
-                'Access-Control-Allow-Methods',
-                'POST'
-            )->withAddedHeader(
-                'Access-Control-Allow-Methods',
-                'PUT'
-            )->withAddedHeader(
-                'Access-Control-Allow-Methods',
-                'DELETE'
-            )->withAddedHeader(
-                'Access-Control-Allow-Methods',
-                'OPTIONS'
-            );
+            )
+                ->withHeader('Access-Control-Allow-Methods', 'GET')
+                ->withAddedHeader('Access-Control-Allow-Methods', 'POST')
+                ->withAddedHeader('Access-Control-Allow-Methods', 'PUT')
+                ->withAddedHeader('Access-Control-Allow-Methods', 'DELETE')
+                ->withAddedHeader('Access-Control-Allow-Methods', 'OPTIONS');
         }
 
         print_r($response->getHeaders());
