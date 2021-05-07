@@ -223,7 +223,7 @@ class App implements MiddlewareInterface
         $baseModule->configure($this->applicationBuilder);
         $this->runApp();
 
-        print_r('booting done \n');
+//        print_r('booting done \n');
 //        print_r(json_encode($this->routeTable));
     }
 
