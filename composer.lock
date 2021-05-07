@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/dflydev/dflydev-fig-cookies.git",
-                "reference": "f06d771bc3983716f8dd7a78853c093dc55248ab"
+                "reference": "6ba089b938c456a1a5cca9d8b20d47ebe6137ec6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dflydev/dflydev-fig-cookies/zipball/f06d771bc3983716f8dd7a78853c093dc55248ab",
-                "reference": "f06d771bc3983716f8dd7a78853c093dc55248ab",
+                "url": "https://api.github.com/repos/dflydev/dflydev-fig-cookies/zipball/6ba089b938c456a1a5cca9d8b20d47ebe6137ec6",
+                "reference": "6ba089b938c456a1a5cca9d8b20d47ebe6137ec6",
                 "shasum": ""
             },
             "require": {
@@ -67,7 +67,7 @@
                 "issues": "https://github.com/dflydev/dflydev-fig-cookies/issues",
                 "source": "https://github.com/dflydev/dflydev-fig-cookies/tree/main"
             },
-            "time": "2021-04-28T22:26:30+00:00"
+            "time": "2021-04-30T14:51:24+00:00"
         },
         {
             "name": "guzzlehttp/psr7",

@@ -151,6 +151,7 @@ class RouterModule implements RouteModuleInterface
         print_r('request method is ' . $this->request->getMethod());
 
         if (in_array($origin, AppConfig['header']['allowed_domains'], true)) {
+            print_r('allow origin');
 //            header('Access-Control-Allow-Origin: ' . $origin);
             $response->withHeader(
                 'Access-Control-Allow-Origin',
@@ -161,7 +162,7 @@ class RouterModule implements RouteModuleInterface
             );
         }
 
-        print_r($response->getHeader('Access-Control-Allow-Origin'));
+        print_r($response->getHeaders());
 
 
         return $response;
