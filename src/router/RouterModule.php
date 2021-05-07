@@ -128,12 +128,10 @@ class RouterModule implements RouteModuleInterface
     {
         if ($this->request->hasHeader('origin')) {
             $origin = $this->request->getHeader('origin')[0];
+        } elseif ($this->request->hasHeader('referer')) {
+            $origin = $this->request->getHeader('referer')[0];
         } else {
-            if ($this->request->hasHeader('referer')) {
-                $origin = $this->request->getHeader('referer')[0];
-            } else {
-                $origin = $_SERVER['REMOTE_ADDR'] ?? '*';
-            }
+            $origin = $_SERVER['REMOTE_ADDR'] ?? '*';
         }
         $parsedOrigin = [];
 
@@ -156,9 +154,21 @@ class RouterModule implements RouteModuleInterface
             $response->withHeader(
                 'Access-Control-Allow-Origin',
                 '*'
+            )->withHeader(
+                'Access-Control-Allow-Methods',
+                'GET'
             )->withAddedHeader(
                 'Access-Control-Allow-Methods',
-                'GET, POST, PUT, DELETE, OPTIONS'
+                'POST'
+            )->withAddedHeader(
+                'Access-Control-Allow-Methods',
+                'PUT'
+            )->withAddedHeader(
+                'Access-Control-Allow-Methods',
+                'DELETE'
+            )->withAddedHeader(
+                'Access-Control-Allow-Methods',
+                'OPTIONS'
             );
         }
 
