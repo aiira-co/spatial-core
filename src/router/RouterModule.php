@@ -160,29 +160,17 @@ class RouterModule implements RouteModuleInterface
             $res = $response->withHeader('Access-Control-Allow-Origin', $origin);
         }
 
-//        allowed headers
-        foreach (AppConfig['header']['allowed_headers'] as $value) {
-            $res = $res->withAddedHeader('Access-Control-Allow-Headers', $value);
-        }
-
-        if (!strtolower($this->request->getMethod()) === 'options') {
-            //        allowed methods
-            foreach (AppConfig['header']['allowed_methods'] as $value) {
-                $res = $res->withAddedHeader('Access-Control-Allow-Methods', $value);
-            }
-        }
-
-//        print_r($res->getHeaders());
-
-
-        return $res->withHeader(
-            'Access-Control-Allow-Credentials',
-            AppConfig['header']['allow_credentials']
-        ) // link to framework settings
-        ->withHeader(
-            'Access-Control-Max-Age',
-            AppConfig['header']['max_cache_age']
-        ); // link to framework settings;
+        return $res
+            ->withAddedHeader('Access-Control-Allow-Headers', AppConfig['header']['allowed_headers'])
+            ->withHeader('Access-Control-Allow-Methods', AppConfig['header']['allowed_methods'])
+            ->withHeader(
+                'Access-Control-Allow-Credentials',
+                AppConfig['header']['allow_credentials']
+            ) // link to framework settings
+            ->withHeader(
+                'Access-Control-Max-Age',
+                AppConfig['header']['max_cache_age']
+            ); // link to framework settings;
     }
 
     /**
