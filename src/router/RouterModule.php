@@ -157,20 +157,24 @@ class RouterModule implements RouteModuleInterface
         if (in_array($origin, AppConfig['header']['allowed_domains'], true)) {
 //            print_r('allow origin');
 //            header('Access-Control-Allow-Origin: ' . $origin);
-           $res = $response->withHeader('Access-Control-Allow-Origin', '*')
-                ->withHeader('Access-Control-Allow-Credentials', 'true')
-                ->withHeader('Access-Control-Max-Age', '86400')
-                ->withHeader('Access-Control-Allow-Methods', 'GET')
-                ->withAddedHeader('Access-Control-Allow-Methods', 'POST')
-                ->withAddedHeader('Access-Control-Allow-Methods', 'PUT')
-                ->withAddedHeader('Access-Control-Allow-Methods', 'DELETE')
-                ->withAddedHeader('Access-Control-Allow-Methods', 'OPTIONS');
+            $res = $response->withHeader('Access-Control-Allow-Origin', '*');
         }
 
-        print_r($res->getHeaders());
+        foreach (AppConfig['header']['allowed_methods'] as $value) {
+            $res = $res->withAddedHeader('Access-Control-Allow-Methods', $value);
+        }
+
+//        print_r($res->getHeaders());
 
 
-        return $res;
+        return $res->withHeader(
+            'Access-Control-Allow-Credentials',
+            AppConfig['header']['allow_credentials']
+        ) // link to framework settings
+        ->withHeader(
+            'Access-Control-Max-Age',
+            AppConfig['header']['max_cache_age']
+        ); // link to framework settings;
     }
 
     /**
