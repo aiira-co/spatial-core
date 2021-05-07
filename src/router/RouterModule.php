@@ -157,13 +157,18 @@ class RouterModule implements RouteModuleInterface
         if (in_array($origin, AppConfig['header']['allowed_domains'], true)) {
 //            print_r('allow origin');
 //            header('Access-Control-Allow-Origin: ' . $origin);
-            $res = $response->withHeader('Access-Control-Allow-Origin', '*');
+            $res = $response->withHeader('Access-Control-Allow-Origin', $origin);
         }
 
+//        allowed headers
+        foreach (AppConfig['header']['allowed_headers'] as $value) {
+            $res = $res->withAddedHeader('Access-Control-Allow-Headers', $value);
+        }
+
+        //        allowed methods
         foreach (AppConfig['header']['allowed_methods'] as $value) {
             $res = $res->withAddedHeader('Access-Control-Allow-Methods', $value);
         }
-
 //        print_r($res->getHeaders());
 
 
