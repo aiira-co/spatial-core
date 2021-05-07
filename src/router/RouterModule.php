@@ -84,7 +84,7 @@ class RouterModule implements RouteModuleInterface
             $route['authGuard'] &&
             !$this->isAuthorized(... $this->getAuthGuardInstance($route['authGuard']))
         ) {
-            return $this->controllerNotFound('Unauthorized', 401);
+            return $this->controllerNotFound('Unauthorized', 401, $this->request);
         }
         //     check constructor for DI later
 
@@ -132,16 +132,21 @@ class RouterModule implements RouteModuleInterface
             if ($this->request->hasHeader('referer')) {
                 $origin = $this->request->getHeader('referer')[0];
             } else {
-                $origin = $_SERVER['REMOTE_ADDR'];
+                $origin = $_SERVER['REMOTE_ADDR'] ?? '*';
             }
         }
+        $parsedOrigin = [];
 
+        if ($origin !== '*') {
+            $parsedOrigin = parse_url($origin);
+            $origin = $parsedOrigin['scheme'] . '://' . $parsedOrigin['host'];
+        }
 
-        $parsedOrigin = parse_url($origin);
-        $origin = $parsedOrigin['scheme'] . '://' . $parsedOrigin['host'];
         if (isset($parsedOrigin['port']) && $parsedOrigin['port'] !== null) {
             $origin .= ':' . $parsedOrigin['port'];
         }
+
+        print_r('origin is ' . $origin);
 
         print_r('request method is ' . $this->request->getMethod());
 
@@ -149,7 +154,10 @@ class RouterModule implements RouteModuleInterface
 //            header('Access-Control-Allow-Origin: ' . $origin);
             $response->withHeader(
                 'Access-Control-Allow-Origin',
-                $origin
+                '*'
+            )->withAddedHeader(
+                'Access-Control-Allow-Methods',
+                'GET, POST, PUT, DELETE, OPTIONS'
             );
         }
 
