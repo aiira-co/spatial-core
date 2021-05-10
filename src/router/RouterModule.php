@@ -52,7 +52,7 @@ class RouterModule implements RouteModuleInterface
 
         $payload = json_encode(['message' => $body, 'status' => $statusCode], JSON_THROW_ON_ERROR);
 
-        $response = new \GuzzleHttp\Psr7\Response();
+        $response = new \GuzzleHttp\Psr7\Response($statusCode);
         $response->getBody()->write($payload);
         $response = $this->setCors($response);
 
