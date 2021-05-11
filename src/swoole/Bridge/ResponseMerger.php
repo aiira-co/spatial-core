@@ -14,9 +14,10 @@ class ResponseMerger
 
     public function toSwoole(ResponseInterface $psrResponse, Response $swooleResponse): Response
     {
+        $swooleResponse->status($psrResponse->getStatusCode());
+        
         $this->copyHeaders($psrResponse, $swooleResponse);
         $this->copyBody($psrResponse, $swooleResponse);
-        $swooleResponse->status($psrResponse->getStatusCode());
 
         return $swooleResponse;
     }
