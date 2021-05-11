@@ -43,12 +43,19 @@ class RouterModule implements RouteModuleInterface
      * @return ResponseInterface
      * @throws JsonException
      */
-    public function controllerNotFound(
+    public function quickResponse(
         string $body,
         int $statusCode,
         ServerRequestInterface $request
     ): ResponseInterface {
         $this->request = $request;
+
+
+//        handling options
+        if (strtolower($request->getMethod()) === 'options') {
+            $statusCode = 200;
+            $body = 'Accept Request';
+        }
 
         $payload = json_encode(['message' => $body, 'status' => $statusCode], JSON_THROW_ON_ERROR);
 
@@ -84,7 +91,7 @@ class RouterModule implements RouteModuleInterface
             $route['authGuard'] &&
             !$this->isAuthorized(... $this->getAuthGuardInstance($route['authGuard']))
         ) {
-            return $this->controllerNotFound('Unauthorized', 401, $this->request);
+            return $this->quickResponse('Unauthorized', 401, $this->request);
         }
         //     check constructor for DI later
 

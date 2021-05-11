@@ -74,7 +74,7 @@ class AppHandler implements RequestHandlerInterface
         return $routeFound ?
             $this->routerModule->getControllerMethod($this->routeActivated, $this->defaults, $request) :
 
-            $this->routerModule->controllerNotFound(
+            $this->routerModule->quickResponse(
                 'No Controller was routed to the uri ' . $this->uri . ' on a ' . $requestedMethod . ' method',
                 404,
                 $request

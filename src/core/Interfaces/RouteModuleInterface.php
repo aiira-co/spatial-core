@@ -17,7 +17,7 @@ interface RouteModuleInterface
         ServerRequestInterface $request
     ): ResponseInterface;
 
-    public function controllerNotFound(
+    public function quickResponse(
         string $body,
         int $statusCode,
         ServerRequestInterface $request
