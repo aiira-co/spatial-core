@@ -503,7 +503,7 @@ class App implements MiddlewareInterface
     ): void {
         if (isset($this->controllers[$controllerReflection->getName()])) {
             throw new \RuntimeException('Controller ' . $controllerReflection->getName() . ' cannot be declared twice');
-            return;
+//            return;
         }
         $this->controllers[$controllerReflection->getName()] = $controllerReflection;
 
@@ -581,7 +581,8 @@ class App implements MiddlewareInterface
         $controllerActions = $controllerReflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($controllerActions as $action) {
-            if ($action->getName() === '__construct') {
+            if (str_starts_with($action->getName(), '__')) {
+//                skip magic methods
                 continue;
             }
             $tokens['action'] = $action->getName();
@@ -627,7 +628,7 @@ class App implements MiddlewareInterface
         }
 
         foreach ($controllerActions as $action) {
-            if ($action->getName() === '__construct') {
+            if (str_starts_with($action->getName(), '__')) {
                 continue;
             }
             $tokens['action'] = $action->getName();
