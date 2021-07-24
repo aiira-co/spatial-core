@@ -121,12 +121,13 @@ class App implements MiddlewareInterface
     /**
      * App constructor.
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function __construct()
     {
 //         Initiate DI Container
         $this->diContainer = new Container();
-//        read ymls for parameters
+//        read yaml for parameters
         $this->defineConstantsAndParameters();
 
 //        bootstraps app
@@ -134,7 +135,7 @@ class App implements MiddlewareInterface
     }
 
     /**
-     * @throws ReflectionException|Exception
+     * @throws Exception
      */
     private function defineConstantsAndParameters(): void
     {
@@ -152,12 +153,39 @@ class App implements MiddlewareInterface
             $this->isProdMode = $appConfigs['enableProdMode'];
 //    config/packages/doctrine.yaml
             $doctrineConfigs = Yaml::parseFile(
-                $configDir . DS . 'packages' . DS . ($this->isProdMode ? 'doctrine.yaml' : 'doctrine.dev.yaml')
+                $configDir . DS . 'packages' . DS . ('doctrine.yaml')
             );
+            $doctrineConfigs = $this->resolveEnv($doctrineConfigs);
             define('DoctrineConfig', $doctrineConfigs);
         } catch (ParseException $exception) {
             printf('Unable to parse the YAML string: %s', $exception->getMessage());
         }
+    }
+
+    /**
+     * @param array $param
+     * @return array
+     */
+    private function resolveEnv(array $param): array
+    {
+        $param_keys = array_keys($param);
+
+        for ($i = 0, $iMax = count($param); $i < $iMax; $i++) {
+//            echo 'param value of ' . $param_keys[$i] . '\n';
+//            print_r($param[$param_keys[$i]]);
+
+            if (is_array($param[$param_keys[$i]])) {
+                $param[$param_keys[$i]] = $this->resolveEnv($param[$param_keys[$i]]);
+            } elseif (is_string($param[$param_keys[$i]]) && str_starts_with($param[$param_keys[$i]], '%env(')) {
+//                echo 'getting env variable \n';
+                $actualValue = str_replace(array('%env(', ')%'), '', $param[$param_keys[$i]]);
+//                print_r($actualValue);
+
+                $param[$param_keys[$i]] = getenv($actualValue);
+            }
+        }
+
+        return $param;
     }
 
     /**
