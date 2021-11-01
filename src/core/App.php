@@ -5,6 +5,8 @@ namespace Spatial\Core;
 
 
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -114,7 +116,7 @@ class App implements MiddlewareInterface
     private int $routeType = 2;
     private bool $showRouteTable = false;
 
-    private Container $diContainer;
+    private static Container $diContainer;
     private bool $isProdMode;
 
 
@@ -126,12 +128,16 @@ class App implements MiddlewareInterface
     public function __construct()
     {
 //         Initiate DI Container
-        $this->diContainer = new Container();
+        self::$diContainer = new Container();
 //        read yaml for parameters
         $this->defineConstantsAndParameters();
 
 //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
+    }
+
+    public static function diContainer():Container{
+        return self::$diContainer;
     }
 
     /**
@@ -215,7 +221,7 @@ class App implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $handler->passParams($this->routeTable, $this->diContainer);
+        $handler->passParams($this->routeTable, self::$diContainer);
         return $handler->handle($request);
     }
 
@@ -294,7 +300,10 @@ class App implements MiddlewareInterface
         foreach ($moduleProviders as $provider) {
             if (!isset($this->providers[$moduleName][$provider])) {
                 // suppose to set it on DI Container
-                $this->diContainer->get($provider);
+                try {
+                    self::$diContainer->get($provider);
+                } catch (DependencyException | NotFoundException $e) {
+                }
 //                record
                 $this->providers[$moduleName][$provider] = new ReflectionClass($provider);
             }
