@@ -18,7 +18,7 @@
     "dflydev/fig-cookies": "^3.0",
     "http-interop/http-factory-guzzle": "^1.0",
     "php-di/php-di": "7.*",
-    "spatial/mediator": "^3.1"
+    "spatial/mediator": "^3.3"
   },
   "autoload": {
     "psr-4": {
