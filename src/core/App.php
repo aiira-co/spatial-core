@@ -29,9 +29,10 @@ use Spatial\Common\HttpAttributes\HttpPost;
 use Spatial\Common\HttpAttributes\HttpPut;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\ApiModule;
-use Spatial\Core\Attributes\Authorize;
-use Spatial\Core\Attributes\Route;
 use Spatial\Core\Attributes\Area;
+use Spatial\Core\Attributes\Authorize;
+use Spatial\Core\Attributes\Injectable;
+use Spatial\Core\Attributes\Route;
 use Spatial\Core\Interfaces\ApplicationBuilderInterface;
 use Spatial\Core\Interfaces\RouteModuleInterface;
 use Spatial\Router\RouterModuleInterface;
@@ -119,6 +120,8 @@ class App implements MiddlewareInterface
     private static Container $diContainer;
     private bool $isProdMode;
 
+    private array $requestDIContainer = [];
+
 
     /**
      * App constructor.
@@ -136,7 +139,8 @@ class App implements MiddlewareInterface
         $this->applicationBuilder = new ApplicationBuilder();
     }
 
-    public static function diContainer():Container{
+    public static function diContainer(): Container
+    {
         return self::$diContainer;
     }
 
@@ -221,6 +225,13 @@ class App implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+//        foreach ($this->requestDIContainer as $requestProvider) {
+//            try {
+//                self::diContainer()->get($requestProvider);
+//            } catch (DependencyException|NotFoundException $e) {
+//                print_r($e);
+//            }
+//        }
         $handler->passParams($this->routeTable, self::$diContainer);
         return $handler->handle($request);
     }
@@ -302,10 +313,19 @@ class App implements MiddlewareInterface
                 // suppose to set it on DI Container
                 try {
                     self::$diContainer->get($provider);
-                } catch (DependencyException | NotFoundException $e) {
+//                    check injectable to see if its lifetime or request
+
+                } catch (DependencyException|NotFoundException $e) {
                 }
 //                record
-                $this->providers[$moduleName][$provider] = new ReflectionClass($provider);
+                $providerReflection = new ReflectionClass($provider);
+                $this->providers[$moduleName][$provider] = $providerReflection;
+
+//                $providerInjectableAttribute = $providerReflection->getAttributes(Injectable::class);
+//                if ($providerInjectableAttribute[0] && $providerInjectableAttribute[0]->newInstance(
+//                    )->providedIn === 'any') {
+//                    $this->requestDIContainer[] = $provider;
+//                }
             }
         }
     }
