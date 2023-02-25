@@ -198,9 +198,9 @@ class RouterModule implements RouteModuleInterface
                 $paramName->getName()
             ) : null,
             'FromQuery' => $this->request->getQueryParams()[$paramName->getName()],
-            'FromRoute' => $this->defaults->{$paramName->getName()} ?? null,
+            'FromRoute' => $this->defaults->{strtolower($paramName->getName())} ?? null,
             'FromServices' => $this->getServiceFromProvider($paramName),
-            default => $this->defaults->{$paramName->getName()} ?? $paramName->getDefaultValue() ?? null
+            default => $this->defaults->{strtolower($paramName->getName())} ?? $paramName->getDefaultValue() ?? null
         };
     }
 
