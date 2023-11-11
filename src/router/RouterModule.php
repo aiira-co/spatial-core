@@ -104,26 +104,24 @@ class RouterModule implements RouteModuleInterface
                     'Argument $' . $param['param']->getName(
                     ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
                 );
-//                return $this->controllerNotFound('Controller Action Argument $' . $param['param'] . ' required', 500);
             }
-            // echo $args;
             $args[] = $value;
         }
-//        var_dump($args);
+        
         try {
             $controller = ($this->container->get($route['controller']));
             $controller($request); // __invoke
-            $response = $controller->{$route['action']}(...$args);
-//            $this->setHeaders($response->getHeaders());
+             $controllerResponse = $controller->{$route['action']}(...$args);
+             $response = $this->setCors($controllerResponse);
 
         } catch (DependencyException $e) {
             throw new DependencyException('Controller DI Error ' . $e->getMessage());
         } catch (NotFoundException $e) {
             throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
+        } catch (\TypeError $e) {
+            throw new \Exception('Response Type Error ' . $controllerResponse . ' ' . $e->getMessage());
         }
 
-
-        $response = $this->setCors($response);
         return $response->hasHeader('Content-Type') ? $response :
             $response->withHeader(
                 'Content-Type',

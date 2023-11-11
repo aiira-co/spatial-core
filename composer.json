@@ -12,13 +12,13 @@
     }
   ],
   "require": {
-    "php": "^8.0",
+    "php": "^8.2",
     "psr/http-message": "^1.0",
     "psr/http-factory": "^1.0",
     "dflydev/fig-cookies": "^3.0",
     "http-interop/http-factory-guzzle": "^1.0",
     "php-di/php-di": "^7.0",
-    "spatial/mediator": "^3.3"
+    "spatial/mediator": "^3"
   },
   "autoload": {
     "psr-4": {

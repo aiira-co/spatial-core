@@ -17,7 +17,7 @@ class AppHandler implements RequestHandlerInterface
     private string $uri;
     private array $patternArray;
     private object $defaults;
-    private object $routerModule;
+    private RouterModule $routerModule;
     private array $routeActivated;
     private array $routeTable;
     private Container $diContainer;
