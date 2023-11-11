@@ -119,7 +119,7 @@ class RouterModule implements RouteModuleInterface
         } catch (NotFoundException $e) {
             throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
         } catch (\TypeError $e) {
-            throw new \Exception('Response Type Error ' . $controllerResponse . ' ' . $e->getMessage());
+            throw new \Exception('Response Type Error ' . json_encode($controllerResponse) . ' ' . $e->getMessage());
         }
 
         return $response->hasHeader('Content-Type') ? $response :

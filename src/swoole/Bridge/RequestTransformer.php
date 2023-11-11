@@ -14,6 +14,10 @@ use Swoole\Http\Request as SwooleRequest;
 class RequestTransformer implements RequestInterface
 {
 
+    private string $method;
+    private string $requestTarget;
+    private UriInterface $uri;
+
 
     public function __construct(
         private UriFactoryInterface $uriFactory,
