@@ -25,8 +25,7 @@ class AppHandler implements RequestHandlerInterface
     public function __construct()
     {
         $this->routerModule = new RouterModule();
-        $this->defaults = new class {
-        };
+        $this->defaults = new \stdClass();
     }
 
     public function passParams(array $routeTable, Container $diContainer): void
@@ -34,6 +33,7 @@ class AppHandler implements RequestHandlerInterface
 //        var_dump($routeTable);
         $this->routeTable = $routeTable;
         $this->routerModule->setContainer($diContainer);
+
     }
 
     /**
@@ -88,7 +88,8 @@ class AppHandler implements RequestHandlerInterface
      */
     private function formatRoute(
         UriInterface $requestUri
-    ): void {
+    ): void
+    {
         $host = $requestUri->getHost();
         $uri = $requestUri->getPath();
 
