@@ -8,6 +8,7 @@ namespace Spatial\Swoole;
 use Spatial\Core\AppHandler;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
+use Swoole\Http\Server;
 use Spatial\Core\App;
 
 use Http\Factory\Guzzle\UriFactory;
@@ -52,11 +53,37 @@ class BridgeManager
      * @param Request $swooleRequest
      * @param Response $swooleResponse
      * @return Response
+     * @throws \JsonException
      */
     public function process(
         Request $swooleRequest,
-        Response $swooleResponse
+        Response $swooleResponse,
+        Server $swooleServer
     ): Response {
+
+
+//        check for reserved routes
+//        - /metrics, /api-docs, health
+        if( $swooleRequest->server['request_uri'] == '/metrics'){
+            $swooleResponse->header("Content-Type", "text/plain");
+            $swooleResponse->write($swooleServer->stats(\OPENSWOOLE_STATS_OPENMETRICS));
+            return $swooleResponse;
+        }
+
+        // use prod to disable this docs
+        if( $swooleRequest->server['request_uri'] == '/api-docs'){
+            $swooleResponse->header("Content-Type", "text/html; charset=utf-8");
+            $swooleResponse->write($this->app->getRouteTable());
+            return $swooleResponse;
+
+        }
+
+        if( $swooleRequest->server['request_uri'] == '/health-check'){
+            $swooleResponse->header("Content-Type", "application/json");
+            $swooleResponse->write(json_encode(['status' => 200,'message' => 'OK']));
+            return $swooleResponse;
+        }
+
         $psr7Request = new Bridge\ServerRequestTransformer(
             new UriFactory(),
             new StreamFactory(),

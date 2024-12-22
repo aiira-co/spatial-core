@@ -12,6 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
 use ReflectionParameter;
+use Spatial\Common\Helper\Caster;
 use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Interfaces\RouteModuleInterface;
 use Spatial\Router\Interfaces\IsAuthorizeInterface;
@@ -179,28 +180,90 @@ class RouterModule implements RouteModuleInterface
     }
 
     /**
+     * Retrieves the value for a parameter based on its binding source.
+     *
      * @param string $bindingSource
      * @param ReflectionParameter $paramName
      * @return mixed
      * @throws ReflectionException
      */
-    private
-    function getBindSourceValue(
+    private function getBindSourceValue(
         string $bindingSource,
         ReflectionParameter $paramName
     ): mixed {
         return match ($bindingSource) {
-            'FromBody' => (string)$this->request->getBody(),
-            'FromForm' => $this->request->getUploadedFiles()[$paramName->getName()],
-            'FromHeader' => $this->request->hasHeader($paramName->getName()) ? $this->request->getHeaderLine(
-                $paramName->getName()
-            ) : null,
-            'FromQuery' => $this->request->getQueryParams()[$paramName->getName()],
-            'FromRoute' => $this->defaults->{strtolower($paramName->getName())} ?? null,
-            'FromServices' => $this->getServiceFromProvider($paramName),
-            default => $this->defaults->{strtolower($paramName->getName())} ?? $paramName->getDefaultValue() ?? null
+            'FromBody' => $this->getFromBody($paramName),
+            'FromForm' => $this->getFromForm($paramName),
+            'FromHeader' => $this->getFromHeader($paramName),
+            'FromQuery' => $this->getFromQuery($paramName),
+            'FromRoute' => $this->getFromRoute($paramName),
+            'FromServices' => $this->getFromServices($paramName),
+            default => $this->getDefault($paramName)
         };
     }
+
+    /**
+     * Handles 'FromBody' binding.
+     */
+    private function getFromBody(ReflectionParameter $paramName): mixed
+    {
+        $body = (string)$this->request->getBody();
+        return class_exists($paramName->getType()?->getName())
+            ? Caster::castToObject($paramName->getType()->getName(), $body)
+            : $body;
+    }
+
+    /**
+     * Handles 'FromForm' binding.
+     */
+    private function getFromForm(ReflectionParameter $paramName): mixed
+    {
+        return $this->request->getUploadedFiles()[$paramName->getName()] ?? null;
+    }
+
+    /**
+     * Handles 'FromHeader' binding.
+     */
+    private function getFromHeader(ReflectionParameter $paramName): mixed
+    {
+        return $this->request->hasHeader($paramName->getName())
+            ? $this->request->getHeaderLine($paramName->getName())
+            : null;
+    }
+
+    /**
+     * Handles 'FromQuery' binding.
+     */
+    private function getFromQuery(ReflectionParameter $paramName): mixed
+    {
+        return $this->request->getQueryParams()[$paramName->getName()] ?? null;
+    }
+
+    /**
+     * Handles 'FromRoute' binding.
+     */
+    private function getFromRoute(ReflectionParameter $paramName): mixed
+    {
+        return $this->defaults->{strtolower($paramName->getName())} ?? null;
+    }
+
+    /**
+     * Handles 'FromServices' binding.
+     */
+    private function getFromServices(ReflectionParameter $paramName): mixed
+    {
+        return $this->getServiceFromProvider($paramName);
+    }
+
+    /**
+     * Handles default case.
+     */
+    private function getDefault(ReflectionParameter $paramName): mixed
+    {
+        return $this->defaults->{strtolower($paramName->getName())}
+            ?? ($paramName->isDefaultValueAvailable() ? $paramName->getDefaultValue() : null);
+    }
+
 
     /**
      * @param ReflectionParameter $parameter
