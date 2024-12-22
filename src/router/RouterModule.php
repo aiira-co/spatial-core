@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spatial\Router;
 
+use Common\Helper\Response\ServerResponse;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -115,19 +116,29 @@ class RouterModule implements RouteModuleInterface
              $controllerResponse = $controller->{$route['action']}(...$args);
              $response = $this->setCors($controllerResponse);
 
+            return $response->hasHeader('Content-Type') ? $response :
+                $response->withHeader(
+                    'Content-Type',
+                    $this->_contentType
+                );
+
         } catch (DependencyException $e) {
             throw new DependencyException('Controller DI Error ' . $e->getMessage());
         } catch (NotFoundException $e) {
             throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
         } catch (\TypeError $e) {
             throw new \Exception('Response Type Error ' . json_encode($controllerResponse) . ' ' . $e->getMessage());
+//            $data = new ServerResponse();
+//            $data->success = false;
+//            $data->message = $e->getMessage();
+//            $response = new \GuzzleHttp\Psr7\Response(500);
+//            $response->withHeader('Content-Type', 'application/json')
+//                ->getBody()
+//                ->write(json_encode($data, JSON_THROW_ON_ERROR));
+//            return $response;
         }
 
-        return $response->hasHeader('Content-Type') ? $response :
-            $response->withHeader(
-                'Content-Type',
-                $this->_contentType
-            );
+
     }
 
     /**
@@ -185,7 +196,6 @@ class RouterModule implements RouteModuleInterface
      * @param string $bindingSource
      * @param ReflectionParameter $paramName
      * @return mixed
-     * @throws ReflectionException
      */
     private function getBindSourceValue(
         string $bindingSource,

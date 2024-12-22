@@ -5,12 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
-      <change afterPath="$PROJECT_DIR$/src/common/Helper/Caster.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/Helper/Response/ErrorResponse.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/Helper/Response/Meta.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/Helper/Response/Pagination.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/Helper/Response/ServerResponse.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/Helper/Caster.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Helper/Caster.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/swoole/BridgeManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/swoole/BridgeManager.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,7 +81,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "I:/Code/PHP/Frameworks/spatial-core",
+    "last_opened_file_path": "I:/Code/PHP/Frameworks/spatial-core/src/common/Helper",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -91,11 +92,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="I:\Code\PHP\Frameworks\spatial-core\src\common\Helper" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\core\Attributes" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/src/router" />
       <recent name="$PROJECT_DIR$/src/common/BindSourceAttributes" />
-      <recent name="$PROJECT_DIR$/src/core/Attributes" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="I:\Code\PHP\Frameworks\spatial-core\test\Services" />
@@ -428,7 +429,8 @@
       <workItem from="1642277427120" duration="201000" />
       <workItem from="1642590430910" duration="22000" />
       <workItem from="1720561180338" duration="870000" />
-      <workItem from="1734798177399" duration="11841000" />
+      <workItem from="1734798177399" duration="12384000" />
+      <workItem from="1734892959992" duration="921000" />
     </task>
     <task id="LOCAL-00001" summary="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <created>1610707692170</created>

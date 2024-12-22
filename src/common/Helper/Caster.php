@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 namespace Spatial\Common\Helper;
-use http\Exception\InvalidArgumentException;
 
+use \Exception;
 class Caster
 {
     /**
@@ -12,24 +12,25 @@ class Caster
      * @param string|array $data The data to cast (JSON string or associative array).
      * @return object The instantiated object with properties set via setters.
      * @throws \ReflectionException If the class does not exist or properties are inaccessible.
+     * @throws Exception
      */
     public static function castToObject(string $className, string|array $data): object
     {
         // Ensure the class exists
         if (!class_exists($className)) {
-            throw new InvalidArgumentException("Class $className does not exist.");
+            throw new Exception("Class $className does not exist.");
         }
 
         // Decode JSON string if provided
         if (is_string($data)) {
             $data = json_decode($data, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new InvalidArgumentException("Invalid JSON string provided.");
+                throw new Exception("Invalid JSON string provided.");
             }
         }
 
         if (!is_array($data)) {
-            throw new InvalidArgumentException("Data must be an array.");
+            throw new Exception("Data must be an array.");
         }
 
         // Create a new instance of the class
@@ -46,7 +47,7 @@ class Caster
                 if (!$propertyType || $propertyType->allowsNull()) {
                     continue;
                 }
-                throw new InvalidArgumentException("Missing required property: $propertyName");
+                throw new Exception("Missing required property: $propertyName");
             }
 
             $value = $data[$propertyName];
@@ -73,7 +74,7 @@ class Caster
                     }
                 }
             } catch (\Throwable $e) {
-                throw new InvalidArgumentException(
+                throw new Exception(
                     "Invalid payload for property '$propertyName': " . $e->getMessage(),
                     0,
                     $e
@@ -91,6 +92,7 @@ class Caster
      * @param \ReflectionType $type
      * @return mixed
      * @throws \ReflectionException
+     * @throws Exception
      */
     private static function castValueToType(mixed $value, \ReflectionType $type): mixed
     {
@@ -98,11 +100,11 @@ class Caster
             foreach ($type->getTypes() as $unionType) {
                 try {
                     return self::castValueToType($value, $unionType);
-                } catch (\InvalidArgumentException $exception) {
+                } catch (\Exception $exception) {
                     // Try next type
                 }
             }
-            throw new InvalidArgumentException("Value does not match any of the union types.");
+            throw new Exception("Value does not match any of the union types.");
         }
 
         if ($type->allowsNull() && $value === null) {
@@ -128,7 +130,7 @@ class Caster
             return self::castToObject($typeName, $value);
         }
 
-        throw new InvalidArgumentException("Cannot cast value to type: $typeName");
+        throw new Exception("Cannot cast value to type: $typeName");
     }
 
 }
