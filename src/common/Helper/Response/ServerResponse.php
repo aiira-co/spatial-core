@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Common\Helper\Response;
+namespace Spatial\Common\Helper\Response;
 
 use function json_encode;
 class ServerResponse

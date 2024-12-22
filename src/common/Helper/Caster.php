@@ -1,110 +1,111 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Spatial\Common\Helper;
 
-use \Exception;
+use ReflectionException;
+use ReflectionProperty;
+use ReflectionType;
+use RuntimeException;
+use InvalidArgumentException;
+
 class Caster
 {
     /**
      * Casts an associative array or JSON string into an object of the given class.
      *
      * @param string $className The fully qualified class name of the target object.
-     * @param string|array $data The data to cast (JSON string or associative array).
+     * @param array|string $data The data to cast (JSON string or associative array).
      * @return object The instantiated object with properties set via setters.
-     * @throws \ReflectionException If the class does not exist or properties are inaccessible.
-     * @throws Exception
+     * @throws ReflectionException If the class does not exist or properties are inaccessible.
+     * @throws InvalidArgumentException If the data is invalid.
+     * @throws RuntimeException If an error occurs during casting.
      */
-    public static function castToObject(string $className, string|array $data): object
+    public static function castToObject(string $className, array|string $data): object
     {
         // Ensure the class exists
         if (!class_exists($className)) {
-            throw new Exception("Class $className does not exist.");
+            throw new InvalidArgumentException("Class '$className' does not exist.");
         }
 
         // Decode JSON string if provided
         if (is_string($data)) {
             $data = json_decode($data, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new Exception("Invalid JSON string provided.");
+                throw new InvalidArgumentException('Invalid JSON string provided.');
             }
         }
 
         if (!is_array($data)) {
-            throw new Exception("Data must be an array.");
+            throw new InvalidArgumentException('Data must be an array.');
         }
 
-        // Create a new instance of the class
+        $classInstance = new $className();
         $reflectionClass = new \ReflectionClass($className);
-        $object = $reflectionClass->newInstanceWithoutConstructor();
 
-        // Iterate through the class properties
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
 
             if (!array_key_exists($propertyName, $data)) {
-                // Check if the property is nullable or has a default value
+                // Check for nullability and default values
                 $propertyType = $property->getType();
-                if (!$propertyType || $propertyType->allowsNull()) {
+                if (!$propertyType || $propertyType->allowsNull() || $property->hasDefaultValue()) {
                     continue;
                 }
-                throw new Exception("Missing required property: $propertyName");
+                throw new InvalidArgumentException("Missing required property: '$propertyName'");
             }
 
             $value = $data[$propertyName];
-            $setterMethod = 'set' . ucfirst($propertyName);
 
             try {
-                if ($reflectionClass->hasMethod($setterMethod)) {
-                    $setter = $reflectionClass->getMethod($setterMethod);
-
-                    if (!$setter->isPublic()) {
-                        continue;
-                    }
-
-                    $parameters = $setter->getParameters();
-                    if (count($parameters) === 1) {
-                        $parameter = $parameters[0];
-                        $parameterType = $parameter->getType();
-
-                        if ($parameterType) {
-                            $value = self::castValueToType($value, $parameterType);
-                        }
-
-                        $setter->invoke($object, $value);
-                    }
+                if (!$property->isPublic()) {
+                    continue;
                 }
-            } catch (\Throwable $e) {
-                throw new Exception(
-                    "Invalid payload for property '$propertyName': " . $e->getMessage(),
+
+                // Check for setter hook (PHP 8.4+)
+                if (PHP_VERSION_ID >= 80400 && !$property->hasHook(\PropertyHookType::Set)) {
+                    continue;
+                }
+
+                $propertyType = $property->getType();
+                if ($propertyType) {
+                    $value = self::castValueToType($value, $propertyType);
+                }
+
+                $classInstance->{$propertyName} = $value;
+            } catch (Throwable $e) {
+                throw new RuntimeException(
+                    "Error casting property '$propertyName': " . $e->getMessage(),
                     0,
                     $e
                 );
             }
         }
 
-        return $object;
+        return $classInstance;
     }
 
     /**
      * Cast a value to a specified ReflectionType.
      *
      * @param mixed $value
-     * @param \ReflectionType $type
+     * @param ReflectionType $type
      * @return mixed
-     * @throws \ReflectionException
-     * @throws Exception
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
      */
-    private static function castValueToType(mixed $value, \ReflectionType $type): mixed
+    private static function castValueToType(mixed $value, ReflectionType $type): mixed
     {
         if ($type instanceof \ReflectionUnionType) {
             foreach ($type->getTypes() as $unionType) {
                 try {
                     return self::castValueToType($value, $unionType);
-                } catch (\Exception $exception) {
+                } catch (RuntimeException) {
                     // Try next type
                 }
             }
-            throw new Exception("Value does not match any of the union types.");
+            throw new InvalidArgumentException("Value does not match any of the union types.");
         }
 
         if ($type->allowsNull() && $value === null) {
@@ -118,19 +119,17 @@ class Caster
             return $value;
         }
 
-        if ($typeName === 'Collection' && is_array($value)) {
-            $collection = new Collection();
-            foreach ($value as $item) {
-                $collection->add($item);
+        if ($typeName === 'array') {
+            if (!is_array($value)) {
+                throw new InvalidArgumentException("Value must be an array.");
             }
-            return $collection;
+            return $value;
         }
 
         if (class_exists($typeName)) {
             return self::castToObject($typeName, $value);
         }
 
-        throw new Exception("Cannot cast value to type: $typeName");
+        throw new RuntimeException("Cannot cast value to type: $typeName");
     }
-
 }

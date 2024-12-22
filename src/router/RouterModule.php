@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spatial\Router;
 
-use Common\Helper\Response\ServerResponse;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -59,7 +58,7 @@ class RouterModule implements RouteModuleInterface
             $body = 'Accept Request';
         }
 
-        $payload = json_encode(['message' => $body, 'status' => $statusCode], JSON_THROW_ON_ERROR);
+        $payload = json_encode(['status' => $statusCode, 'success' => $statusCode === 200,'message' => $body], JSON_THROW_ON_ERROR);
 
         $response = new \GuzzleHttp\Psr7\Response($statusCode);
         $response->getBody()->write($payload);
@@ -96,25 +95,25 @@ class RouterModule implements RouteModuleInterface
             return $this->quickResponse('Unauthorized', 401, $this->request);
         }
         //     check constructor for DI later
-
-        $args = [];
-        foreach ($route['params'] as $param) {
-            $value = $this->getBindSourceValue($param['bindingSource'], $param['param']);
-            //$param is an instance of ReflectionParameter
-            if ($value === null && !$param['param']->isOptional()) {
-                throw new \Exception(
-                    'Argument $' . $param['param']->getName(
-                    ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
-                );
-            }
-            $args[] = $value;
-        }
-        
         try {
+            $args = [];
+            foreach ($route['params'] as $param) {
+                $value = $this->getBindSourceValue($param['bindingSource'], $param['param']);
+                //$param is an instance of ReflectionParameter
+                if ($value === null && !$param['param']->isOptional()) {
+                    throw new \Exception(
+                        'Argument $' . $param['param']->getName(
+                        ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
+                    );
+                }
+                $args[] = $value;
+            }
+
+
             $controller = ($this->container->get($route['controller']));
             $controller($request); // __invoke
-             $controllerResponse = $controller->{$route['action']}(...$args);
-             $response = $this->setCors($controllerResponse);
+            $controllerResponse = $controller->{$route['action']}(...$args);
+            $response = $this->setCors($controllerResponse);
 
             return $response->hasHeader('Content-Type') ? $response :
                 $response->withHeader(
@@ -128,14 +127,8 @@ class RouterModule implements RouteModuleInterface
             throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
         } catch (\TypeError $e) {
             throw new \Exception('Response Type Error ' . json_encode($controllerResponse) . ' ' . $e->getMessage());
-//            $data = new ServerResponse();
-//            $data->success = false;
-//            $data->message = $e->getMessage();
-//            $response = new \GuzzleHttp\Psr7\Response(500);
-//            $response->withHeader('Content-Type', 'application/json')
-//                ->getBody()
-//                ->write(json_encode($data, JSON_THROW_ON_ERROR));
-//            return $response;
+        }catch(\Exception $e) {
+            return $this->quickResponse($e->getMessage(), 500, $this->request);
         }
 
 
