@@ -5,13 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Helper/Caster.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Helper/Caster.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Helper/Response/ErrorResponse.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Helper/Response/ErrorResponse.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/common/Helper/Response/Meta.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Helper/Response/Meta.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Helper/Response/Pagination.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Helper/Response/Pagination.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/Helper/Response/ServerResponse.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/Helper/Response/ServerResponse.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/router/RouterModule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/RouterModule.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,25 +69,24 @@
   &quot;associatedIndex&quot;: 4
 }</component>
   <component name="ProjectId" id="1jVRlvBcYX20DtOwa2bScSvgjQZ" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "I:/Code/PHP/Frameworks/spatial-core/src/common/Helper",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;I:/Code/PHP/Frameworks/spatial-core/src/common/Helper&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\common\Helper" />
@@ -334,8 +331,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-PS-243.22562.164" />
-        <option value="bundled-php-predefined-a98d8de5180a-7980c7aaca61-com.jetbrains.php.sharedIndexes-PS-243.22562.164" />
+        <option value="bundled-js-predefined-d6986cc7102b-b81319f9767f-JavaScript-PS-251.17181.10" />
+        <option value="bundled-php-predefined-a98d8de5180a-0f211e4baf26-com.jetbrains.php.sharedIndexes-PS-251.17181.10" />
       </set>
     </attachedChunks>
   </component>
@@ -430,7 +427,8 @@
       <workItem from="1642590430910" duration="22000" />
       <workItem from="1720561180338" duration="870000" />
       <workItem from="1734798177399" duration="12384000" />
-      <workItem from="1734892959992" duration="2414000" />
+      <workItem from="1734892959992" duration="5518000" />
+      <workItem from="1738091498076" duration="60000" />
     </task>
     <task id="LOCAL-00001" summary="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <created>1610707692170</created>

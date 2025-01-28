@@ -2,11 +2,9 @@
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/common" isTestSource="false" packagePrefix="Spatial\Common\" />
       <sourceFolder url="file://$MODULE_DIR$/src/core" isTestSource="false" packagePrefix="Spatial\Core\" />
       <sourceFolder url="file://$MODULE_DIR$/src/swoole" isTestSource="false" packagePrefix="Spatial\Swoole\" />
-      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/infrastructure" isTestSource="false" packagePrefix="Spatial\Infrastructure\" />
       <sourceFolder url="file://$MODULE_DIR$/src/router" isTestSource="false" packagePrefix="Spatial\Router\" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" packagePrefix="Spatial\Api\" />

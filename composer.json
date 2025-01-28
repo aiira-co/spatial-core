@@ -3,6 +3,7 @@
   "description": "Spatial API Core Contains Attributes",
   "type": "library",
   "license": "MIT",
+  "version": "4.0.0-RC1",
   "authors": [
     {
       "name": "Kofi Owusu-Afriyie",
