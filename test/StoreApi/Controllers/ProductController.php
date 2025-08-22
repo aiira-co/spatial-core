@@ -14,6 +14,8 @@ use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Attributes\Route;
 use Spatial\Psr7\Response;
+use Psr\Log\LoggerInterface;
+use OpenTelemetry\API\Trace\TracerInterface;
 
 /**
  * ValuesController Class exists in the Api\Controllers namespace
@@ -29,13 +31,17 @@ class ProductController
 {
 
     private Response $response;
+    private LoggerInterface $logger;
+    private TracerInterface $tracer;
 
     /**
      * Use constructor to Inject or instantiate dependencies
      */
-    public function __construct()
+    public function __construct(LoggerInterface $logger, TracerInterface $tracer)
     {
         $this->response = new Response();
+        $this->logger = $logger;
+        $this->tracer = $tracer;
     }
 
     /**
@@ -47,6 +53,10 @@ class ProductController
     #[HttpGet]
     public function productList(): ResponseInterface
     {
+        $span = $this->tracer->spanBuilder('ProductController::productList')->startSpan();
+
+        $this->logger->info('Fetching product list');
+
         $data = [
             'app api',
             'value1',
@@ -57,6 +67,9 @@ class ProductController
         $this->response
             ->getBody()
             ?->write(json_encode($payload, JSON_THROW_ON_ERROR));
+
+        $span->end();
+
         return $this->response;
         // ->withHeader('Content-Type', 'application/json');
         // ->withHeader('Content-Disposition', 'attachment;filename="downloaded.pdf"');

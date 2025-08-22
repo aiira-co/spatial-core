@@ -36,10 +36,11 @@ use Spatial\Core\Attributes\Route;
 use Spatial\Core\Interfaces\ApplicationBuilderInterface;
 use Spatial\Core\Interfaces\RouteModuleInterface;
 use Spatial\Router\RouterModuleInterface;
+use Spatial\Telemetry\OtelProviderFactory;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use function Psl\Str\uppercase;
-
+use Psr\Log\LoggerInterface;
 /**
  * Class App
  * @package Spatial\Core
@@ -48,6 +49,8 @@ class App implements MiddlewareInterface
 {
     private ApplicationBuilderInterface $applicationBuilder;
     private RouteModuleInterface $routerModule;
+    private LoggerInterface $logger;
+
     /**
      * @var array|string[]
      */
@@ -136,8 +139,16 @@ class App implements MiddlewareInterface
 //        read yaml for parameters
         $this->defineConstantsAndParameters();
 
-//        bootstraps app
+        //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
+
+        // Initialize OpenTelemetry
+        $this->logger = OtelProviderFactory::create(
+            'spatial-core',
+            '1.0.0',
+            getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: 'http://collector:4318'
+        );
+        self::$diContainer->set(LoggerInterface::class, $this->logger);
     }
 
     public static function diContainer(): Container
