@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spatial\Router\RouterModule;
+use Spatial\Telemetry\OpenTelemetryMiddleware;
 
 class AppHandler implements RequestHandlerInterface
 {
@@ -22,6 +23,7 @@ class AppHandler implements RequestHandlerInterface
     private array $routeTable;
     private Container $diContainer;
 
+    private OpenTelemetryMiddleware $otelMiddleware;
     public function __construct()
     {
         $this->routerModule = new RouterModule();
@@ -33,6 +35,7 @@ class AppHandler implements RequestHandlerInterface
 //        var_dump($routeTable);
         $this->routeTable = $routeTable;
         $this->routerModule->setContainer($diContainer);
+        $this->otelMiddleware = $this->diContainer->get(OpenTelemetryMiddleware::class);
 
     }
 
@@ -71,7 +74,9 @@ class AppHandler implements RequestHandlerInterface
         }
 
 
-        return $routeFound ?
+// implement otel middleware
+
+        $response = $routeFound ?
             $this->routerModule->getControllerMethod($this->routeActivated, $this->defaults, $request) :
 
             $this->routerModule->quickResponse(
@@ -79,6 +84,9 @@ class AppHandler implements RequestHandlerInterface
                 404,
                 $request
             );
+
+        $this->otelMiddleware->handle($request, $response,function(){});
+        return $response;
     }
 
 

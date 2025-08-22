@@ -17,7 +17,6 @@ use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Interfaces\RouteModuleInterface;
 use Spatial\Router\Interfaces\IsAuthorizeInterface;
 use Spatial\Router\Trait\SecurityTrait;
-
 class RouterModule implements RouteModuleInterface
 {
     use SecurityTrait;
@@ -31,6 +30,7 @@ class RouterModule implements RouteModuleInterface
 
     private ServerRequestInterface $request;
     private Container $container;
+
 
 
     public function setContainer(Container $diContainer): void
