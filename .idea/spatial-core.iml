@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/infrastructure" isTestSource="false" packagePrefix="Spatial\Infrastructure\" />
       <sourceFolder url="file://$MODULE_DIR$/src/router" isTestSource="false" packagePrefix="Spatial\Router\" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" packagePrefix="Spatial\Api\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/telemetry" isTestSource="false" packagePrefix="Spatial\Telemetry\" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/php-di/invoker" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatial/psr7" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/ralouphie/getallheaders" />

@@ -145,8 +145,8 @@ class App implements MiddlewareInterface
 
         // Initialize OpenTelemetry
         $this->logger = OtelProviderFactory::create(
-            'spatial-core',
-            '1.0.0',
+            getenv('APP_NAME') ?: 'spatial-core',
+            getenv('APP_VERSION') ?: '1.0.0',
             getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: 'http://collector:4318'
         );
         self::$diContainer->set(LoggerInterface::class, $this->logger);

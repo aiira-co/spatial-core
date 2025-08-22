@@ -33,7 +33,8 @@
       "Spatial\\Common\\": "src/common/",
       "Spatial\\Infrastructure\\": "src/infrastructure/",
       "Spatial\\Swoole\\": "src/swoole/",
-      "Spatial\\Router\\": "src/router/"
+      "Spatial\\Router\\": "src/router/",
+      "Spatial\\Telemetry\\": "src/telemetry/"
     }
   },
   "autoload-dev": {
