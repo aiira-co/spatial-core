@@ -36,6 +36,7 @@ use Spatial\Core\Attributes\Route;
 use Spatial\Core\Interfaces\ApplicationBuilderInterface;
 use Spatial\Core\Interfaces\RouteModuleInterface;
 use Spatial\Router\RouterModuleInterface;
+use Spatial\Telemetry\OpenTelemetryMiddleware;
 use Spatial\Telemetry\OtelProviderFactory;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -383,7 +384,10 @@ class App implements MiddlewareInterface
 //            }
 //        }
         $handler->passParams($this->routeTable, self::$diContainer);
-        return $handler->handle($request);
+
+        $otelMiddleWare = self::diContainer()->get(OpenTelemetryMiddleware::class);
+       return $otelMiddleWare->handle($request, $handler);
+//        return $handler->handle($request);
     }
 
     /**

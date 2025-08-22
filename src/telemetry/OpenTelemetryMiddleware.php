@@ -8,14 +8,15 @@ use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\API\Trace\TracerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 
 class OpenTelemetryMiddleware
 {
     public function __construct(private TracerInterface $tracer, private LoggerInterface $logger)
     {}
-
-    public function handle(RequestInterface $request, ResponseInterface $response, callable $next)
+    public function handle(ServerRequestInterface $request, RequestHandlerInterface $next)
     {
         // Start the span for the entire request
         $span = $this->tracer->spanBuilder('http.request')->startSpan();
@@ -28,19 +29,19 @@ class OpenTelemetryMiddleware
 
         try {
             // Process the request
-            $result = $next($request, $response);
+            $response = $next->handle($request);
 
             // Set response attributes
             $this->setHttpResponseAttributes($span, $response);
 
-            return $result;
+            return $response;
         } catch (Exception $e) {
             // Record the exception
             $span->recordException($e);
             $span->setStatus(StatusCode::STATUS_ERROR, $e->getMessage());
 
             // Set error status code
-            $span->setAttribute('http.status_code', $response->getStatusCode());
+//            $span->setAttribute('http.status_code', $response->getStatusCode());
 
             throw $e;
         } finally {
@@ -49,6 +50,7 @@ class OpenTelemetryMiddleware
             $scope->detach();
         }
     }
+
 
     private function setHttpRequestAttributes(SpanInterface $span, RequestInterface $request): void
     {
@@ -88,7 +90,7 @@ class OpenTelemetryMiddleware
         // For Symfony:
         // return $request->attributes->get('_route', '');
 
-        return $request->getUri()->get();
+        return $request->getUri()->getPath();
     }
 
 
