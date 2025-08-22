@@ -8,6 +8,9 @@ use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
+use OpenTelemetry\API\Trace\TracerInterface;
+use OpenTelemetry\SDK\Sdk;
+use OpenTelemetry\SDK\Trace\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -150,6 +153,9 @@ class App implements MiddlewareInterface
             getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: 'http://collector:4318'
         );
         self::$diContainer->set(LoggerInterface::class, $this->logger);
+
+
+        self::$diContainer->set(TracerInterface::class, OtelProviderFactory::$tracer);
     }
 
     public static function diContainer(): Container

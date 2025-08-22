@@ -35,7 +35,7 @@ class OpenTelemetryMiddleware
             $this->setHttpResponseAttributes($span, $response);
 
             return $response;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Record the exception
             $span->recordException($e);
             $span->setStatus(StatusCode::STATUS_ERROR, $e->getMessage());
@@ -55,11 +55,11 @@ class OpenTelemetryMiddleware
     private function setHttpRequestAttributes(SpanInterface $span, RequestInterface $request): void
     {
         $span->setAttribute('http.method', $request->getMethod());
-        $span->setAttribute('http.target', $request->getUri());
+        $span->setAttribute('http.target', $request->getUri()->getQuery());
         $span->setAttribute('http.route', $this->getRoutePattern($request));
-        $span->setAttribute('http.url', $request->getUri());
-        $span->setAttribute('http.user_agent', $request->getHeader('User-Agent'));
-        $span->setAttribute('http.request_content_length', $request->getHeader('Content-Length'));
+        $span->setAttribute('http.url', $request->getUri()->getQuery());
+        $span->setAttribute('http.user_agent', $request->getHeaderLine('User-Agent'));
+        $span->setAttribute('http.request_content_length', $request->getHeaderLine('Content-Length'));
         $span->setAttribute('http.scheme', $request->getUri()->getScheme());
 
         $span->setAttribute('net.host.name', $request->getUri()->getHost());
@@ -67,13 +67,13 @@ class OpenTelemetryMiddleware
         $span->setAttribute('net.peer.ip', $this->getClientIp($request));
 
         // Add custom headers if needed (be careful with sensitive data)
-        $span->setAttribute('http.request_id', $request->getHeader('X-Request-ID'));
+        $span->setAttribute('http.request_id', $request->getHeaderLine('X-Request-ID'));
     }
 
     private function setHttpResponseAttributes(SpanInterface $span, ResponseInterface $response): void
     {
         $span->setAttribute('http.status_code', $response->getStatusCode());
-        $span->setAttribute('http.response_content_length', $response->getHeader('Content-Length'));
+        $span->setAttribute('http.response_content_length', $response->getHeaderLine('Content-Length'));
 
         // Set span status based on HTTP status code
         if ($response->getStatusCode() >= 400) {

@@ -6,6 +6,7 @@ namespace Spatial\Telemetry;
 
 use Monolog\Logger;
 use OpenTelemetry\API\Common\Time\Clock;
+use OpenTelemetry\API\Trace\TracerInterface;
 use OpenTelemetry\Contrib\Logs\Monolog\Handler;
 use OpenTelemetry\Contrib\Otlp\LogsExporter;
 use OpenTelemetry\Contrib\Otlp\MetricExporter;
@@ -29,6 +30,7 @@ use Throwable;
 
 class OtelProviderFactory
 {
+    static TracerInterface $tracer;
     /**
      * Build and return a Monolog logger integrated with OpenTelemetry.
      *
@@ -50,6 +52,11 @@ class OtelProviderFactory
         $endpoint = $endpoint ?? getenv('OTEL_EXPORTER_OTLP_ENDPOINT');
         if (empty($endpoint)) {
             return new Logger($serviceName); // Fallback if no endpoint
+        }
+
+        // Check if collector is reachable
+        if (!self::isCollectorAvailable($endpoint)) {
+            return new Logger($serviceName); // Fallback to regular Monolog
         }
 
         try {
@@ -85,7 +92,7 @@ class OtelProviderFactory
 
             // --- Providers
             $tracerProvider = new TracerProvider(
-              spanProcessors:  [
+                spanProcessors:  [
                     new BatchSpanProcessor(
                         $spanExporter,
                         Clock::getDefault()
@@ -95,10 +102,12 @@ class OtelProviderFactory
                 instrumentationScopeFactory:  $instrumentationScopeFactory
             );
 
+            self::$tracer =  $tracerProvider->getTracer('io.opentelemetry.contrib.php');
+
             $loggerProvider = new LoggerProvider(
                 processor:  new BatchLogRecordProcessor($logExporter, Clock::getDefault()),
-               instrumentationScopeFactory:  $instrumentationScopeFactory,
-               resource:  $resource
+                instrumentationScopeFactory:  $instrumentationScopeFactory,
+                resource:  $resource
             );
 
             // Use the builder for meter provider
@@ -150,5 +159,23 @@ class OtelProviderFactory
             class_exists(SpanExporter::class) &&
             class_exists(MetricExporter::class) &&
             class_exists(Handler::class);
+    }
+
+    private static function isCollectorAvailable(string $endpoint): bool
+    {
+        $urlParts = parse_url($endpoint);
+        $host = $urlParts['host'] ?? 'collector';
+        $port = $urlParts['port'] ?? 4318;
+
+        try {
+            $connection = @fsockopen($host, $port, $errno, $errstr, 1);
+            if ($connection) {
+                fclose($connection);
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }
