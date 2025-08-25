@@ -453,7 +453,7 @@
       <workItem from="1738091498076" duration="341000" />
       <workItem from="1755839593162" duration="14314000" />
       <workItem from="1755858056586" duration="4633000" />
-      <workItem from="1756043757297" duration="720000" />
+      <workItem from="1756043757297" duration="970000" />
     </task>
     <task id="LOCAL-00001" summary="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <created>1610707692170</created>
