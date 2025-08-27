@@ -125,7 +125,7 @@ class App implements MiddlewareInterface
     private int $routeType = 2;
     private bool $showRouteTable = false;
 
-    private static Container $diContainer;
+    public static Container $diContainer;
     private bool $isProdMode;
 
     private array $requestDIContainer = [];

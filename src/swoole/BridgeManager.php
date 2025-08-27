@@ -41,8 +41,8 @@ class BridgeManager
      */
     public function __construct(
         App $app,
-        Bridge\RequestTransformerInterface $requestTransformer = null,
-        Bridge\ResponseMergerInterface $responseMerger = null
+        Bridge\RequestTransformerInterface|null $requestTransformer = null,
+        Bridge\ResponseMergerInterface|null $responseMerger = null
     ) {
         $this->app = $app;
         $this->requestTransformer = $requestTransformer;
