@@ -17,6 +17,8 @@ class RequestTransformer implements RequestInterface
     private string $method;
     private string $requestTarget;
     private UriInterface $uri;
+    private StreamInterface $body;
+    private string $protocol;
 
 
     public function __construct(
@@ -27,14 +29,14 @@ class RequestTransformer implements RequestInterface
     }
 
 
-    public function getRequestTarget()
+    public function getRequestTarget(): string
     {
         return !empty($this->requestTarget)
             ? $this->requestTarget
             : ($this->requestTarget = $this->buildRequestTarget());
     }
 
-    private function buildRequestTarget()
+    private function buildRequestTarget(): string
     {
         $queryString = !empty($this->swooleRequest->server['query_string'])
             ? '?' . $this->swooleRequest->server['query_string']
@@ -44,21 +46,21 @@ class RequestTransformer implements RequestInterface
             . $queryString;
     }
 
-    public function withRequestTarget($requestTarget)
+    public function withRequestTarget($requestTarget): static
     {
         $new = clone $this;
         $new->requestTarget = $requestTarget;
         return $new;
     }
 
-    public function getMethod()
+    public function getMethod(): string
     {
         return !empty($this->method)
             ? $this->method
             : ($this->method = $this->swooleRequest->server['request_method']);
     }
 
-    public function withMethod($method)
+    public function withMethod($method): static
     {
         $validMethods = ['options', 'get', 'head', 'post', 'put', 'delete', 'trace', 'connect'];
         if (!in_array(strtolower($method), $validMethods)) {
@@ -71,7 +73,7 @@ class RequestTransformer implements RequestInterface
     }
 
 
-    public function getUri()
+    public function getUri(): UriInterface
     {
         if (!empty($this->uri)) {
             return $this->uri;
@@ -88,7 +90,7 @@ class RequestTransformer implements RequestInterface
         );
     }
 
-    private function parseUserInfo()
+    private function parseUserInfo(): ?string
     {
         $authorization = $this->swooleRequest->header['authorization'] ?? '';
 
@@ -100,31 +102,31 @@ class RequestTransformer implements RequestInterface
         return null;
     }
 
-    public function withUri(UriInterface $uri, $preserveHost = false)
+    public function withUri(UriInterface $uri, $preserveHost = false): static
     {
         $new = clone $this;
         $new->uri = $uri;
         return $new;
     }
 
-    public function getProtocolVersion()
+    public function getProtocolVersion(): string
     {
         return $this->protocol ?? ($this->protocol = '1.1');
     }
 
-    public function withProtocolVersion($version)
+    public function withProtocolVersion($version): static
     {
         $new = clone $this;
         $new->protocol = $version;
         return $new;
     }
 
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->swooleRequest->header;
     }
 
-    public function hasHeader($name)
+    public function hasHeader($name): bool
     {
         foreach ($this->swooleRequest->header as $key => $value) {
             if (strtolower($name) == strtolower($key)) {
@@ -135,7 +137,7 @@ class RequestTransformer implements RequestInterface
         return false;
     }
 
-    public function getHeader($name)
+    public function getHeader($name): array
     {
         if (!$this->hasHeader($name)) {
             return [];
@@ -148,21 +150,23 @@ class RequestTransformer implements RequestInterface
                     : [$value];
             }
         }
+
+        return [];
     }
 
-    public function getHeaderLine($name)
+    public function getHeaderLine($name): string
     {
         return \implode(',', $this->getHeader($name));
     }
 
-    public function withHeader($name, $value)
+    public function withHeader($name, $value): self
     {
         $new = clone $this;
         $new->swooleRequest->header[$name] = $value;
         return $new;
     }
 
-    public function withAddedHeader($name, $value)
+    public function withAddedHeader($name, $value): self
     {
         if (!$this->hasHeader($name)) {
             return $this->withHeader($name, $value);
@@ -181,7 +185,7 @@ class RequestTransformer implements RequestInterface
         return $new;
     }
 
-    public function withoutHeader($name)
+    public function withoutHeader($name): self
     {
         $new = clone $this;
 
@@ -192,17 +196,19 @@ class RequestTransformer implements RequestInterface
         foreach ($new->swooleRequest->header as $key => $value) {
             if (strtolower($name) == strtolower($key)) {
                 unset($new->swooleRequest->header[$key]);
-                return $new;
+                break;
             }
         }
+
+        return $new;
     }
 
-    public function getBody()
+    public function getBody(): StreamInterface
     {
         return $this->body ?? $this->streamFactory->createStream($this->swooleRequest->rawContent());
     }
 
-    public function withBody(StreamInterface $body)
+    public function withBody(StreamInterface $body): self
     {
         $new = clone $this;
         $new->body = $body;

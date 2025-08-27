@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);                
 
 
 namespace Spatial\Swoole\Bridge;
@@ -15,6 +16,10 @@ use Swoole\Http\Request as SwooleRequest;
 class ServerRequestTransformer extends RequestTransformer implements ServerRequestInterface
 {
     public $attributes = [];
+    protected $parsedBody;
+    protected $files;
+    protected $query;
+    protected $cookies;
 
     public function __construct(
         private UriFactoryInterface $uriFactory,
@@ -27,36 +32,36 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
     }
 
 
-    public function getServerParams()
+    public function getServerParams(): array
     {
         return $_SERVER ?? [];
     }
 
-    public function getCookieParams()
+    public function getCookieParams(): array
     {
         return $this->cookies ?? ($this->swooleRequest->cookie ?? []);
     }
 
-    public function withCookieParams(array $cookies)
+    public function withCookieParams(array $cookies): static
     {
         $new = clone $this;
         $new->cookies = $cookies;
         return $new;
     }
 
-    public function getQueryParams()
+    public function getQueryParams(): array
     {
         return $this->query ?? ($this->swooleRequest->get ?? []);
     }
 
-    public function withQueryParams(array $query)
+    public function withQueryParams(array $query): static
     {
         $new = clone $this;
         $new->query = $query;
         return $new;
     }
 
-    public function getUploadedFiles()
+    public function getUploadedFiles(): array
     {
         if (isset($this->files)) {
             return $this->files;
@@ -77,14 +82,14 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return $files;
     }
 
-    public function withUploadedFiles(array $uploadedFiles)
+    public function withUploadedFiles(array $uploadedFiles): static
     {
         $new = clone $this;
         $new->files = $uploadedFiles;
         return $new;
     }
 
-    public function getParsedBody()
+    public function getParsedBody(): array|null|object
     {
         if (!empty($this->parsedBody)) {
             return $this->parsedBody;
@@ -98,7 +103,7 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return null;
     }
 
-    public function withParsedBody($data)
+    public function withParsedBody(array|object|null $data): self
     {
         if (!is_object($data) && !is_array($data)) {
             throw new \InvalidArgumentException('Unsupported argument type');
@@ -109,24 +114,24 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return $new;
     }
 
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }
 
-    public function getAttribute($name, $default = null)
+    public function getAttribute(string $name, $default = null): mixed
     {
         return $this->attributes[$name] ?? $default;
     }
 
-    public function withAttribute($name, $value)
+    public function withAttribute(string $name, mixed $value): self
     {
         $new = clone $this;
         $new->attributes[$name] = $value;
         return $new;
     }
 
-    public function withoutAttribute($name)
+    public function withoutAttribute(string $name): self
     {
         $new = clone $this;
         unset($new->attributes[$name]);

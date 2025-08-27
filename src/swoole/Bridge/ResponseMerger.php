@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace Spatial\Swoole\Bridge;
 
@@ -22,7 +22,7 @@ class ResponseMerger
         return $swooleResponse;
     }
 
-    private function copyHeaders($psrResponse, $swooleResponse)
+    private function copyHeaders(ResponseInterface $psrResponse, Response $swooleResponse): void
     {
         if (empty($psrResponse->getHeaders())) {
             return;
@@ -33,11 +33,11 @@ class ResponseMerger
         $psrResponse = $psrResponse->withoutHeader('Set-Cookie');
 
         foreach ($psrResponse->getHeaders() as $key => $headerArray) {
-            $swooleResponse->header($key, implode('; ', $headerArray));
+            $swooleResponse->header((string)$key, implode('; ', $headerArray));
         }
     }
 
-    private function setCookies($swooleResponse, $psrResponse)
+    private function setCookies(Response $swooleResponse, ResponseInterface $psrResponse): void
     {
         if (!$psrResponse->hasHeader('Set-Cookie')) {
             return;
@@ -57,7 +57,7 @@ class ResponseMerger
         }
     }
 
-    private function copyBody($psrResponse, $swooleResponse)
+    private function copyBody(ResponseInterface $psrResponse, Response $swooleResponse): void
     {
         if ($psrResponse->getBody()->getSize() == 0) {
             $this->copyBodyIfIsAPipe($psrResponse, $swooleResponse);
@@ -71,7 +71,7 @@ class ResponseMerger
         $swooleResponse->write($psrResponse->getBody()->getContents());
     }
 
-    private function copyBodyIfIsAPipe($psrResponse, $swooleResponse)
+    private function copyBodyIfIsAPipe(ResponseInterface $psrResponse, Response $swooleResponse): void
     {
         $resource = $psrResponse->getBody()->detach();
 
@@ -88,7 +88,7 @@ class ResponseMerger
         }
     }
 
-    private function isPipe($resource)
+    private function isPipe($resource): bool
     {
         $stat = fstat($resource);
         return (isset($stat['mode']) && ($stat['mode'] & self::FSTAT_MODE_S_IFIFO) !== 0);
