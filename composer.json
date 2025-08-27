@@ -3,7 +3,7 @@
   "description": "Spatial API Core Contains Attributes",
   "type": "library",
   "license": "MIT",
-  "version": "4.0.0-RC2.6",
+  "version": "4.0.0-RC2.7",
   "authors": [
     {
       "name": "Kofi Owusu-Afriyie",
@@ -26,8 +26,7 @@
     "guzzlehttp/guzzle": "^7.10",
     "monolog/monolog": "^3.0",
     "open-telemetry/opentelemetry-logger-monolog": "^1.0",
-    "php-http/httplug": "2.x-dev",
-    "openswoole/ide-helper": "^4.11"
+    "php-http/httplug": "2.x-dev"
   },
   "autoload": {
     "psr-4": {
@@ -46,7 +45,8 @@
   },
   "minimum-stability": "dev",
   "require-dev": {
-    "ext-json": "*"
+    "ext-json": "*",
+    "openswoole/ide-helper": "~22.1.5"
   },
   "config": {
     "allow-plugins": {
