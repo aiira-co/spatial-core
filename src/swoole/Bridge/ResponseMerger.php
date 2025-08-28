@@ -5,7 +5,7 @@ namespace Spatial\Swoole\Bridge;
 
 
 use Psr\Http\Message\ResponseInterface;
-use Swoole\Http\Response;
+use OpenSwoole\Http\Response;
 use Dflydev\FigCookies\SetCookies;
 
 class ResponseMerger

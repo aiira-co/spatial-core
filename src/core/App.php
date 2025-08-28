@@ -146,16 +146,6 @@ class App implements MiddlewareInterface
         //        bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
 
-        // Initialize OpenTelemetry
-        $this->logger = OtelProviderFactory::create(
-            getenv('APP_NAME') ?: 'spatial-core',
-            getenv('APP_VERSION') ?: '1.0.0',
-            getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: 'http://collector:4318'
-        );
-        self::$diContainer->set(LoggerInterface::class, $this->logger);
-
-
-        self::$diContainer->set(TracerInterface::class, OtelProviderFactory::$tracer);
     }
 
     public static function diContainer(): Container
@@ -405,10 +395,16 @@ class App implements MiddlewareInterface
      */
     public function boot(string $appModule): void
     {
-//        print_r('booting app \n');
-//        if ($this->hasColdBooted) {
-//            return;
-//        }
+        // Initialize OpenTelemetry
+        $this->logger = OtelProviderFactory::create(
+            getenv('APP_NAME') ?: 'spatial-core',
+            getenv('APP_VERSION') ?: '1.0.0',
+            getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: 'http://collector:4318'
+        );
+        self::$diContainer->set(LoggerInterface::class, $this->logger);
+        self::$diContainer->set(TracerInterface::class, OtelProviderFactory::$tracer);
+
+        
 
         $reflectionClass = new ReflectionClass($appModule);
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);

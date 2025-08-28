@@ -9,6 +9,7 @@ use ReflectionProperty;
 use ReflectionType;
 use RuntimeException;
 use InvalidArgumentException;
+use Throwable;
 
 class Caster
 {
@@ -64,9 +65,9 @@ class Caster
                 }
 
                 // Check for setter hook (PHP 8.4+)
-                if (PHP_VERSION_ID >= 80400 && !$property->hasHook(\PropertyHookType::Set)) {
-                    continue;
-                }
+                // if (PHP_VERSION_ID >= 80400 && !$property->hasHook(\PropertyHookType::Set)) {
+                //     continue;
+                // }
 
                 $propertyType = $property->getType();
                 if ($propertyType) {

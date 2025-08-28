@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
-use Swoole\Http\Request as SwooleRequest;
+use OpenSwoole\Http\Request as SwooleRequest;
 
 class ServerRequestTransformer extends RequestTransformer implements ServerRequestInterface
 {
@@ -42,7 +42,7 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return $this->cookies ?? ($this->swooleRequest->cookie ?? []);
     }
 
-    public function withCookieParams(array $cookies): static
+    public function withCookieParams(array $cookies): ServerRequestInterface
     {
         $new = clone $this;
         $new->cookies = $cookies;
@@ -54,7 +54,7 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return $this->query ?? ($this->swooleRequest->get ?? []);
     }
 
-    public function withQueryParams(array $query): static
+    public function withQueryParams(array $query): ServerRequestInterface
     {
         $new = clone $this;
         $new->query = $query;
@@ -82,7 +82,7 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return $files;
     }
 
-    public function withUploadedFiles(array $uploadedFiles): static
+    public function withUploadedFiles(array $uploadedFiles): ServerRequestInterface
     {
         $new = clone $this;
         $new->files = $uploadedFiles;
@@ -103,7 +103,7 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return null;
     }
 
-    public function withParsedBody(array|object|null $data): self
+    public function withParsedBody( $data): ServerRequestInterface
     {
         if (!is_object($data) && !is_array($data)) {
             throw new \InvalidArgumentException('Unsupported argument type');
@@ -124,14 +124,14 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return $this->attributes[$name] ?? $default;
     }
 
-    public function withAttribute(string $name, mixed $value): self
+    public function withAttribute(string $name, mixed $value): ServerRequestInterface
     {
         $new = clone $this;
         $new->attributes[$name] = $value;
         return $new;
     }
 
-    public function withoutAttribute(string $name): self
+    public function withoutAttribute(string $name): ServerRequestInterface
     {
         $new = clone $this;
         unset($new->attributes[$name]);

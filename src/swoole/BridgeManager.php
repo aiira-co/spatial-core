@@ -6,9 +6,9 @@ namespace Spatial\Swoole;
 
 
 use Spatial\Core\AppHandler;
-use Swoole\Http\Request;
-use Swoole\Http\Response;
-use Swoole\Http\Server;
+use OpenSwoole\Http\Request;
+use OpenSwoole\Http\Response;
+use OpenSwoole\Http\Server;
 use Spatial\Core\App;
 
 use Http\Factory\Guzzle\UriFactory;

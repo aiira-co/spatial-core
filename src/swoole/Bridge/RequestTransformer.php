@@ -46,7 +46,7 @@ class RequestTransformer implements RequestInterface
             . $queryString;
     }
 
-    public function withRequestTarget($requestTarget): static
+    public function withRequestTarget($requestTarget): RequestInterface
     {
         $new = clone $this;
         $new->requestTarget = $requestTarget;
@@ -102,7 +102,7 @@ class RequestTransformer implements RequestInterface
         return null;
     }
 
-    public function withUri(UriInterface $uri, $preserveHost = false): static
+    public function withUri(UriInterface $uri, $preserveHost = false): RequestInterface
     {
         $new = clone $this;
         $new->uri = $uri;
@@ -114,7 +114,7 @@ class RequestTransformer implements RequestInterface
         return $this->protocol ?? ($this->protocol = '1.1');
     }
 
-    public function withProtocolVersion($version): static
+    public function withProtocolVersion($version): RequestInterface
     {
         $new = clone $this;
         $new->protocol = $version;
@@ -159,14 +159,14 @@ class RequestTransformer implements RequestInterface
         return \implode(',', $this->getHeader($name));
     }
 
-    public function withHeader($name, $value): self
+    public function withHeader($name, $value): RequestInterface
     {
         $new = clone $this;
         $new->swooleRequest->header[$name] = $value;
         return $new;
     }
 
-    public function withAddedHeader($name, $value): self
+    public function withAddedHeader($name, $value): RequestInterface
     {
         if (!$this->hasHeader($name)) {
             return $this->withHeader($name, $value);
@@ -185,7 +185,7 @@ class RequestTransformer implements RequestInterface
         return $new;
     }
 
-    public function withoutHeader($name): self
+    public function withoutHeader($name): RequestInterface
     {
         $new = clone $this;
 
@@ -208,7 +208,7 @@ class RequestTransformer implements RequestInterface
         return $this->body ?? $this->streamFactory->createStream($this->swooleRequest->rawContent());
     }
 
-    public function withBody(StreamInterface $body): self
+    public function withBody(StreamInterface $body): RequestInterface
     {
         $new = clone $this;
         $new->body = $body;
