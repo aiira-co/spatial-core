@@ -8,9 +8,8 @@ use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
+use OpenTelemetry\API\Metrics\MeterInterface;
 use OpenTelemetry\API\Trace\TracerInterface;
-use OpenTelemetry\SDK\Sdk;
-use OpenTelemetry\SDK\Trace\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -217,142 +216,7 @@ class App implements MiddlewareInterface
         return $this;
     }
 
-    public function getRouteTable(): string
-    {
-        $html = '
-    <style>
-        h2 {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        h3, h4 {
-            font-family: Arial, sans-serif;
-            color: #2c3e50;
-            margin-top: 20px;
-            margin-bottom: 5px;
-            cursor: pointer;
-            text-align:center;
-        }
-        h4 {
-            text-align:left;
-            }
-            
-        div {
-            font-family: Arial, sans-serif;
-            color: #555;
-            line-height: 1.6;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            color: #333;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        thead {
-            background-color: #e8f5ff;
-            text-align: left;
-        }
-        th, td {
-            padding: 8px;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #dfefff;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .params-list {
-            font-family: Consolas, monospace;
-            font-size: 13px;
-            color: #444;
-            background-color: #f8f8f8;
-            padding: 5px;
-            border-radius: 5px;
-        }
-    </style>
-    <h2>API Documentation</h2>
-    <div>';
 
-        // Group by modules and controllers
-        $modules = [];
-        foreach ($this->routeTable as $row) {
-            $modules[$row['module']][$row['controller']][] = $row;
-        }
-
-        foreach ($modules as $moduleName => $controllers) {
-            $module = explode("\\", $moduleName);
-            $html .= '
-        <div>
-            <h3 onclick="toggleSection(\'' . $moduleName . '\')">
-                ' . end($module) . '
-            </h3>
-            <div id="' . $moduleName . '" style="display: block; margin-left: 20px;">';
-
-            foreach ($controllers as $controllerName => $actions) {
-                $controller = explode("\\", $controllerName);
-                $html .= '
-            <h4 onclick="toggleSection(\'' . $moduleName . '_' . $controllerName . '\')">
-                😅 ' .end($controller) . '
-            </h4>
-            <div id="' . htmlspecialchars($moduleName . '_' . $controllerName) . '" style="display: block; margin-left: 20px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Action</th>
-                            <th>Route</th>
-                            <th>Params</th>
-                            <th>HttpVerb</th>
-                            <th>Authorize</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
-
-                foreach ($actions as $action) {
-                    $formattedParams = array_map(function ($reflectionParameter) {
-                        return '<pre style="margin:0"> <small>#['.$reflectionParameter["bindingSource"].']</small> <span style="background: white">'.$reflectionParameter["param"]->name . ' : <span style="opacity: .5">' . $reflectionParameter["param"]->getType() .'</span></span></pre>';
-                    }, $action['params']);
-
-                    $html .= '
-                        <tr>
-                            <td>' . htmlspecialchars($action['action']) . '</td>
-                            <td>' . htmlspecialchars($action['route']) . '</td>
-                            <td>' .  (implode('', $formattedParams)) . '</td>
-                            <td>' . strtoupper(htmlspecialchars($action['httpMethod'])) . '</td>
-                            <td>' . htmlspecialchars(json_encode($action['authGuard'], JSON_THROW_ON_ERROR)) . '</td>
-                        </tr>';
-                }
-
-                $html .= '</tbody></table>
-            </div>';
-            }
-
-            $html .= '</div></div>';
-        }
-
-        $html .= '
-    </div>
-    <script>
-        function toggleSection(id) {
-            var section = document.getElementById(id);
-            if (section.style.display === "none") {
-                section.style.display = "block";
-            } else {
-                section.style.display = "none";
-            }
-        }
-    </script>';
-
-        return $html;
-    }
 
 
 
@@ -372,18 +236,14 @@ class App implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-//        foreach ($this->requestDIContainer as $requestProvider) {
-//            try {
-//                self::diContainer()->get($requestProvider);
-//            } catch (DependencyException|NotFoundException $e) {
-//                print_r($e);
-//            }
-//        }
         $handler->passParams($this->routeTable, self::$diContainer);
 
-        $otelMiddleWare = self::diContainer()->get(OpenTelemetryMiddleware::class);
-       return $otelMiddleWare->handle($request, $handler);
-//        return $handler->handle($request);
+        if (isset(OtelProviderFactory::$tracer)) {
+            $otelMiddleWare = self::diContainer()->get(OpenTelemetryMiddleware::class);
+            return $otelMiddleWare->handle($request, $handler);
+        }
+
+        return $handler->handle($request);
     }
 
     /**
@@ -403,14 +263,23 @@ class App implements MiddlewareInterface
         );
         self::$diContainer->set(LoggerInterface::class, $this->logger);
         self::$diContainer->set(TracerInterface::class, OtelProviderFactory::$tracer);
+        self::$diContainer->set(MeterInterface::class, OtelProviderFactory::$meter);
 
-        
+        // Register the middleware in the container
+        self::$diContainer->set(OpenTelemetryMiddleware::class, new OpenTelemetryMiddleware(
+            OtelProviderFactory::$tracer,
+            $this->logger,
+            OtelProviderFactory::$meter
+        ));
+
+
+
 
         $reflectionClass = new ReflectionClass($appModule);
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
 
         if (count($reflectionClassApiAttributes) === 0) {
-            throw ReflectionException();
+            throw new ReflectionException();
         }
 
         $apiModuleAttributes = $reflectionClassApiAttributes[0]->newInstance();

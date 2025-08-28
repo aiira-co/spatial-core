@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Spatial\Telemetry;
 
+use OpenTelemetry\API\Metrics\CounterInterface;
+use OpenTelemetry\API\Metrics\HistogramInterface;
+use OpenTelemetry\API\Metrics\MeterInterface;
 use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\API\Trace\TracerInterface;
@@ -14,8 +17,26 @@ use Psr\Log\LoggerInterface;
 
 class OpenTelemetryMiddleware
 {
-    public function __construct(private TracerInterface $tracer, private LoggerInterface $logger)
-    {}
+     private CounterInterface $requestCounter;
+    private HistogramInterface $requestDuration;
+
+    public function __construct(private TracerInterface $tracer, private LoggerInterface $logger, private MeterInterface $meter)
+    {
+         // Counter for requests
+        $this->requestCounter = $this->meter
+            ->createCounter(
+                name:'http.server.request.count',
+                description:'Number of incoming HTTP requests',
+                unit:'requests'
+            );
+
+        // Histogram for request duration
+        $this->requestDuration = $this->meter
+            ->createHistogram(
+                name:'http.server.duration',
+                description:'Duration of incoming HTTP requests',
+                unit:'milliseconds');
+    }
     public function handle(ServerRequestInterface $request, RequestHandlerInterface $next)
     {
         // Start the span for the entire request
@@ -27,6 +48,8 @@ class OpenTelemetryMiddleware
         // Activate the span
         $scope = $span->activate();
 
+        $startTime = hrtime(true); // high-res timer
+
         try {
             // Process the request
             $response = $next->handle($request);
@@ -34,17 +57,39 @@ class OpenTelemetryMiddleware
             // Set response attributes
             $this->setHttpResponseAttributes($span, $response);
 
+             // ✅ Metric: increment request count
+            $this->requestCounter->add(1, [
+                'http.method' => $request->getMethod(),
+                'http.route' => $request->getUri()->getPath(),
+                'http.status_code' => $response->getStatusCode(),
+            ]);
+
             return $response;
         } catch (\Exception $e) {
             // Record the exception
             $span->recordException($e);
             $span->setStatus(StatusCode::STATUS_ERROR, $e->getMessage());
 
+            $this->requestCounter->add(1, [
+                'http.method' => $request->getMethod(),
+                'http.route' => $request->getUri()->getPath(),
+                'http.status_code' => 500,
+            ]);
+
             // Set error status code
 //            $span->setAttribute('http.status_code', $response->getStatusCode());
 
             throw $e;
         } finally {
+
+            $durationMs = (hrtime(true) - $startTime) / 1_000_000;
+
+            // ✅ Metric: record request duration
+            $this->requestDuration->record($durationMs, [
+                'http.method' => $request->getMethod(),
+                'http.route' => $request->getUri()->getPath(),
+            ]);
+
             // Always end the span
             $span->end();
             $scope->detach();

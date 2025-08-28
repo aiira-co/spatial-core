@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Spatial\Telemetry;
 
+use Monolog\Level;
 use Monolog\Logger;
 use OpenTelemetry\API\Common\Time\Clock;
 use OpenTelemetry\API\Trace\TracerInterface;
+use OpenTelemetry\API\Metrics\MeterInterface;
 use OpenTelemetry\Contrib\Logs\Monolog\Handler;
 use OpenTelemetry\Contrib\Otlp\LogsExporter;
 use OpenTelemetry\Contrib\Otlp\MetricExporter;
@@ -31,6 +33,7 @@ use Throwable;
 class OtelProviderFactory
 {
     static TracerInterface $tracer;
+    static MeterInterface $meter;
     /**
      * Build and return a Monolog logger integrated with OpenTelemetry.
      *
@@ -118,6 +121,8 @@ class OtelProviderFactory
                 ->addReader($reader)
                 ->build();
 
+            self::$meter =  $meterProvider->getMeter('io.opentelemetry.contrib.php');
+
             // --- Register globally
             Sdk::builder()
                 ->setTracerProvider($tracerProvider)
@@ -139,7 +144,7 @@ class OtelProviderFactory
 
             // --- Monolog Logger with OTEL handler
             $logger = new Logger($serviceName);
-            $otelHandler = new Handler($loggerProvider, Logger::DEBUG);
+            $otelHandler = new Handler($loggerProvider, Level::Debug);
             $logger->pushHandler($otelHandler);
 
             return $logger;
@@ -174,7 +179,7 @@ class OtelProviderFactory
                 return true;
             }
             return false;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
