@@ -8,8 +8,6 @@ use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
-use OpenTelemetry\API\Metrics\MeterInterface;
-use OpenTelemetry\API\Trace\TracerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -29,20 +27,16 @@ use Spatial\Common\HttpAttributes\HttpHead;
 use Spatial\Common\HttpAttributes\HttpPatch;
 use Spatial\Common\HttpAttributes\HttpPost;
 use Spatial\Common\HttpAttributes\HttpPut;
+use Spatial\Common\Processor\MiddlewareProcessor;
 use Spatial\Core\Attributes\ApiController;
 use Spatial\Core\Attributes\ApiModule;
 use Spatial\Core\Attributes\Area;
 use Spatial\Core\Attributes\Authorize;
-use Spatial\Core\Attributes\Injectable;
 use Spatial\Core\Attributes\Route;
 use Spatial\Core\Interfaces\ApplicationBuilderInterface;
 use Spatial\Core\Interfaces\RouteModuleInterface;
-use Spatial\Router\RouterModuleInterface;
-use Spatial\Telemetry\OpenTelemetryMiddleware;
-use Spatial\Telemetry\OtelProviderFactory;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-use function Psl\Str\uppercase;
 use Psr\Log\LoggerInterface;
 /**
  * Class App
@@ -104,7 +98,7 @@ class App implements MiddlewareInterface
      * and exports from imported modules
      * @var array
      */
-    private array $providers = [];
+    private static array $providers = [];
 
     /**
      * Modules declarations with imported declarations from import module's exports
@@ -216,7 +210,142 @@ class App implements MiddlewareInterface
         return $this;
     }
 
+    public function getRouteTable(): string
+    {
+        $html = '
+    <style>
+        h2 {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        h3, h4 {
+            font-family: Arial, sans-serif;
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            text-align:center;
+        }
+        h4 {
+            text-align:left;
+            }
+            
+        div {
+            font-family: Arial, sans-serif;
+            color: #555;
+            line-height: 1.6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        thead {
+            background-color: #e8f5ff;
+            text-align: left;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #dfefff;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .params-list {
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            color: #444;
+            background-color: #f8f8f8;
+            padding: 5px;
+            border-radius: 5px;
+        }
+    </style>
+    <h2>API Documentation</h2>
+    <div>';
 
+        // Group by modules and controllers
+        $modules = [];
+        foreach ($this->routeTable as $row) {
+            $modules[$row['module']][$row['controller']][] = $row;
+        }
+
+        foreach ($modules as $moduleName => $controllers) {
+            $module = explode("\\", $moduleName);
+            $html .= '
+        <div>
+            <h3 onclick="toggleSection(\'' . $moduleName . '\')">
+                ' . end($module) . '
+            </h3>
+            <div id="' . $moduleName . '" style="display: block; margin-left: 20px;">';
+
+            foreach ($controllers as $controllerName => $actions) {
+                $controller = explode("\\", $controllerName);
+                $html .= '
+            <h4 onclick="toggleSection(\'' . $moduleName . '_' . $controllerName . '\')">
+                😅 ' .end($controller) . '
+            </h4>
+            <div id="' . htmlspecialchars($moduleName . '_' . $controllerName) . '" style="display: block; margin-left: 20px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Route</th>
+                            <th>Params</th>
+                            <th>HttpVerb</th>
+                            <th>Authorize</th>
+                        </tr>
+                    </thead>
+                    <tbody>';
+
+                foreach ($actions as $action) {
+                    $formattedParams = array_map(function ($reflectionParameter) {
+                        return '<pre style="margin:0"> <small>#['.$reflectionParameter["bindingSource"].']</small> <span style="background: white">'.$reflectionParameter["param"]->name . ' : <span style="opacity: .5">' . $reflectionParameter["param"]->getType() .'</span></span></pre>';
+                    }, $action['params']);
+
+                    $html .= '
+                        <tr>
+                            <td>' . htmlspecialchars($action['action']) . '</td>
+                            <td>' . htmlspecialchars($action['route']) . '</td>
+                            <td>' .  (implode('', $formattedParams)) . '</td>
+                            <td>' . strtoupper(htmlspecialchars($action['httpMethod'])) . '</td>
+                            <td>' . htmlspecialchars(json_encode($action['authGuard'], JSON_THROW_ON_ERROR)) . '</td>
+                        </tr>';
+                }
+
+                $html .= '</tbody></table>
+            </div>';
+            }
+
+            $html .= '</div></div>';
+        }
+
+        $html .= '
+    </div>
+    <script>
+        function toggleSection(id) {
+            var section = document.getElementById(id);
+            if (section.style.display === "none") {
+                section.style.display = "block";
+            } else {
+                section.style.display = "none";
+            }
+        }
+    </script>';
+
+        return $html;
+    }
 
 
 
@@ -237,14 +366,19 @@ class App implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $handler->passParams($this->routeTable, self::$diContainer);
-
-        if (isset(OtelProviderFactory::$tracer)) {
-            $otelMiddleWare = self::diContainer()->get(OpenTelemetryMiddleware::class);
-            return $otelMiddleWare->handle($request, $handler);
-        }
-
-        return $handler->handle($request);
+        return self::pipeMiddleware('root')->process($request, $handler);
     }
+
+    public static function pipeMiddleware(string $module):MiddlewareProcessor{
+        return new MiddlewareProcessor(self::getModuleProvider($module));
+    }
+
+    private static function getModuleProvider(string $module):array{
+        return self::$providers[$module] ?? [];
+    }
+
+
+
 
     /**
      * @param string $appModule
@@ -255,25 +389,6 @@ class App implements MiddlewareInterface
      */
     public function boot(string $appModule): void
     {
-        // Initialize OpenTelemetry
-        $this->logger = OtelProviderFactory::create(
-            getenv('APP_NAME') ?: 'spatial-core',
-            getenv('APP_VERSION') ?: '1.0.0',
-            getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: 'http://collector:4318'
-        );
-        self::$diContainer->set(LoggerInterface::class, $this->logger);
-        self::$diContainer->set(TracerInterface::class, OtelProviderFactory::$tracer);
-        self::$diContainer->set(MeterInterface::class, OtelProviderFactory::$meter);
-
-        // Register the middleware in the container
-        self::$diContainer->set(OpenTelemetryMiddleware::class, new OpenTelemetryMiddleware(
-            OtelProviderFactory::$tracer,
-            $this->logger,
-            OtelProviderFactory::$meter
-        ));
-
-
-
 
         $reflectionClass = new ReflectionClass($appModule);
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
@@ -286,7 +401,7 @@ class App implements MiddlewareInterface
 
 
         //        load attribute metadata
-        $this->resolveAppModule('root', $apiModuleAttributes);
+        $this->registerAppModule('root', $apiModuleAttributes);
 
         //          load configs
         $baseModule = $reflectionClass->newInstance();
@@ -304,16 +419,16 @@ class App implements MiddlewareInterface
      * @return void
      * @throws ReflectionException
      */
-    private function resolveAppModule(string $moduleName, ApiModule $app): void
+    private function registerAppModule(string $moduleName, ApiModule $app): void
     {
 //        find the import with routeModule
-        $this->resolveImports($moduleName, $app->imports);
+        $this->registerImports($moduleName, $app->imports);
 
 //        Dependency Injection Services
-        $this->resolveProviders($moduleName, $app->providers);
+        $this->registerProviders($moduleName, $app->providers);
 
 //        Declarations
-        $this->resolveDeclarations($moduleName, $app->declarations);
+        $this->registerDeclarations($moduleName, $app->declarations);
 //        $routeModule->render();
 
     }
@@ -323,28 +438,30 @@ class App implements MiddlewareInterface
      * @param array|null $moduleProviders
      * @throws ReflectionException
      */
-    private function resolveProviders(string $moduleName, ?array $moduleProviders): void
+    private function registerProviders(string $moduleName, ?array $moduleProviders): void
     {
         if (!$moduleProviders) {
             return;
         }
         //        create provider section
-        if (!isset($this->providers[$moduleName])) {
-            $this->providers[$moduleName] = [];
+        if (!isset(self::$providers[$moduleName])) {
+            self::$providers[$moduleName] = [];
         }
 
-        foreach ($moduleProviders as $provider) {
-            if (!isset($this->providers[$moduleName][$provider])) {
+        foreach ($moduleProviders as $providerClassName) {
+            if (!isset(self::$providers[$moduleName][$providerClassName])) {
                 // suppose to set it on DI Container
                 try {
-                    self::$diContainer->get($provider);
+                    self::$diContainer->get($providerClassName);
 //                    check injectable to see if its lifetime or request
 
                 } catch (DependencyException|NotFoundException $e) {
+                    // Handle cases where the class doesn't exist or can't be instantiated.
+                    echo "Error registering provider '{$providerClassName}': " . $e->getMessage() . "\n";
                 }
 //                record
-                $providerReflection = new ReflectionClass($provider);
-                $this->providers[$moduleName][$provider] = $providerReflection;
+                $providerReflection = new ReflectionClass($providerClassName);
+                self::$providers[$moduleName][$providerClassName] = $providerReflection;
 
 //                $providerInjectableAttribute = $providerReflection->getAttributes(Injectable::class);
 //                if ($providerInjectableAttribute[0] && $providerInjectableAttribute[0]->newInstance(
@@ -361,7 +478,7 @@ class App implements MiddlewareInterface
      * @param array|null $moduleDeclarations
      * @throws ReflectionException
      */
-    private function resolveDeclarations(string $moduleName, ?array $moduleDeclarations): void
+    private function registerDeclarations(string $moduleName, ?array $moduleDeclarations): void
     {
         if (!$moduleDeclarations) {
             return;
@@ -385,7 +502,7 @@ class App implements MiddlewareInterface
      * @return void
      * @throws ReflectionException
      */
-    private function resolveImports(string $moduleName, ?array $moduleImports): void
+    private function registerImports(string $moduleName, ?array $moduleImports): void
     {
         if (!$moduleImports) {
             return;
@@ -415,7 +532,7 @@ class App implements MiddlewareInterface
 //            run throught its declarations and providers to record them
             $apiModuleAttributes = $apiModuleAttributes[0]->newInstance();
             //        load attribute metadata
-            $this->resolveAppModule($module, $apiModuleAttributes);
+            $this->registerAppModule($module, $apiModuleAttributes);
         }
     }
 
@@ -429,7 +546,7 @@ class App implements MiddlewareInterface
      * @return array
      * @throws ReflectionException
      */
-    private function resolveController(string $controllerClass): array
+    private function registerController(string $controllerClass): array
     {
         $reflectionClass = new ReflectionClass($controllerClass);
 
@@ -471,7 +588,7 @@ class App implements MiddlewareInterface
      */
     private function runApp(): void
     {
-        $this->resolveModuleRouting();
+        $this->registerModuleRouting();
 
 
         if (count($this->routeTable) === 0) {
@@ -939,7 +1056,7 @@ class App implements MiddlewareInterface
 
 
     private
-    function resolveModuleRouting(): void
+    function registerModuleRouting(): void
     {
 //        get routing settings
         foreach ($this->applicationBuilder->routingType as $routeEndpoint) {

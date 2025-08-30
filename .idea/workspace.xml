@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release" />
+    <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
+      <change afterPath="$PROJECT_DIR$/src/common/Processor/MiddlewareProcessor.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/router/RouterRequestHandler.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/telemetry/Attributes/TraceAttribute.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/spatial-core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/spatial-core.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/App.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/App.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/AppHandler.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/AppHandler.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/telemetry/OpenTelemetryMiddleware.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/telemetry/OpenTelemetryMiddleware.php" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -84,6 +95,10 @@
       <path value="$PROJECT_DIR$/vendor/symfony/http-client" />
       <path value="$PROJECT_DIR$/vendor/monolog/monolog" />
       <path value="$PROJECT_DIR$/vendor/open-telemetry/opentelemetry-logger-monolog" />
+      <path value="$PROJECT_DIR$/vendor/openswoole/ide-helper" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php83" />
+      <path value="$PROJECT_DIR$/vendor/php-http/promise" />
+      <path value="$PROJECT_DIR$/vendor/php-http/httplug" />
     </include_path>
   </component>
   <component name="ProjectColorInfo">{
@@ -94,28 +109,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;I:/Code/PHP/Frameworks/spatial-core/src/common/Helper&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "I:/Code/PHP/Frameworks/spatial-core/src/router",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="I:\Code\PHP\Frameworks\spatial-core\src\router" />
+      <recent name="I:\Code\PHP\Frameworks\spatial-core\src\common" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\common\Helper" />
       <recent name="I:\Code\PHP\Frameworks\spatial-core\src\core\Attributes" />
       <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/src/router" />
-      <recent name="$PROJECT_DIR$/src/common/BindSourceAttributes" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="I:\Code\PHP\Frameworks\spatial-core\test\Services" />
@@ -454,6 +469,7 @@
       <workItem from="1755839593162" duration="14314000" />
       <workItem from="1755858056586" duration="4633000" />
       <workItem from="1756043757297" duration="970000" />
+      <workItem from="1756501727872" duration="2491000" />
     </task>
     <task id="LOCAL-00001" summary="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <created>1610707692170</created>
@@ -482,16 +498,5 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release" />
     <option name="LAST_COMMIT_MESSAGE" value="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="php">
-          <url>file://$PROJECT_DIR$/src/core/App.php</url>
-          <line>6</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

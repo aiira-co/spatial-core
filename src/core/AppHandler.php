@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spatial\Router\RouterModule;
+use Spatial\Router\RouterRequestHandler;
 
 class AppHandler implements RequestHandlerInterface
 {
@@ -70,15 +71,42 @@ class AppHandler implements RequestHandlerInterface
             }
         }
 
+        if($routeFound){
+            $module = $this->routeActivated['module'];
+            if($module == 'root'){
+                return $this->routerModule->getControllerMethod($this->routeActivated, $this->defaults, $request);
+            }
 
-        return $routeFound ?
-            $this->routerModule->getControllerMethod($this->routeActivated, $this->defaults, $request) :
 
-            $this->routerModule->quickResponse(
-                'No Controller was routed to the uri ' . $this->uri . ' on a ' . $requestedMethod . ' method',
-                404,
-                $request
-            );
+//            $handlerFn = function () use ($this->routerModule, $this->routeActivated, $this->defaults) {
+//                return new RouterRequestHandler(
+//                    $this->routerModule,
+//                    $this->routeActivated,
+//                    $this->defaults
+//                );
+//            };
+
+            echo '<br> module is ' . $module;
+
+            return App::pipeMiddleware($module)
+                ->process(
+                    request: $request,
+                    handler: new RouterRequestHandler(
+                        $this->routerModule,
+                        $this->routeActivated,
+                        $this->defaults
+                    )
+                );
+
+        }
+
+
+        return   $this->routerModule->quickResponse(
+            'No Controller was routed to the uri ' . $this->uri . ' on a ' . $requestedMethod . ' method',
+            404,
+            $request
+        );
+
     }
 
 

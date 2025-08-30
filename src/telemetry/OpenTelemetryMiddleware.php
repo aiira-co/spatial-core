@@ -12,32 +12,68 @@ use OpenTelemetry\API\Trace\TracerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
+use Spatial\Core\App;
 
-class OpenTelemetryMiddleware
+class OpenTelemetryMiddleware implements MiddlewareInterface
 {
-     private CounterInterface $requestCounter;
+    private CounterInterface $requestCounter;
     private HistogramInterface $requestDuration;
+    private TracerInterface $tracer;
+    private LoggerInterface $logger;
+    private MeterInterface $meter;
 
-    public function __construct(private TracerInterface $tracer, private LoggerInterface $logger, private MeterInterface $meter)
+    public function __construct()
     {
-         // Counter for requests
+
+        $this->_configureOtel();
+        $this->_configMetrics();
+    }
+
+    private function _configureOtel(): void
+    {
+
+        // Initialize OpenTelemetry
+        $this->logger = OtelProviderFactory::create(
+            getenv('APP_NAME') ?: 'spatial-service',
+            getenv('APP_VERSION') ?: '1.0.0',
+            getenv('OTEL_EXPORTER_OTLP_ENDPOINT') ?: 'http://collector:4318'
+        );
+        $this->tracer = OtelProviderFactory::$tracer;
+        $this->meter = OtelProviderFactory::$meter;
+
+//        register on DI
+        App::$diContainer->set(LoggerInterface::class, $this->logger);
+        App::$diContainer->set(TracerInterface::class, OtelProviderFactory::$tracer);
+        App::$diContainer->set(MeterInterface::class, OtelProviderFactory::$meter);
+
+    }
+
+    private function _configMetrics(): void
+    {
+        // Counter for requests
         $this->requestCounter = $this->meter
             ->createCounter(
-                name:'http.server.request.count',
-                description:'Number of incoming HTTP requests',
-                unit:'requests'
+                name: 'http.server.request.count',
+                unit: 'requests',
+                description: 'Number of incoming HTTP requests'
             );
 
         // Histogram for request duration
         $this->requestDuration = $this->meter
             ->createHistogram(
-                name:'http.server.duration',
-                description:'Duration of incoming HTTP requests',
-                unit:'milliseconds');
+                name: 'http.server.duration',
+                unit: 'milliseconds',
+                description: 'Duration of incoming HTTP requests');
     }
-    public function handle(ServerRequestInterface $request, RequestHandlerInterface $next)
+
+
+    /**
+     * @throws \Exception
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler):ResponseInterface
     {
         // Start the span for the entire request
         $span = $this->tracer->spanBuilder('http.request')->startSpan();
@@ -52,12 +88,12 @@ class OpenTelemetryMiddleware
 
         try {
             // Process the request
-            $response = $next->handle($request);
+            $response = $handler->handle($request);
 
             // Set response attributes
             $this->setHttpResponseAttributes($span, $response);
 
-             // ✅ Metric: increment request count
+            // ✅ Metric: increment request count
             $this->requestCounter->add(1, [
                 'http.method' => $request->getMethod(),
                 'http.route' => $request->getUri()->getPath(),
