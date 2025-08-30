@@ -86,7 +86,6 @@ class AppHandler implements RequestHandlerInterface
 //                );
 //            };
 
-            echo '<br> module is ' . $module;
 
             return App::pipeMiddleware($module)
                 ->process(
