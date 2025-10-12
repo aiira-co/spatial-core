@@ -5,6 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bea42b9c-cef7-4074-abae-63fd0ffa4517" name="Default Changelist" comment="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
+      <change afterPath="$PROJECT_DIR$/src/common/Middleware/AuthMiddleware.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/Middleware/CorsAndSecurityHeadersMiddleware.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/Middleware/ErrorHandlingMiddleware.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/Middleware/ValidationMiddleware.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -460,7 +464,7 @@
       <workItem from="1755839593162" duration="14314000" />
       <workItem from="1755858056586" duration="4633000" />
       <workItem from="1756043757297" duration="970000" />
-      <workItem from="1756501727872" duration="3056000" />
+      <workItem from="1756501727872" duration="4349000" />
     </task>
     <task id="LOCAL-00001" summary="- Added 404 to un-found controller to match route pattern.&#10;- Getting ready for first release">
       <created>1610707692170</created>

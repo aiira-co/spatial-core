@@ -9,7 +9,9 @@ use ReflectionProperty;
 use ReflectionType;
 use RuntimeException;
 use InvalidArgumentException;
+use ReflectionNamedType;
 use Throwable;
+use ValueError;
 
 class Caster
 {
@@ -98,6 +100,7 @@ class Caster
      */
     private static function castValueToType(mixed $value, ReflectionType $type): mixed
     {
+
         if ($type instanceof \ReflectionUnionType) {
             foreach ($type->getTypes() as $unionType) {
                 try {
@@ -127,6 +130,29 @@ class Caster
             return $value;
         }
 
+
+        // Check if the type is a named type (not a union or intersection)
+        if ($type instanceof ReflectionNamedType) {
+            $typeName = $type->getName();
+
+            if (enum_exists($typeName)) {
+                try {
+                    return $enumValue = $typeName::from($value); // throws if invalid
+                } catch (ValueError $e) {
+                    throw new InvalidArgumentException("Invalid value for enum $typeName" . PHP_EOL);
+                }
+            } else if ($typeName === 'DateTime' || $typeName === \DateTime::class) {
+                // Cast to DateTime
+                try {
+                    return new \DateTime($value);
+                } catch (\Exception $e) {
+                    throw new InvalidArgumentException("Invalid value for DateTime" . PHP_EOL);
+                }
+            }
+        }
+
+
+        // If the type is a class, attempt to cast recursively
         if (class_exists($typeName)) {
             return self::castToObject($typeName, $value);
         }

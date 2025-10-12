@@ -88,5 +88,8 @@ abstract class ControllerBase
     {
         $this->request = $request;
         $this->routeData = $request->getQueryParams();
+
+        // the request will be spread to the cqrs request
+        $this->mediator->request = $request;
     }
 }
