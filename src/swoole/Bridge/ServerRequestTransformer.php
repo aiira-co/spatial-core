@@ -1,5 +1,6 @@
 <?php
-declare(strict_types=1);                
+
+declare(strict_types=1);
 
 
 namespace Spatial\Swoole\Bridge;
@@ -69,14 +70,16 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
 
         $files = [];
 
-        foreach ($this->swooleRequest->files as $name => $fileData) {
-            $files[$name] = $this->uploadedFileFactory->createUploadedFile(
-                $this->streamFactory->createStreamFromFile($fileData['tmp_name']),
-                $fileData['size'],
-                $fileData['error'],
-                $fileData['name'],
-                $fileData['type']
-            );
+        if ($this->swooleRequest->files) {
+            foreach ($this->swooleRequest->files as $name => $fileData) {
+                $files[$name] = $this->uploadedFileFactory->createUploadedFile(
+                    $this->streamFactory->createStreamFromFile($fileData['tmp_name']),
+                    $fileData['size'],
+                    $fileData['error'],
+                    $fileData['name'],
+                    $fileData['type']
+                );
+            }
         }
 
         return $files;
@@ -103,7 +106,7 @@ class ServerRequestTransformer extends RequestTransformer implements ServerReque
         return null;
     }
 
-    public function withParsedBody( $data): ServerRequestInterface
+    public function withParsedBody($data): ServerRequestInterface
     {
         if (!is_object($data) && !is_array($data)) {
             throw new \InvalidArgumentException('Unsupported argument type');
