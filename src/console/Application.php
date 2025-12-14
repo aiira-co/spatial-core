@@ -24,16 +24,18 @@ class Application
 
     /**
      * Register default commands.
+     * 
+     * Only runtime utilities are registered here.
+     * Development commands are in spatial/cli package.
      */
     private function registerDefaultCommands(): void
     {
-        $this->register(new Commands\MakeControllerCommand());
-        $this->register(new Commands\MakeCommandCommand());
-        $this->register(new Commands\MakeQueryCommand());
-        $this->register(new Commands\MakeModuleCommand());
-        $this->register(new Commands\MakeDtoCommand());
+        // Runtime utilities (stay in core)
         $this->register(new Commands\RouteListCommand());
+        $this->register(new Commands\RouteCacheCommand());
         $this->register(new Commands\CacheClearCommand());
+        $this->register(new Commands\ConfigCacheCommand());
+        $this->register(new Commands\QueueWorkCommand());
     }
 
     /**

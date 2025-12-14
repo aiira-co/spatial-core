@@ -36,7 +36,12 @@
       "Spatial\\Swoole\\": "src/swoole/",
       "Spatial\\Router\\": "src/router/",
       "Spatial\\Telemetry\\": "src/telemetry/",
-      "Spatial\\Console\\": "src/console/"
+      "Spatial\\Console\\": "src/console/",
+      "Spatial\\Events\\": "src/events/",
+      "Spatial\\WebSocket\\": "src/websocket/",
+      "Spatial\\Queue\\": "src/queue/",
+      "Spatial\\Database\\": "src/database/",
+      "Spatial\\Validation\\": "src/validation/"
     }
   },
   "autoload-dev": {
