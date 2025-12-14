@@ -1,0 +1,46 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Spatial CLI
+ * 
+ * Command-line interface for the Spatial PHP Framework.
+ * 
+ * Usage:
+ *   php spatial <command> [arguments]
+ * 
+ * Examples:
+ *   php spatial make:controller User
+ *   php spatial make:command CreateUser
+ *   php spatial make:query GetUsers
+ *   php spatial route:list
+ *   php spatial cache:clear
+ */
+
+declare(strict_types=1);
+
+// Find autoloader
+$autoloadPaths = [
+    __DIR__ . '/vendor/autoload.php',           // When in project root
+    __DIR__ . '/../vendor/autoload.php',        // When in bin directory
+    __DIR__ . '/../../../autoload.php',         // When installed as vendor package
+    getcwd() . '/vendor/autoload.php',          // From project root
+];
+
+$autoloadFound = false;
+foreach ($autoloadPaths as $autoload) {
+    if (file_exists($autoload)) {
+        require $autoload;
+        $autoloadFound = true;
+        break;
+    }
+}
+
+if (!$autoloadFound) {
+    fwrite(STDERR, "Error: Could not find Composer autoloader.\n");
+    fwrite(STDERR, "Please run 'composer install' first.\n");
+    exit(1);
+}
+
+// Run CLI application
+$app = new \Spatial\Console\Application();
+exit($app->run($argv));

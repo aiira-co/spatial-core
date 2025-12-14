@@ -46,7 +46,13 @@ class App implements MiddlewareInterface
 {
     private ApplicationBuilderInterface $applicationBuilder;
     private RouteModuleInterface $routerModule;
-    private LoggerInterface $logger;
+    private ?LoggerInterface $logger = null;
+
+    // Extracted service classes
+    private ConfigurationLoader $configLoader;
+    private ModuleRegistrar $moduleRegistrar;
+    private RouteTableBuilder $routeTableBuilder;
+    private RouteTableRenderer $routeTableRenderer;
 
     /**
      * @var array|string[]
@@ -120,6 +126,7 @@ class App implements MiddlewareInterface
 
     public static Container $diContainer;
     private bool $isProdMode;
+    private ?RouteCache $routeCache = null;
 
     private array $requestDIContainer = [];
 
@@ -131,14 +138,29 @@ class App implements MiddlewareInterface
      */
     public function __construct()
     {
-//         Initiate DI Container
+        // Initiate DI Container
         self::$diContainer = new Container();
-//        read yaml for parameters
-        $this->defineConstantsAndParameters();
 
-        //        bootstraps app
+        // Initialize extracted services
+        $this->configLoader = new ConfigurationLoader();
+        $this->routeTableBuilder = new RouteTableBuilder();
+        $this->routeTableRenderer = new RouteTableRenderer();
+
+        // Load configuration
+        $configDir = getcwd() . DIRECTORY_SEPARATOR . 'config';
+        $config = $this->configLoader->load($configDir);
+        $this->configLoader->defineConstants($config);
+        $this->isProdMode = $config['isProdMode'];
+
+        // Initialize route cache
+        $cacheDir = getcwd() . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'cache';
+        $this->routeCache = new RouteCache($cacheDir, $this->isProdMode);
+
+        // Initialize module registrar with DI container
+        $this->moduleRegistrar = new ModuleRegistrar(self::$diContainer);
+
+        // Bootstraps app
         $this->applicationBuilder = new ApplicationBuilder();
-
     }
 
     public static function diContainer(): Container
@@ -382,34 +404,32 @@ class App implements MiddlewareInterface
 
     /**
      * @param string $appModule
-     * @return App|null expects all params to have an attribute
-     * expects all params to have an attribute
      * @throws ReflectionException
      * @throws Exception
      */
     public function boot(string $appModule): void
     {
-
         $reflectionClass = new ReflectionClass($appModule);
         $reflectionClassApiAttributes = $reflectionClass->getAttributes(ApiModule::class);
 
         if (count($reflectionClassApiAttributes) === 0) {
-            throw new ReflectionException();
+            throw new ReflectionException(
+                "Class {$appModule} must have #[ApiModule] attribute."
+            );
         }
 
         $apiModuleAttributes = $reflectionClassApiAttributes[0]->newInstance();
 
+        // Register module using extracted ModuleRegistrar
+        $this->moduleRegistrar->registerModule('root', $apiModuleAttributes);
 
-        //        load attribute metadata
+        // Also keep local reference for backward compatibility
         $this->registerAppModule('root', $apiModuleAttributes);
 
-        //          load configs
+        // Load module configs
         $baseModule = $reflectionClass->newInstance();
         $baseModule->configure($this->applicationBuilder);
         $this->runApp();
-
-//        print_r('booting done \n');
-//        print_r(json_encode($this->routeTable));
     }
 
 
@@ -456,8 +476,8 @@ class App implements MiddlewareInterface
 //                    check injectable to see if its lifetime or request
 
                 } catch (DependencyException|NotFoundException $e) {
-                    // Handle cases where the class doesn't exist or can't be instantiated.
-                    echo "Error registering provider '{$providerClassName}': " . $e->getMessage() . "\n";
+                    // Log error but continue - provider may be resolved later
+                    error_log("[Spatial] Warning: Could not pre-register provider '{$providerClassName}': " . $e->getMessage());
                 }
 //                record
                 $providerReflection = new ReflectionClass($providerClassName);
@@ -583,25 +603,44 @@ class App implements MiddlewareInterface
     }
 
     /**
-     *
      * @throws Exception
      */
     private function runApp(): void
     {
         $this->registerModuleRouting();
 
+        // Try to load from cache in production
+        if ($this->routeCache !== null) {
+            $cachedRoutes = $this->routeCache->getCached();
+            if ($cachedRoutes !== null) {
+                $this->routeTable = $cachedRoutes;
+                return;
+            }
+        }
 
         if (count($this->routeTable) === 0) {
-            foreach ($this->declarations as $module => $declarations) {
-                $this->createRouteTable($module, $declarations);
+            // Use RouteTableBuilder for route generation
+            $declarations = $this->moduleRegistrar->getDeclarations();
+            if (!empty($declarations)) {
+                $this->routeTable = $this->routeTableBuilder->build($declarations);
+            } else {
+                // Fallback to legacy method if moduleRegistrar has no declarations
+                foreach ($this->declarations as $module => $decls) {
+                    $this->createRouteTable($module, $decls);
+                }
             }
 
-//            Print Route Table
+            // Cache routes for next boot (production only)
+            $this->routeCache?->cache($this->routeTable);
+
+            // Print Route Table (dev only)
             if ($this->showRouteTable) {
                 $this->printRouteTable();
             }
-//            $this->hasColdBooted = true;
         }
+
+        // Sync providers for middleware pipeline
+        self::$providers = array_merge(self::$providers, $this->moduleRegistrar->getAllProviders());
     }
 
 
@@ -651,12 +690,15 @@ class App implements MiddlewareInterface
     }
 
     /**
-     * Print route tables
+     * Print route tables to output
+     * Note: In production, prefer logging or returning the table.
      */
-    private
-    function printRouteTable(): void
+    private function printRouteTable(): void
     {
-        echo $this->getRouteTable();
+        // Output route table - for CLI/dev use only
+        if (php_sapi_name() === 'cli') {
+            fwrite(STDOUT, $this->routeTableRenderer->renderText($this->routeTable));
+        }
     }
 
     /**
@@ -732,7 +774,7 @@ class App implements MiddlewareInterface
             }
         }
 
-        echo $baseRoute . '<br/>';
+        // Debug removed: echo $baseRoute . '<br/>';
         $this->baseRouteTemplate[] = $baseRoute;
     }
 
@@ -1065,7 +1107,7 @@ class App implements MiddlewareInterface
 //        To be moved to application builder to use endpoints
                 $this->convertRouteTemplateToPattern($routeEndpoint->pattern);
                 $this->enableConventionalRouting = true;
-                print_r($routeEndpoint->name);
+                // Debug removed: print_r($routeEndpoint->name);
             } else {
                 $this->enableAttributeRouting = true;
             }
