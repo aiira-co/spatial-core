@@ -6,6 +6,7 @@ namespace Spatial\Telemetry;
 
 use Monolog\Level;
 use Monolog\Logger;
+use OpenTelemetry\API\Globals;
 use OpenTelemetry\API\Common\Time\Clock;
 use OpenTelemetry\API\Trace\TracerInterface;
 use OpenTelemetry\API\Metrics\MeterInterface;
@@ -46,6 +47,14 @@ class OtelProviderFactory
         string $serviceVersion,
         ?string $endpoint = null
     ): LoggerInterface {
+        // Initialize with default no-op providers to prevent uninitialized property access
+        if (!isset(self::$tracer)) {
+            self::$tracer = Globals::tracerProvider()->getTracer('io.opentelemetry.contrib.php');
+        }
+        if (!isset(self::$meter)) {
+            self::$meter = Globals::meterProvider()->getMeter('io.opentelemetry.contrib.php');
+        }
+
         // Check if OpenTelemetry is available
         if (!self::isOpenTelemetryAvailable()) {
             return new Logger($serviceName); // Fallback to regular Monolog

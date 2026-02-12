@@ -52,13 +52,13 @@ class RouterModule implements RouteModuleInterface
         $this->request = $request;
 
 
-//        handling options
+        //        handling options
         if (strtolower($request->getMethod()) === 'options') {
             $statusCode = 200;
             $body = 'Accept Request';
         }
 
-        $payload = json_encode(['status' => $statusCode, 'success' => $statusCode === 200,'message' => $body], JSON_THROW_ON_ERROR);
+        $payload = json_encode(['status' => $statusCode, 'success' => $statusCode === 200, 'message' => $body], JSON_THROW_ON_ERROR);
 
         $response = new \GuzzleHttp\Psr7\Response($statusCode);
         $response->getBody()->write($payload);
@@ -90,19 +90,30 @@ class RouterModule implements RouteModuleInterface
         //                check for authguard
         if (
             $route['authGuard'] &&
-            !$this->isAuthorized(... $this->getAuthGuardInstance($route['authGuard']))
+            !$this->isAuthorized(...$this->getAuthGuardInstance($route['authGuard']))
         ) {
             return $this->quickResponse('Unauthorized', 401, $this->request);
         }
         //     check constructor for DI later
         try {
+            $reflectionMethod = new \ReflectionMethod($route['controller'], $route['action']);
+            $reflectionParams = $reflectionMethod->getParameters();
+            $routeParamsMap = [];
+
+            foreach ($route['params'] as $p) {
+                $name = is_array($p['param']) ? $p['param']['name'] : $p['param']->getName();
+                $routeParamsMap[$name] = $p['bindingSource'];
+            }
+
             $args = [];
-            foreach ($route['params'] as $param) {
-                $value = $this->getBindSourceValue($param['bindingSource'], $param['param']);
-                //$param is an instance of ReflectionParameter
-                if ($value === null && !$param['param']->isOptional()) {
+
+            foreach ($reflectionParams as $param) {
+                $bindingSource = $routeParamsMap[$param->getName()] ?? 'FromRoute';
+                $value = $this->getBindSourceValue($bindingSource, $param);
+
+                if ($value === null && !$param->isOptional()) {
                     throw new \Exception(
-                        'Argument $' . $param['param']->getName(
+                        'Argument $' . $param->getName(
                         ) . ' in ' . $route['controller'] . '->' . $route['action'] . '() is required'
                     );
                 }
@@ -124,10 +135,10 @@ class RouterModule implements RouteModuleInterface
         } catch (DependencyException $e) {
             throw new DependencyException('Controller DI Error ' . $e->getMessage());
         } catch (NotFoundException $e) {
-            throw new NotFoundException ('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
+            throw new NotFoundException('Controller ' . $route['controller'] . 'Not Found ' . $e->getMessage());
         } catch (\TypeError $e) {
-            throw new \Exception('Response Type Error ' . json_encode($controllerResponse) . ' ' . $e->getMessage());
-        }catch(\Exception $e) {
+            throw new \Exception('Response Type Error ' . json_encode($controllerResponse ?? []) . ' ' . $e->getMessage());
+        } catch (\Exception $e) {
             return $this->quickResponse($e->getMessage(), 500, $this->request);
         }
 
@@ -160,12 +171,12 @@ class RouterModule implements RouteModuleInterface
         }
 
         $res = $response;
-//        print_r('origin is ' . $origin);
+        //        print_r('origin is ' . $origin);
 //
 //        print_r('request method is ' . $this->request->getMethod());
 //        Check If Origin is Allowed
         if (in_array($origin, AppConfig['header']['allowed_domains'], true)) {
-//            print_r('allow origin');
+            //            print_r('allow origin');
 //            header('Access-Control-Allow-Origin: ' . $origin);
             $res = $response->withHeader('Access-Control-Allow-Origin', $origin);
         }
@@ -210,7 +221,7 @@ class RouterModule implements RouteModuleInterface
      */
     private function getFromBody(ReflectionParameter $paramName): mixed
     {
-        $body = (string)$this->request->getBody();
+        $body = (string) $this->request->getBody();
         return class_exists($paramName->getType()?->getName())
             ? Caster::castToObject($paramName->getType()->getName(), $body)
             : $body;
@@ -273,7 +284,7 @@ class RouterModule implements RouteModuleInterface
      * @return object|null
      */
     private
-    function getServiceFromProvider(
+        function getServiceFromProvider(
         ReflectionParameter $parameter
     ): ?object {
         $serviceName = $parameter->getType();
@@ -297,7 +308,7 @@ class RouterModule implements RouteModuleInterface
      * @return object|null
      */
     private
-    function instantiateService(
+        function instantiateService(
         $serviceName
     ): ?object {
         //        make sure it has injectable attribute
@@ -308,7 +319,7 @@ class RouterModule implements RouteModuleInterface
             return null;
         }
 
-//        check  for dependencies too
+        //        check  for dependencies too
         $constructorParams = $serviceReflection->getConstructor()?->getParameters();
         foreach ($constructorParams as $param) {
             if (!$param->isPromoted()) {
@@ -316,7 +327,8 @@ class RouterModule implements RouteModuleInterface
             }
             if ($param->getType()->allowsNull()) {
                 continue;
-            };
+            }
+            ;
         }
 
         return null;
@@ -326,7 +338,7 @@ class RouterModule implements RouteModuleInterface
      * @param array $headers
      */
     private
-    function setHeaders(
+        function setHeaders(
         array $headers
     ): void {
         if (!isset($headers['Content-Type'])) {
