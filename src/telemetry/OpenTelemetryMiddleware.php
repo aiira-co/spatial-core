@@ -106,13 +106,17 @@ class OpenTelemetryMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler):ResponseInterface
     {
+        CoroutineContext::bind();
+
         $method = $request->getMethod();
         $route = $this->resolveRoute($request);
+        $parentContext = Psr7Propagation::extractParent($request);
 
         // Span name follows the stable convention "{method} {route}", which is
         // readable in a trace list and stays low-cardinality.
         $span = $this->tracer
             ->spanBuilder($method . ' ' . $route)
+            ->setParent($parentContext)
             ->setSpanKind(SpanKind::KIND_SERVER)
             ->startSpan();
 
