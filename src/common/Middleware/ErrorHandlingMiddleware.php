@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
+use Spatial\Core\Exception\HttpAwareExceptionInterface;
 use Throwable;
 
 class ErrorHandlingMiddleware implements MiddlewareInterface
@@ -24,17 +25,39 @@ class ErrorHandlingMiddleware implements MiddlewareInterface
         try {
             return $handler->handle($request);
         } catch (Throwable $e) {
-            // Log error
-            $this->logger->error('Unhandled exception', [
-                'exception' => $e,
-                'uri' => (string) $request->getUri(),
-                'method' => $request->getMethod(),
-            ]);
+            $status = 500;
+            $title = 'Internal Server Error';
+            $headers = ['Content-Type' => 'application/json'];
 
-            // Build error payload
+            // Exceptions that already know their HTTP meaning translate directly,
+            // so infrastructure conditions such as an exhausted connection pool
+            // shed load as 503 instead of being reported as an application bug.
+            if ($e instanceof HttpAwareExceptionInterface) {
+                $status = $e->getStatusCode();
+                $title = $e->getErrorTitle();
+
+                $retryAfter = $e->getRetryAfter();
+                if ($retryAfter !== null) {
+                    $headers['Retry-After'] = (string)$retryAfter;
+                }
+            }
+
+            $context = [
+                'exception' => $e,
+                'uri' => (string)$request->getUri(),
+                'method' => $request->getMethod(),
+                'status' => $status,
+            ];
+
+            if ($status >= 500) {
+                $this->logger->error('Unhandled exception', $context);
+            } else {
+                $this->logger->warning('Request failed', $context);
+            }
+
             $error = [
-                'error' => 'Internal Server Error',
-                'status' => 500,
+                'error' => $title,
+                'status' => $status,
             ];
 
             if ($this->displayErrorDetails) {
@@ -44,12 +67,14 @@ class ErrorHandlingMiddleware implements MiddlewareInterface
                 $error['trace'] = explode("\n", $e->getTraceAsString());
             }
 
-            // JSON response by default
-            $response = new Response(500);
-            $response->withHeader('Content-Type', 'application/json');
-            $response->getBody()->write(json_encode($error, JSON_PRETTY_PRINT));
-
-            return $response;
+            // Headers and body are passed to the constructor: PSR-7 messages are
+            // immutable, so the previous `$response->withHeader(...)` on its own
+            // line discarded the result and never set Content-Type.
+            return new Response(
+                $status,
+                $headers,
+                json_encode($error, JSON_PRETTY_PRINT)
+            );
         }
     }
 }

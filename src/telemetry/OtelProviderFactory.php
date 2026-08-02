@@ -6,6 +6,7 @@ namespace Spatial\Telemetry;
 
 use Monolog\Level;
 use Monolog\Logger;
+use OpenSwoole\Timer;
 use OpenTelemetry\API\Globals;
 use OpenTelemetry\API\Common\Time\Clock;
 use OpenTelemetry\API\Trace\TracerInterface;
@@ -20,6 +21,7 @@ use OpenTelemetry\SDK\Common\Attribute\AttributesFactory;
 use OpenTelemetry\SDK\Logs\LoggerProvider;
 use OpenTelemetry\SDK\Logs\Processor\BatchLogRecordProcessor;
 use OpenTelemetry\SDK\Metrics\MeterProviderBuilder;
+use OpenTelemetry\SDK\Metrics\MeterProviderInterface;
 use OpenTelemetry\SDK\Metrics\MetricReader\ExportingReader;
 use OpenTelemetry\SDK\Resource\ResourceInfo;
 use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
@@ -33,10 +35,26 @@ use Throwable;
 
 class OtelProviderFactory
 {
+    /** Default periodic metric export interval, matching OTEL_METRIC_EXPORT_INTERVAL's default. */
+    private const DEFAULT_METRIC_EXPORT_INTERVAL_MS = 60_000;
+
     static TracerInterface $tracer;
     static MeterInterface $meter;
+
+    private static ?TracerProvider $tracerProvider = null;
+    private static ?LoggerProvider $loggerProvider = null;
+    private static ?MeterProviderInterface $meterProvider = null;
+    private static ?LoggerInterface $logger = null;
+    private static bool $initialized = false;
+    private static ?int $flushTimerId = null;
+
     /**
      * Build and return a Monolog logger integrated with OpenTelemetry.
+     *
+     * Idempotent: repeated calls return the logger built by the first one.
+     * Without this guard, resolving the middleware more than once rebuilt the
+     * whole SDK, re-registered it globally and stacked another shutdown
+     * function on every call.
      *
      * @param non-empty-string $serviceName
      * @param non-empty-string $serviceVersion
@@ -47,6 +65,12 @@ class OtelProviderFactory
         string $serviceVersion,
         ?string $endpoint = null
     ): LoggerInterface {
+        if (self::$initialized && self::$logger !== null) {
+            return self::$logger;
+        }
+
+        self::$initialized = true;
+
         // Initialize with default no-op providers to prevent uninitialized property access
         if (!isset(self::$tracer)) {
             self::$tracer = Globals::tracerProvider()->getTracer('io.opentelemetry.contrib.php');
@@ -57,18 +81,25 @@ class OtelProviderFactory
 
         // Check if OpenTelemetry is available
         if (!self::isOpenTelemetryAvailable()) {
-            return new Logger($serviceName); // Fallback to regular Monolog
+            return self::$logger = new Logger($serviceName); // Fallback to regular Monolog
         }
 
         // Use environment variable if endpoint is not provided
         $endpoint = $endpoint ?? getenv('OTEL_EXPORTER_OTLP_ENDPOINT');
         if (empty($endpoint)) {
-            return new Logger($serviceName); // Fallback if no endpoint
+            return self::$logger = new Logger($serviceName); // Fallback if no endpoint
         }
+
+        $endpoint = self::normalizeEndpoint($endpoint);
 
         // Check if collector is reachable
         if (!self::isCollectorAvailable($endpoint)) {
-            return new Logger($serviceName); // Fallback to regular Monolog
+            error_log(sprintf(
+                'OpenTelemetry: collector at %s is unreachable; tracing and metrics are disabled for this process.',
+                $endpoint
+            ));
+
+            return self::$logger = new Logger($serviceName); // Fallback to regular Monolog
         }
 
         try {
@@ -132,6 +163,10 @@ class OtelProviderFactory
 
             self::$meter =  $meterProvider->getMeter('io.opentelemetry.contrib.php');
 
+            self::$tracerProvider = $tracerProvider;
+            self::$loggerProvider = $loggerProvider;
+            self::$meterProvider = $meterProvider;
+
             // --- Register globally
             Sdk::builder()
                 ->setTracerProvider($tracerProvider)
@@ -139,16 +174,11 @@ class OtelProviderFactory
                 ->setLoggerProvider($loggerProvider)
                 ->buildAndRegisterGlobal();
 
-            // Ensure shutdown flushes all telemetry
-            register_shutdown_function(static function () use ($tracerProvider, $loggerProvider, $meterProvider): void {
-                try {
-                    $tracerProvider->shutdown();
-                    $loggerProvider->shutdown();
-                    $meterProvider->shutdown();
-                } catch (Throwable $e) {
-                    // Log shutdown errors if needed
-                    error_log('OpenTelemetry shutdown error: ' . $e->getMessage());
-                }
+            // Last-resort flush. Under Swoole this only runs when the process
+            // itself exits, so shutdown() must also be called from onWorkerStop
+            // and the SIGTERM handler.
+            register_shutdown_function(static function (): void {
+                self::shutdown();
             });
 
             // --- Monolog Logger with OTEL handler
@@ -156,12 +186,85 @@ class OtelProviderFactory
             $otelHandler = new Handler($loggerProvider, Level::Debug);
             $logger->pushHandler($otelHandler);
 
-            return $logger;
+            return self::$logger = $logger;
         } catch (Throwable $e) {
             // Log the error and fall back to regular Monolog
             error_log('OpenTelemetry initialization failed: ' . $e->getMessage());
-            return new Logger($serviceName);
+
+            return self::$logger = new Logger($serviceName);
         }
+    }
+
+    /**
+     * Start the periodic metric export timer for the current worker.
+     *
+     * ExportingReader has no internal schedule: it only exports when collect(),
+     * forceFlush() or shutdown() is called. Because Swoole workers are
+     * long-lived, without this tick the HTTP metrics accumulate in memory and
+     * reach the collector only when the process finally exits.
+     *
+     * Call from onWorkerStart, after the workers have been forked.
+     */
+    public static function registerFlushTimer(?int $intervalMs = null): void
+    {
+        if (self::$meterProvider === null || self::$flushTimerId !== null) {
+            return;
+        }
+
+        if (!class_exists(Timer::class)) {
+            return;
+        }
+
+        $intervalMs ??= (int)(getenv('OTEL_METRIC_EXPORT_INTERVAL')
+            ?: self::DEFAULT_METRIC_EXPORT_INTERVAL_MS);
+
+        if ($intervalMs < 1_000) {
+            $intervalMs = 1_000;
+        }
+
+        self::$flushTimerId = Timer::tick($intervalMs, static function (): void {
+            self::forceFlush();
+        });
+    }
+
+    /**
+     * Export whatever is currently buffered without tearing the SDK down.
+     */
+    public static function forceFlush(): void
+    {
+        try {
+            self::$meterProvider?->forceFlush();
+            self::$tracerProvider?->forceFlush();
+            self::$loggerProvider?->forceFlush();
+        } catch (Throwable $e) {
+            error_log('OpenTelemetry flush error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Flush and shut down every provider.
+     *
+     * Call from onWorkerStop and from the SIGTERM handler; otherwise a rolling
+     * deploy discards whatever the batch processors still hold.
+     */
+    public static function shutdown(): void
+    {
+        if (self::$flushTimerId !== null && class_exists(Timer::class)) {
+            Timer::clear(self::$flushTimerId);
+            self::$flushTimerId = null;
+        }
+
+        try {
+            self::$tracerProvider?->shutdown();
+            self::$loggerProvider?->shutdown();
+            self::$meterProvider?->shutdown();
+        } catch (Throwable $e) {
+            error_log('OpenTelemetry shutdown error: ' . $e->getMessage());
+        }
+
+        self::$tracerProvider = null;
+        self::$loggerProvider = null;
+        self::$meterProvider = null;
     }
 
     /**
@@ -173,6 +276,23 @@ class OtelProviderFactory
             class_exists(SpanExporter::class) &&
             class_exists(MetricExporter::class) &&
             class_exists(Handler::class);
+    }
+
+    /**
+     * Ensure the endpoint carries a scheme.
+     *
+     * A bare `host:4318` parses as host+port here but produces a schemeless
+     * exporter URL that the HTTP transport cannot use.
+     */
+    private static function normalizeEndpoint(string $endpoint): string
+    {
+        $endpoint = rtrim(trim($endpoint), '/');
+
+        if (!str_contains($endpoint, '://')) {
+            $endpoint = 'http://' . $endpoint;
+        }
+
+        return $endpoint;
     }
 
     private static function isCollectorAvailable(string $endpoint): bool
