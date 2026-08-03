@@ -38,8 +38,10 @@ class ConfigurationLoader
             $appConfigs = Yaml::parseFile(
                 $configDir . 'packages' . DIRECTORY_SEPARATOR . 'framework.yaml'
             );
-            
-            $this->isProdMode = $appConfigs['enableProdMode'] ?? false;
+            $appConfigs['enableProdMode'] = self::resolveEnableProdMode(
+                $appConfigs['enableProdMode'] ?? false
+            );
+            $this->isProdMode = $appConfigs['enableProdMode'];
 
             // Load doctrine.yaml with env resolution
             $doctrineConfigs = Yaml::parseFile(
@@ -86,6 +88,22 @@ class ConfigurationLoader
     public function isProdMode(): bool
     {
         return $this->isProdMode;
+    }
+
+    /**
+     * Derive enableProdMode from APP_ENV when set.
+     *
+     * Rule: any APP_ENV other than "development" is production mode.
+     * When APP_ENV is unset/empty, the framework.yaml boolean is used as fallback.
+     */
+    public static function resolveEnableProdMode(mixed $yamlFallback): bool
+    {
+        $appEnv = getenv('APP_ENV');
+        if ($appEnv === false || trim((string) $appEnv) === '') {
+            return (bool) $yamlFallback;
+        }
+
+        return strtolower(trim((string) $appEnv)) !== 'development';
     }
 
     /**

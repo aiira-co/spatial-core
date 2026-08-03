@@ -182,6 +182,9 @@ class App implements MiddlewareInterface
 
             //    config/packages/framework.yaml
             $appConfigs = Yaml::parseFile($configDir . DS . 'packages' . DS . 'framework.yaml');
+            $appConfigs['enableProdMode'] = ConfigurationLoader::resolveEnableProdMode(
+                $appConfigs['enableProdMode'] ?? false
+            );
             define('AppConfig', $appConfigs);
 
             $this->isProdMode = $appConfigs['enableProdMode'];
