@@ -121,7 +121,9 @@ class RouterModule implements RouteModuleInterface
             }
 
 
-            $controller = ($this->container->get($route['controller']));
+            // Fresh controller per request so #[Injectable('request')] deps are not
+            // captured on a worker-long singleton controller instance.
+            $controller = $this->container->make($route['controller']);
             $controller($request); // __invoke
             $controllerResponse = $controller->{$route['action']}(...$args);
             $response = $this->setCors($controllerResponse);

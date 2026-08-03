@@ -10,6 +10,10 @@ use Attribute;
  * Class Injectable
  * @package Spatial\Core\Attributes
  * Injectable Attribute for DI Service
+ *
+ * providedIn:
+ * - 'root' / 'platform' (default): one instance per worker (PHP-DI singleton)
+ * - 'request' / 'any': one instance per HTTP request (cleared after the response)
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 class Injectable
@@ -18,19 +22,10 @@ class Injectable
     /**
      * Determines which injectors will provide the injectable.
      *
-     * - `Type<any>` - associates the injectable with an `@NgModule` or other `InjectorType`,
-     * - 'null' : Equivalent to `undefined`. The injectable is not provided in any scope automatically
-     * and must be added to a `providers` array of an [@NgModule](api/core/NgModule#providers),
-     * [@Component](api/core/Directive#providers) or [@Directive](api/core/Directive#providers).
-     *
-     * The following options specify that this injectable should be provided in one of the following
-     * injectors:
-     * - 'root' : The application-level injector in most apps.
-     * - 'platform' : A special singleton platform injector shared by all
-     * applications on the page.
-     * - 'any' : Provides a unique instance in each lazy loaded module while all eagerly loaded
-     * modules share one instance.
-     *
+     * - 'root' : The application-level injector (worker singleton under Swoole).
+     * - 'platform' : Treated like root in this runtime.
+     * - 'request' / 'any' : Unique instance per request; not eagerly created at boot.
+     * - null : Not provided automatically; must appear in a module providers array.
      */
     public function __construct(public mixed $providedIn = 'root')
     {

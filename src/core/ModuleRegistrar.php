@@ -10,13 +10,16 @@ use DI\NotFoundException;
 use ReflectionClass;
 use ReflectionException;
 use Spatial\Core\Attributes\ApiModule;
+use Spatial\Core\Attributes\Injectable;
+use Spatial\Core\DI\InjectableScope;
+use Spatial\Core\DI\ScopedContainer;
 
 /**
  * Module Registrar
- * 
+ *
  * Handles registration of modules, providers, declarations, and imports
  * in the dependency injection container.
- * 
+ *
  * @package Spatial\Core
  */
 class ModuleRegistrar
@@ -45,27 +48,17 @@ class ModuleRegistrar
 
     /**
      * Register a module and all its imports, providers, and declarations.
-     * 
-     * @param string $moduleName Module identifier
-     * @param ApiModule $moduleAttributes Module attribute instance
+     *
      * @throws ReflectionException
      */
     public function registerModule(string $moduleName, ApiModule $moduleAttributes): void
     {
-        // Register imports first (they may provide dependencies)
         $this->registerImports($moduleName, $moduleAttributes->imports);
-
-        // Register providers for DI
         $this->registerProviders($moduleName, $moduleAttributes->providers);
-
-        // Register declarations (controllers, etc.)
         $this->registerDeclarations($moduleName, $moduleAttributes->declarations);
     }
 
     /**
-     * Register providers for a module.
-     * 
-     * @param string $moduleName Module identifier
      * @param array|null $moduleProviders Provider class names
      * @throws ReflectionException
      */
@@ -84,23 +77,43 @@ class ModuleRegistrar
                 continue;
             }
 
-            // Pre-register in DI container
-            try {
-                $this->container->get($providerClassName);
-            } catch (DependencyException|NotFoundException $e) {
-                error_log(
-                    "[Spatial] Warning: Could not pre-register provider '{$providerClassName}': " . $e->getMessage()
-                );
+            $reflection = new ReflectionClass($providerClassName);
+            $requestScoped = $this->isRequestScopedProvider($reflection);
+
+            if ($requestScoped && $this->container instanceof ScopedContainer) {
+                $this->container->markRequestScoped($providerClassName);
             }
 
-            $this->providers[$moduleName][$providerClassName] = new ReflectionClass($providerClassName);
+            // Eagerly resolve root/platform providers so boot-time wiring and
+            // pool warmup run once per worker. Request-scoped providers are
+            // deferred until the first request that needs them.
+            if (!$requestScoped) {
+                try {
+                    $this->container->get($providerClassName);
+                } catch (DependencyException|NotFoundException $e) {
+                    error_log(
+                        "[Spatial] Warning: Could not pre-register provider '{$providerClassName}': " . $e->getMessage()
+                    );
+                }
+            }
+
+            $this->providers[$moduleName][$providerClassName] = $reflection;
         }
     }
 
+    private function isRequestScopedProvider(ReflectionClass $reflection): bool
+    {
+        $attributes = $reflection->getAttributes(Injectable::class);
+        if ($attributes === []) {
+            return false;
+        }
+
+        $injectable = $attributes[0]->newInstance();
+
+        return InjectableScope::isRequestScoped($injectable->providedIn);
+    }
+
     /**
-     * Register declarations (controllers, pipes, etc.) for a module.
-     * 
-     * @param string $moduleName Module identifier
      * @param array|null $moduleDeclarations Declaration class names
      * @throws ReflectionException
      */
@@ -122,9 +135,6 @@ class ModuleRegistrar
     }
 
     /**
-     * Register imported modules.
-     * 
-     * @param string $moduleName Parent module identifier
      * @param array|null $moduleImports Import module class names
      * @throws ReflectionException
      */
@@ -155,15 +165,11 @@ class ModuleRegistrar
             }
 
             $this->importModules[$moduleName][$module] = $reflectionClass;
-
-            // Recursively register the imported module
             $this->registerModule($module, $apiModuleAttributes[0]->newInstance());
         }
     }
 
     /**
-     * Get all declarations across all modules.
-     * 
      * @return array<string, array<string, ReflectionClass>>
      */
     public function getDeclarations(): array
@@ -172,9 +178,6 @@ class ModuleRegistrar
     }
 
     /**
-     * Get providers for a specific module.
-     * 
-     * @param string $moduleName Module identifier
      * @return array<string, ReflectionClass>
      */
     public function getModuleProviders(string $moduleName): array
@@ -183,8 +186,6 @@ class ModuleRegistrar
     }
 
     /**
-     * Get all providers across all modules.
-     * 
      * @return array<string, array<string, ReflectionClass>>
      */
     public function getAllProviders(): array
