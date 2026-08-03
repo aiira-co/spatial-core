@@ -26,8 +26,10 @@ use OpenTelemetry\SDK\Metrics\MetricReader\ExportingReader;
 use OpenTelemetry\SDK\Resource\ResourceInfo;
 use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
 use OpenTelemetry\SDK\Sdk;
+use OpenTelemetry\SDK\Trace\SamplerFactory;
 use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
+use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
 use OpenTelemetry\SDK\Common\Instrumentation\InstrumentationScopeFactory;
 use OpenTelemetry\SemConv\Attributes\ServiceAttributes;
 use Psr\Log\LoggerInterface;
@@ -134,23 +136,25 @@ class OtelProviderFactory
             );
 
             // --- Providers
+            $sampler = self::createSampler();
             $tracerProvider = new TracerProvider(
-                spanProcessors:  [
+                spanProcessors: [
                     new BatchSpanProcessor(
                         $spanExporter,
                         Clock::getDefault()
                     )
                 ],
-                resource:  $resource,
-                instrumentationScopeFactory:  $instrumentationScopeFactory
+                sampler: $sampler,
+                resource: $resource,
+                instrumentationScopeFactory: $instrumentationScopeFactory
             );
 
-            self::$tracer =  $tracerProvider->getTracer('io.opentelemetry.contrib.php');
+            self::$tracer = $tracerProvider->getTracer('io.opentelemetry.contrib.php');
 
             $loggerProvider = new LoggerProvider(
-                processor:  new BatchLogRecordProcessor($logExporter, Clock::getDefault()),
-                instrumentationScopeFactory:  $instrumentationScopeFactory,
-                resource:  $resource
+                processor: new BatchLogRecordProcessor($logExporter, Clock::getDefault()),
+                instrumentationScopeFactory: $instrumentationScopeFactory,
+                resource: $resource
             );
 
             // Use the builder for meter provider
@@ -161,7 +165,7 @@ class OtelProviderFactory
                 ->addReader($reader)
                 ->build();
 
-            self::$meter =  $meterProvider->getMeter('io.opentelemetry.contrib.php');
+            self::$meter = $meterProvider->getMeter('io.opentelemetry.contrib.php');
 
             self::$tracerProvider = $tracerProvider;
             self::$loggerProvider = $loggerProvider;
@@ -172,6 +176,7 @@ class OtelProviderFactory
                 ->setTracerProvider($tracerProvider)
                 ->setMeterProvider($meterProvider)
                 ->setLoggerProvider($loggerProvider)
+                ->setPropagator(TraceContextPropagator::getInstance())
                 ->buildAndRegisterGlobal();
 
             // Last-resort flush. Under Swoole this only runs when the process
@@ -265,6 +270,25 @@ class OtelProviderFactory
         self::$tracerProvider = null;
         self::$loggerProvider = null;
         self::$meterProvider = null;
+    }
+
+    /**
+     * Honour OTEL_TRACES_SAMPLER / OTEL_TRACES_SAMPLER_ARG (OpenTelemetry SDK defaults).
+     *
+     * Falls back to parentbased_always_on when the env vars are unset or invalid,
+     * matching the TracerProvider constructor default.
+     */
+    private static function createSampler(): \OpenTelemetry\SDK\Trace\SamplerInterface
+    {
+        try {
+            return (new SamplerFactory())->create();
+        } catch (Throwable $e) {
+            error_log('OpenTelemetry: invalid sampler configuration (' . $e->getMessage() . '); using parentbased_always_on.');
+
+            return new \OpenTelemetry\SDK\Trace\Sampler\ParentBased(
+                new \OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler()
+            );
+        }
     }
 
     /**
