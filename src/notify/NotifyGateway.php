@@ -39,6 +39,52 @@ final class NotifyGateway
         return $this->enabled;
     }
 
+    /**
+     * @param array<string, scalar|null> $variables
+     */
+    public function queueTemplatedEmail(
+        string $commandId,
+        string $recipientEmail,
+        string $templateId,
+        array $variables,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
+        int $templateVersion = 1,
+        string $locale = 'en',
+    ): bool {
+        if (!$this->enabled) {
+            $this->logger->warning('Notify gateway is disabled because NOTIFY_API_TOKEN is not configured.');
+            return false;
+        }
+
+        try {
+            $this->client->send(NotificationCommandBuilder::templatedEmail(
+                commandId: $commandId,
+                recipientEmail: $recipientEmail,
+                templateId: $templateId,
+                templateVersion: $templateVersion,
+                locale: $locale,
+                variables: $variables,
+                source: $this->source,
+                referenceType: $referenceType,
+                referenceId: $referenceId,
+            ));
+
+            return true;
+        } catch (NotifyApiException $exception) {
+            $this->logger->error('Failed to queue templated email notification.', [
+                'commandId' => $commandId,
+                'templateId' => $templateId,
+                'recipient' => $recipientEmail,
+                'retryable' => $exception->retryable,
+                'statusCode' => $exception->statusCode,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
     public function queueRawEmail(
         string $commandId,
         string $recipientEmail,
