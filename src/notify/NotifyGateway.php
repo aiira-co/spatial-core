@@ -168,6 +168,12 @@ final class NotifyGateway
         string $message,
         ?string $referenceType = null,
         ?string $referenceId = null,
+        ?int $businessId = null,
+        ?string $gatewayId = null,
+        ?string $senderIdentityId = null,
+        ?string $senderValue = null,
+        string $deliveryBasisType = 'transactional',
+        array $metadata = [],
     ): bool {
         if (!$this->enabled) {
             $this->logger->warning('Notify gateway is disabled because NOTIFY_API_TOKEN is not configured.');
@@ -175,18 +181,96 @@ final class NotifyGateway
         }
 
         try {
-            $this->client->send(NotificationCommandBuilder::sms(
+            $command = NotificationCommandBuilder::sms(
                 commandId: $commandId,
                 phoneNumber: $phoneNumber,
                 message: $message,
                 source: $this->source,
                 referenceType: $referenceType,
                 referenceId: $referenceId,
-            ));
+                businessId: $businessId,
+                metadata: $metadata,
+                gatewayId: $gatewayId,
+                senderIdentityId: $senderIdentityId,
+                senderValue: $senderValue,
+            );
+            $command['deliveryBasis'] = [
+                'type' => $deliveryBasisType,
+                'reference' => $commandId,
+            ];
+            if ($deliveryBasisType === 'explicit_consent') {
+                $command['deliveryBasis']['capturedAt'] = (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
+            }
+            $this->client->send($command);
 
             return true;
         } catch (NotifyApiException $exception) {
             $this->logger->error('Failed to queue SMS notification.', [
+                'commandId' => $commandId,
+                'retryable' => $exception->retryable,
+                'statusCode' => $exception->statusCode,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Queue a campaign email (HTML) with optional gateway/sender routing.
+     *
+     * @param array<string, scalar|null> $metadata
+     */
+    public function queueCampaignEmail(
+        string $commandId,
+        string $recipientEmail,
+        string $subject,
+        string $htmlBody,
+        ?int $businessId = null,
+        ?string $gatewayId = null,
+        ?string $senderIdentityId = null,
+        ?string $senderValue = null,
+        ?string $referenceType = null,
+        ?string $referenceId = null,
+        string $deliveryBasisType = 'explicit_consent',
+        array $metadata = [],
+    ): bool {
+        if (!$this->enabled) {
+            $this->logger->warning('Notify gateway is disabled because NOTIFY_API_TOKEN is not configured.');
+            return false;
+        }
+
+        try {
+            $command = NotificationCommandBuilder::rawEmail(
+                commandId: $commandId,
+                recipientEmail: $recipientEmail,
+                subject: $subject,
+                htmlBody: $htmlBody,
+                source: $this->source,
+                referenceType: $referenceType,
+                referenceId: $referenceId,
+                businessId: $businessId,
+                metadata: $metadata,
+            );
+            $command['deliveryBasis'] = [
+                'type' => $deliveryBasisType,
+                'reference' => $commandId,
+                'capturedAt' => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+            ];
+            if ($gatewayId !== null) {
+                $command['gatewayId'] = $gatewayId;
+            }
+            if ($senderIdentityId !== null) {
+                $command['senderIdentityId'] = $senderIdentityId;
+            }
+            if ($senderValue !== null && $senderValue !== '') {
+                $command['sender'] = $senderValue;
+            }
+            $this->client->send($command);
+
+            return true;
+        } catch (NotifyApiException $exception) {
+            $this->logger->error('Failed to queue campaign email notification.', [
                 'commandId' => $commandId,
                 'retryable' => $exception->retryable,
                 'statusCode' => $exception->statusCode,

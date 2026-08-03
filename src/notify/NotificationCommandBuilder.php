@@ -118,10 +118,13 @@ final class NotificationCommandBuilder
         ?string $correlationId = null,
         ?string $causationId = null,
         array $metadata = [],
+        ?string $gatewayId = null,
+        ?string $senderIdentityId = null,
+        ?string $senderValue = null,
     ): array {
         self::assertIdentifier($commandId, 'commandId');
 
-        return self::baseCommand(
+        $command = self::baseCommand(
             commandId: $commandId,
             channel: 'sms',
             recipientAddress: trim($phoneNumber),
@@ -137,6 +140,18 @@ final class NotificationCommandBuilder
             causationId: $causationId,
             metadata: $metadata,
         );
+
+        if ($gatewayId !== null) {
+            $command['gatewayId'] = $gatewayId;
+        }
+        if ($senderIdentityId !== null) {
+            $command['senderIdentityId'] = $senderIdentityId;
+        }
+        if ($senderValue !== null && $senderValue !== '') {
+            $command['sender'] = $senderValue;
+        }
+
+        return $command;
     }
 
     /**
